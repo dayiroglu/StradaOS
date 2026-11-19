@@ -1,0 +1,42 @@
+name: APK derle (arac karti yamasi)
+
+# Elle calistirilir: Actions > "APK derle (arac karti yamasi)" > Run workflow
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Yamayi uygula
+        run: |
+          test -f stradaos-arac-karti.patch || { echo "stradaos-arac-karti.patch deponun ana dizininde yok"; exit 1; }
+          git apply --ignore-whitespace --verbose stradaos-arac-karti.patch
+
+      - name: Debug APK derle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Release olarak yayinla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=$(find app/build/outputs/apk/debug -name '*.apk' | head -n 1)
+          echo "APK: $APK"
+          cp "$APK" StradaOS-arac-karti.apk
+          gh release delete arac-karti --yes --cleanup-tag || true
+          gh release create arac-karti StradaOS-arac-karti.apk \
+            --title "StradaOS Prueba (arac karti)" \
+            --notes "Arac fotografi karti kaldirildi, hiz gostergesi buyutuldu." \
+            --target "${{ github.sha }}"
