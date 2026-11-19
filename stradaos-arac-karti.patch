@@ -1,0 +1,166 @@
+From e54179a76db3ca4cb3904aada8aa7d2a36b4ae9c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 19 Nov 2026 14:56:31 +0300
+Subject: [PATCH] =?UTF-8?q?Inicio:=20quita=20la=20foto=20del=20veh=C3=ADcu?=
+ =?UTF-8?q?lo=20y=20agranda=20el=20veloc=C3=ADmetro=20mixto?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+La tarjeta del vehículo queda solo con el nombre (y su etiqueta al lado). El velocímetro usa todo el ancho y el
+alto libres, centrado. En el modo mixto el número, la unidad y los números de la escala son más grandes.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01LAQpHxjNVwsMzQEBL4eM8d
+---
+ .../java/com/stradaos/launcher/Gauge.java     | 14 ++--
+ .../main/java/com/stradaos/launcher/Main.java | 70 ++++++-------------
+ 2 files changed, 31 insertions(+), 53 deletions(-)
+
+diff --git a/app/src/main/java/com/stradaos/launcher/Gauge.java b/app/src/main/java/com/stradaos/launcher/Gauge.java
+index 04e5094..3e4a554 100644
+--- a/app/src/main/java/com/stradaos/launcher/Gauge.java
++++ b/app/src/main/java/com/stradaos/launcher/Gauge.java
+@@ -153,7 +153,8 @@ public class Gauge extends View {
+         int n = Math.round(max / (step / 2));
+         float labelEvery = small ? step * 2 : step;
+         pNum.setColor(soft);
+-        pNum.setTextSize(r * (small ? 0.15f : 0.11f));
++        // mixto (con el número grande): números de la escala más grandes y más pegados al aro
++        pNum.setTextSize(r * (small ? 0.15f : number ? 0.145f : 0.11f));
+         for (int i = 0; i <= n; i++) {
+             float v = i * step / 2;
+             boolean major = i % 2 == 0;
+@@ -164,7 +165,7 @@ public class Gauge extends View {
+             pTick.setStrokeWidth(Math.max(1f, r * (major ? 0.018f : 0.010f)));
+             c.drawLine(cx + cs * r1, cy + sn * r1, cx + cs * r2, cy + sn * r2, pTick);
+             if (major && (v % labelEvery == 0 || v == max)) {
+-                float rl = r * 0.64f;
++                float rl = r * (number && !small ? 0.655f : 0.64f);
+                 float ty = cy + sn * rl - (pNum.ascent() + pNum.descent()) / 2f;
+                 c.drawText(String.valueOf(Math.round(v)), cx + cs * rl, ty, pNum);
+             }
+@@ -183,13 +184,14 @@ public class Gauge extends View {
+ 
+         // centro: número grande (mixto) y la unidad
+         pUnit.setColor(accent);
+-        pUnit.setTextSize(r * (small ? 0.16f : 0.12f));
++        pUnit.setTextSize(r * (small ? 0.16f : number ? 0.17f : 0.12f));
+         if (number) {
++            // mixto: número y unidad más grandes (el número cabe dentro del arranque de la aguja, 0,50 r)
+             pBig.setColor(ring);
+-            pBig.setTextSize(r * (small ? 0.46f : 0.40f));
++            pBig.setTextSize(r * (small ? 0.46f : 0.52f));
+             String s = ok ? String.valueOf(Math.round(val < 1.5f && target == 0 ? 0 : val)) : "--";
+-            c.drawText(s, cx, cy + r * (small ? 0.16f : 0.14f), pBig);
+-            c.drawText(unit, cx, cy - r * (small ? 0.24f : 0.26f), pUnit);
++            c.drawText(s, cx, cy + r * (small ? 0.16f : 0.19f), pBig);
++            c.drawText(unit, cx, cy - r * (small ? 0.24f : 0.30f), pUnit);
+         } else {
+             c.drawText(unit, cx, cy + r * 0.30f, pUnit);
+             pBig.setColor(ring);
+diff --git a/app/src/main/java/com/stradaos/launcher/Main.java b/app/src/main/java/com/stradaos/launcher/Main.java
+index d5035d5..e8334c9 100644
+--- a/app/src/main/java/com/stradaos/launcher/Main.java
++++ b/app/src/main/java/com/stradaos/launcher/Main.java
+@@ -1646,59 +1646,32 @@ public class Main extends Activity {
+     private void buildCarCard() {
+         final FrameLayout card = card(carX, rowY, 300, cardH, CARD);
+         carCard = card;
+-        // barra de abajo compacta: la foto crece y la velocidad baja; sin velocidad (carros sin GPS) la foto llena el resto
+-        // 2.20: velocímetro analógico o mixto: el recuadro de la velocidad crece 70 y la foto se achica lo mismo
+         final int speedo = carSpeed ? prefs.getInt("speedo", 0) : 0;
+-        // 2.20.1: el velocímetro analógico ocupa todo el ancho y el mantenimiento va debajo, dentro del arco
+-        // el recuadro y la foto quedan del tamaño de la 2.20; adentro, velocímetro centrado y barrita de mantenimiento abajo
+-        final float gx = speedo > 0 ? 70 : 0;
+-        final float dy = cardH - 380 + (carSpeed ? 0 : 130) - gx;
++        // Sin la foto del vehículo: arriba solo el nombre (con su etiqueta al lado) y todo el resto de la tarjeta es
++        // para el velocímetro, que así puede ocupar casi todo el ancho.
++        final float top = 52, boxMargin = 10;
++        final float bh = speedo > 0 ? cardH - top - boxMargin : 118;
++        final float by = speedo > 0 ? top : top + Math.max(0, (cardH - top - boxMargin - bh) / 2f);
++        LinearLayout nameRow = new LinearLayout(this);
++        nameRow.setGravity(Gravity.CENTER_VERTICAL);
+         carTv = tv(prefs.getString("car_name", "Mi vehículo"), 20, TEXT, true);
+-        place(card, carTv, 20, 16, 260, 26);
++        carTv.setSingleLine(true);
++        carTv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+         TextView chip = tv(prefs.getString("car_tag", ""), 11, Color.WHITE, true);
+         chipTv = chip;
+         chip.setPadding((int) (8 * s), (int) (3 * s), (int) (8 * s), (int) (3 * s));
+         chip.setBackground(round(RED, 8));
+         chip.setVisibility(prefs.getString("car_tag", "").trim().length() == 0 ? View.GONE : View.VISIBLE);
+-        placeWrap(card, chip, 20, 46);
+-
+-        Bitmap photo = CarPhoto.load(this);
+-        if (photo != null) {
+-            ImageView car = new ImageView(this);
+-            // 2.18: una foto con fondo (sin recortar) llena el recuadro con esquinas redondas; la recortada, como siempre
+-            boolean cutout = false;
+-            try { cutout = CarPhoto.hasTransparency(photo); } catch (Throwable ignored) { }
+-            if (cutout) car.setImageBitmap(photo);
+-            else car.setImageBitmap(CarPhoto.cardCrop(photo, (int) (264 * s), (int) ((160 + dy) * s), 16 * s));
+-            car.setScaleType(ImageView.ScaleType.FIT_CENTER);
+-            place(card, car, 18, 78, 264, 160 + dy);
+-            car.setOnLongClickListener(new View.OnLongClickListener() {
+-                public boolean onLongClick(View v) { photoMenu(); return true; }
+-            });
+-        } else {
+-            LinearLayout ph = new LinearLayout(this);
+-            ph.setOrientation(LinearLayout.VERTICAL);
+-            ph.setGravity(Gravity.CENTER);
+-            ph.setBackground(round(INNER, 16));
+-            ImageView ic = icon("directions_car", 72);
+-            ic.setAlpha(0.35f);
+-            ph.addView(ic, new LinearLayout.LayoutParams((int) (72 * s), (int) (72 * s)));
+-            TextView t = tv("Toca para poner la foto de tu vehículo", 12, MUTED, false);
+-            t.setSingleLine(false);   // con fuentes anchas (Samsung) se salía por la izquierda
+-            t.setMaxLines(2);
+-            t.setGravity(Gravity.CENTER);
+-            t.setPadding((int) (12 * s), (int) (6 * s), (int) (12 * s), 0);
+-            ph.addView(t, new LinearLayout.LayoutParams(-1, -2));
+-            if (152 + dy < 110) t.setVisibility(View.GONE);   // con el velocímetro analógico el recuadro es bajo
+-            place(card, ph, 18, 82, 264, 152 + dy);
+-            ph.setOnClickListener(new View.OnClickListener() {
+-                public void onClick(View v) { pickPhoto(); }
+-            });
+-        }
++        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(0, -2, 1f);
++        nameRow.addView(carTv, nlp);
++        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(-2, -2);
++        clp.leftMargin = (int) (8 * s);
++        nameRow.addView(chip, clp);
++        place(card, nameRow, 20, 14, 260, 30);
+ 
+         FrameLayout box = new FrameLayout(this);
+         box.setBackground(round(INNER, 16));
+-        place(card, box, 12, 250 + dy, 276, 118 + gx);
++        place(card, box, 6, by, 288, bh);
+         if (!carSpeed) box.setVisibility(View.GONE);   // se arma igual: setGps y el kilometraje siguen funcionando
+ 
+         LinearLayout lbl = new LinearLayout(this);
+@@ -1739,14 +1712,17 @@ public class Main extends Activity {
+             carGauge.setUnit(useMph());
+             carGauge.setNumber(speedo == 2);
+             // Velocímetro centrado, lo más grande que quepa; debajo (afuera del velocímetro) la barrita del mantenimiento
+-            float bh = 118 + gx, barH = 32, gaugeH = oilHome ? bh - barH - 8 : bh - 6;
++            // Sin la foto sobra alto: el velocímetro usa casi todo el ancho de la tarjeta y queda centrado en el alto libre.
++            float barH = 34, gaugeAreaH = oilHome ? bh - barH - 10 : bh - 6;
++            float gaugeW = 284, gaugeNeed = gaugeW / 2f * 0.97f * 1.56f + 4;   // alto que usa el aro en modo compacto
++            float gaugeH = Math.min(gaugeAreaH, gaugeNeed);
+             carGauge.setCompact(true);
+-            place(box, carGauge, 4, 3, 268, gaugeH);
++            place(box, carGauge, 2, 3 + (gaugeAreaH - gaugeH) / 2f, gaugeW, gaugeH);
+             g.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+             gpsTv.setTextSize(TypedValue.COMPLEX_UNIT_PX, gpsTv.getTextSize() * 10f / 11f);
+             box.removeView(g);   // ya estaba puesto: se vuelve a poner en la esquina de arriba a la derecha, fuera del aro
+-            place(box, g, 178, 4, 90, 16);
+-            if (oilHome) buildOilStrip(box, 10, bh - barH - 6, 256, barH);
++            place(box, g, 192, 6, 90, 16);
++            if (oilHome) buildOilStrip(box, 14, bh - barH - 8, 260, barH);
+         }
+         if (oilHome && speedo == 0) buildOilBadge(box, 0, 0);
+         if (!oilHome) { oilValTv = null; oilBar = null; oilBarBg = null; oilLblTv = null; oilIc = null; }
+-- 
+2.43.0
+
