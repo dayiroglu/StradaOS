@@ -1157,3 +1157,548 @@ Irlanda del Norte	Nordirland
 Islas Canarias	Kanarische Inseln
 Tiempo en StradaOS: {}	Zeit in StradaOS: {}
 Último tiempo por Bluetooth: {}	Letzte Zeit über Bluetooth: {}
+# Bloque 16 (2.25): tema premium Faro
+Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.	Anthrazitfarbener Hintergrund (perlweiß im hellen Modus) mit einem diagonalen Lichtstrahl. Links der Tacho und ein Auto von oben, das nachts die Scheinwerfer einschaltet; in der Mitte die Karte, in den Hintergrund eingebettet; rechts das Wetter nach Stunden und deine nächsten Wartungen, darunter der Player und die App-Leiste.
+Color del carro	Autofarbe
+El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.	Das Auto im Faro-Design, von oben gesehen. Lässt sich auch durch langes Drücken auf das Auto ändern.
+Intensidad del mapa	Kartenintensität
+Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.	Wie deutlich die Karte über dem Hintergrund zu sehen ist. Auto macht sie auf einfachen Autoradio-Bildschirmen kräftiger und auf hochwertigen Bildschirmen dezenter. Erhöhe sie, wenn sie in der Sonne schlecht zu sehen ist.
+Baja	Niedrig
+Media	Mittel
+Alta	Hoch
+Negro	Schwarz
+Sin mantenimientos programados	Keine Wartung geplant
+Toca para agregar uno	Tippe, um eine hinzuzufügen
+Navegar	Navigieren
+# 2.25: canción de las apps (acceso a notificaciones)
+Música sonando	Musik läuft
+Toca para ver la canción	Tippe, um den Titel zu sehen
+Ver la canción de tus apps	Titel deiner Apps anzeigen
+Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.	Um Titel, Interpret und Cover von Spotify, YouTube Music und anderen Apps zu zeigen, braucht StradaOS den „Zugriff auf Benachrichtigungen“. Er dient nur zum Lesen, was gerade läuft: Es wird nichts gespeichert oder gesendet.
+No volver a mostrar	Nicht mehr anzeigen
+Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:	Dieser Bildschirm hat die Einstellung „Zugriff auf Benachrichtigungen“ nicht. Du kannst sie einmalig von einem Computer mit ADB aktivieren:
+Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)	Spotify, YouTube Music und andere Apps des Bildschirms (Zugriff auf Benachrichtigungen)
+# Pantallas FYT: tema según las luces, espera para cambiar de tema y datos del carro
+Encendidas	An
+Apagadas	Aus
+Espera para pasar a oscuro	Verzögerung bis Dunkel
+Cuánto debe durar el cambio (luces encendidas, poco brillo…) antes de oscurecer	Wie lange die Änderung (Licht an, geringe Helligkeit …) anhalten muss, bevor es dunkel wird
+Espera para pasar a claro	Verzögerung bis Hell
+Útil si al apagar el carro de noche se apagan las luces y la pantalla pasa a claro de golpe	Nützlich, wenn beim Abstellen des Autos nachts das Licht ausgeht und der Bildschirm plötzlich hell wird
+Sin espera	Keine Verzögerung
+Marca de la pantalla	Marke des Autoradios
+Genérica	Generisch
+Detectada:	Erkannt:
+No se detectó una marca con funciones propias	Keine Marke mit eigenen Funktionen erkannt
+Datos del carro	Fahrzeugdaten
+Lectura actual	Aktueller Wert
+Servicio com.syu.ms:	Dienst com.syu.ms:
+sin caja CAN	ohne CAN-Box
+Esperando datos	Warte auf Daten
+Luces del carro	Fahrzeuglicht
+Sin datos	Keine Daten
+sin conectar	nicht verbunden
+conectando	verbinde
+conectado	verbunden
+desconectado	getrennt
+no se encontró com.syu.ms	com.syu.ms nicht gefunden
+com.syu.ms no respondió	com.syu.ms hat nicht geantwortet
+com.syu.ms se reinició	com.syu.ms wurde neu gestartet
+Tema según las luces, batería y temperatura exterior	Design nach Fahrlicht, Batterie und Außentemperatur
+Pantallas FYT (com.syu.ms)	FYT-Autoradios (com.syu.ms)
+luces detectadas	Licht erkannt
+Auto: por horario. Sistema: sigue las luces del carro (pantalla FYT)	Auto: nach Uhrzeit. System: folgt dem Fahrlicht (FYT-Autoradio)
+Espera para cambiar de tema	Verzögerung beim Designwechsel
+Evita cambios de golpe, p. ej. al apagar el carro de noche	Verhindert plötzliche Wechsel, z. B. beim Abstellen des Autos nachts
+Para seguirlas, elige Apariencia → Tema → Modo → Sistema	Dazu Darstellung → Design → Modus → System wählen
+Elige qué datos del carro se ven arriba, junto al Wi-Fi	Wähle, welche Fahrzeugdaten oben neben dem WLAN erscheinen
+Tensión de la batería	Batteriespannung
+Medida por la pantalla; no necesita la caja CAN	Vom Autoradio gemessen; keine CAN-Box nötig
+Temperatura exterior	Außentemperatur
+Del sensor del carro; necesita la caja CAN	Vom Fahrzeugsensor; CAN-Box nötig
+pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT-Autoradio erkannt: wähle es unter Dein Fahrzeug → Autoradio
+esta pantalla no informa las luces	dieses Autoradio meldet das Fahrlicht nicht
+# 2.26: escáner OBD-II (panel del vehículo y ajustes)
+Escáner OBD-II	OBD-II-Scanner
+Enciende el monitor del motor en «Escáner OBD-II»	Schalte den Motormonitor unter „OBD-II-Scanner“ ein
+Conectando…	Verbinde…
+Monitor del motor	Motormonitor
+Está apagado: enciéndelo para conectar el escáner	Er ist aus: Schalte ihn ein, um den Scanner zu verbinden
+Estado	Status
+Abrir el panel del vehículo	Fahrzeugpanel öffnen
+Medidores, alertas y códigos encima del tema que tengas	Anzeigen, Warnungen und Codes über deinem Design
+Diagnóstico	Diagnose
+Qué vigila StradaOS y cuándo avisa por voz	Was StradaOS überwacht und wann es per Sprache warnt
+Todo normal	Alles normal
+Qué significan y qué hacer; borrarlos con el motor apagado	Was sie bedeuten und was zu tun ist; bei ausgeschaltetem Motor löschen
+Cada dato que entrega tu auto, con gráficos	Jeder Wert, den dein Auto liefert, mit Diagrammen
+Más	Mehr
+Opcional: explica los códigos para tu auto en particular	Optional: erklärt die Codes für dein Auto
+Motor, protocolo, panel y escaneo completo	Motor, Protokoll, Panel und Komplettscan
+Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar	Gekoppeltes Bluetooth, WLAN (IP und Port) oder ein simuliertes Auto zum Testen
+Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)	Koppele den Scanner, ohne StradaOS zu verlassen (PIN 1234 oder 0000)
+Reconectar	Neu verbinden
+Conectar al iniciar StradaOS	Beim Start von StradaOS verbinden
+Las alertas funcionan aunque estés en otra app (con una notificación fija)	Warnungen funktionieren auch in anderen Apps (mit einer dauerhaften Benachrichtigung)
+Cómo conectar el escáner	So verbindest du den Scanner
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».	1. Stecke den ELM327-Scanner in die OBD-Buchse (unter dem Lenkrad) und schalte die Zündung ein.\n2. Bluetooth: koppele ihn mit PIN 1234 oder 0000. WLAN: verbinde das Autoradio mit dem Netz des Scanners und gib IP und Port ein (fast immer 192.168.0.10:35000).\n3. Wähle ihn oben unter „Scanner“.
+Lo que respondió el escáner (para reportar un problema)	Was der Scanner geantwortet hat (um ein Problem zu melden)
+Todo normal por ahora	Vorerst alles normal
+Alerta	Alarm
+Aviso	Warnung
+Avisos	Hinweise
+Habla aunque estés en Waze o con música	Spricht auch in Waze oder bei Musik
+Abrir el panel con una alerta grave	Panel bei ernstem Alarm öffnen
+Por ejemplo, el motor muy caliente o la batería que no carga	Zum Beispiel sehr heißer Motor oder Batterie, die nicht lädt
+Más de 4 °C por minuto con el motor caliente	Mehr als 4 °C pro Minute bei warmem Motor
+Cuándo avisa cada dato	Wann jeder Wert warnt
+Códigos guardados en el auto	Im Auto gespeicherte Codes
+El auto no tiene códigos guardados	Das Auto hat keine gespeicherten Codes
+Se revisan al conectar y cada 30 segundos	Werden beim Verbinden und alle 30 Sekunden geprüft
+Luz del motor encendida	Motorkontrollleuchte an
+El computador del motor confirmó una falla	Das Motorsteuergerät hat einen Fehler bestätigt
+Con el motor apagado y el contacto puesto. Anota los códigos antes: no se puede deshacer	Bei ausgeschaltetem Motor und eingeschalteter Zündung. Notiere die Codes vorher: Das lässt sich nicht rückgängig machen
+Conecta el escáner para ver los datos	Verbinde den Scanner, um die Daten zu sehen
+Gráficos	Diagramme
+Hasta 3 datos a la vez, de 1 a 30 minutos	Bis zu 3 Werte gleichzeitig, von 1 bis 30 Minuten
+La tuya: cada consulta la cobra tu proveedor	Dein eigener: Jede Anfrage rechnet dein Anbieter ab
+Privacidad	Datenschutz
+Qué se envía	Was gesendet wird
+Solo el código, el vehículo que escribas y los datos del motor de ese momento; nunca tu ubicación. Las respuestas se guardan en la pantalla	Nur der Code, das Fahrzeug, das du einträgst, und die Motordaten dieses Moments; nie dein Standort. Die Antworten werden auf dem Autoradio gespeichert
+Tu vehículo (para la IA)	Dein Fahrzeug (für die KI)
+Marca, modelo, año, motor y caja	Marke, Modell, Jahr, Motor und Getriebe
+Identifica tu auto de forma única. Apagado por defecto	Identifiziert dein Auto eindeutig. Standardmäßig aus
+Probar	Testen
+Pregunta por un código de ejemplo	Fragt nach einem Beispielcode
+Motor	Motor
+Para calcular el consumo en motores sin sensor MAF	Um den Verbrauch bei Motoren ohne MAF-Sensor zu berechnen
+Automático casi siempre; fuerza uno si el escáner no lo detecta	Fast immer automatisch; erzwinge eines, wenn der Scanner es nicht erkennt
+Panel del vehículo	Fahrzeugpanel
+Lado del panel	Seite des Panels
+Pestaña en el borde	Lasche am Rand
+Toca o desliza la pestaña para abrir el panel. Sin ella, ábrelo con un botón de la barra	Tippe oder wische über die Lasche, um das Panel zu öffnen. Ohne sie öffnest du es mit einer Leistentaste
+Informe de cada dato estándar y los propios de la marca. Solo lee	Bericht über jeden Standardwert und die markeneigenen. Nur Lesen
+Ver el último informe	Letzten Bericht ansehen
+Con un escáner ELM327 por Wi-Fi o Bluetooth: temperatura, batería, alertas por voz y códigos de falla	Mit einem ELM327-Scanner per WLAN oder Bluetooth: Temperatur, Batterie, Sprachwarnungen und Fehlercodes
+También con la pestaña del borde o con un botón de la barra	Auch über die Lasche am Rand oder eine Leistentaste
+Vehículo (OBD-II)	Fahrzeug (OBD-II)
+Sin elegir	Nicht gewählt
+Apagada	Aus
+Alerta sobre	Alarm über
+Alerta bajo	Alarm unter
+Alerta sobre ±	Alarm über ±
+No	Nein
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en Ajustes → Tu vehículo → Escáner OBD-II → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	Damit eine KI die Codes erklärt, gib deinen API-Schlüssel (Claude, Groq, Gemini oder andere) unter Einstellungen → Dein Fahrzeug → OBD-II-Scanner → Künstliche Intelligenz ein. Die Erklärungen werden auf dem Gerät gespeichert und funktionieren danach offline.
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar; también se reinician los monitores de emisiones. No se puede deshacer y, si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	Die Motorkontrollleuchte geht aus und die Daten, die die Werkstatt zur Diagnose nutzt, werden gelöscht; auch die Abgasmonitore werden zurückgesetzt. Das lässt sich nicht rückgängig machen, und wenn der Fehler bleibt, kommt der Code zurück. Notiere die Codes vorher.
+Ej.: Kia Picanto 2019 1.2 gasolina mecánico	Z. B.: Kia Picanto 2019 1.2 Benzin Schaltgetriebe
+Sin poner	Nicht gesetzt
+Escaneando… el avance se ve en el estado del escáner	Scan läuft… der Fortschritt steht im Scannerstatus
+Todavía no hay un informe	Es gibt noch keinen Bericht
+Sin monitor activo	Kein aktiver Monitor
+Sin códigos guardados	Keine gespeicherten Codes
+Se revisan al conectar	Werden beim Verbinden geprüft
+Ver todo	Alle ansehen
+1 activa	1 aktiv
+{} activas	{} aktiv
+Vehículo	Fahrzeug
+Monitor del vehículo	Fahrzeugmonitor
+Batería	Batterie
+Carga del motor	Motorlast
+Acelerador	Drosselklappe
+Aire de admisión	Ansaugluft
+Combustible	Kraftstoff
+Mezcla corta	Kurzzeit-Gemischkorrektur
+Mezcla larga	Langzeit-Gemischkorrektur
+Flujo de aire	Luftmasse
+Presión del múltiple	Saugrohrdruck
+Consumo del motor	Motorverbrauch
+Consumo por hora	Verbrauch pro Stunde
+Aceite del motor	Motoröl
+Datos del motor	Motordaten
+Cilindrada del motor	Hubraum
+Cilindrada del motor (litros)	Hubraum (Liter)
+Protocolo	Protokoll
+CAN 11 bits · 500 kbps	CAN 11 Bit · 500 kbps
+CAN 29 bits · 500 kbps	CAN 29 Bit · 500 kbps
+CAN 11 bits · 250 kbps	CAN 11 Bit · 250 kbps
+CAN 29 bits · 250 kbps	CAN 29 Bit · 250 kbps
+Escribe un número entre 0,5 y 8	Gib eine Zahl zwischen 0,5 und 8 ein
+Conectando con el escáner…	Verbinde mit dem Scanner…
+Conectado	Verbunden
+Esperando al auto (¿contacto apagado?)	Warte auf das Auto (Zündung aus?)
+Escáner conectado. Vigilando el motor.	Scanner verbunden. Motor wird überwacht.
+Se perdió la conexión con el escáner.	Verbindung zum Scanner verloren.
+Códigos borrados.	Codes gelöscht.
+El auto no aceptó borrar los códigos.	Das Auto hat das Löschen der Codes nicht akzeptiert.
+El escáner no logra hablar con el auto. ¿Está el contacto puesto?	Der Scanner kann nicht mit dem Auto sprechen. Ist die Zündung an?
+El escáner no responde	Der Scanner antwortet nicht
+El escáner cerró la conexión	Der Scanner hat die Verbindung geschlossen
+El Bluetooth está apagado	Bluetooth ist aus
+Este equipo no tiene Bluetooth	Dieses Gerät hat kein Bluetooth
+No se pudo conectar	Verbindung fehlgeschlagen
+Motor sobrecalentado: {}	Motor überhitzt: {}
+Refrigerante alto: {}	Kühlmittel hoch: {}
+El refrigerante sube rápido: {} °C	Kühlmittel steigt schnell: {} °C
+Voltaje alto: {}	Spannung hoch: {}
+Voltaje bajo: {}	Spannung niedrig: {}
+RPM muy altas: {}	Drehzahl sehr hoch: {}
+Motor muy exigido: {}	Motor stark belastet: {}
+Aire de admisión muy caliente: {}	Ansaugluft sehr heiß: {}
+Poco combustible: {}	Wenig Kraftstoff: {}
+Aceite del motor muy caliente: {}	Motoröl sehr heiß: {}
+Código de falla {}	Fehlercode {}
+Código pendiente {}	Ausstehender Code {}
+revisa el detalle en la pantalla	Details auf dem Bildschirm ansehen
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Espera que enfríe y revisa el nivel de refrigerante, el electroventilador y la correa.	Halte an einem sicheren Ort und stelle den Motor ab. Öffne den Kühlerdeckel nicht im heißen Zustand. Lass ihn abkühlen und prüfe Kühlmittelstand, Lüfter und Riemen.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y, si sigue subiendo, pon la calefacción al máximo y busca dónde parar.	Weniger Last: niedrigeren Gang nutzen, Klimaanlage aus und, wenn es weiter steigt, Heizung auf Maximum und einen Halteplatz suchen.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y vigila que el electroventilador encienda.	Weniger Last: niedrigeren Gang nutzen, Klimaanlage aus und prüfen, ob der Lüfter anspringt.
+El alternador está cargando de más y puede dañar la batería. Revísalo pronto.	Die Lichtmaschine lädt zu stark und kann die Batterie beschädigen. Bald prüfen lassen.
+El alternador no está cargando bien: apaga lo que no necesites (aire, luces extra) y ve a un taller antes de que se descargue la batería. Revisa la correa.	Die Lichtmaschine lädt nicht richtig: schalte Unnötiges aus (Klimaanlage, Zusatzlicht) und fahre in eine Werkstatt, bevor die Batterie leer ist. Prüfe den Riemen.
+Baja la velocidad o usa una marcha más alta. En bajadas, frena con motor sin pasar la zona roja.	Langsamer fahren oder höheren Gang nutzen. Bergab mit Motorbremse, ohne in den roten Bereich zu kommen.
+El motor va al máximo hace rato. En cuestas largas usa una marcha más baja y deja descansar el motor y la caja.	Der Motor läuft schon eine Weile unter Volllast. Bei langen Steigungen niedrigeren Gang nutzen und Motor und Getriebe schonen.
+El aire que entra al motor está muy caliente: pierde potencia. Si estás detenido, avanza para que circule aire.	Die Luft, die in den Motor strömt, ist sehr heiß, dadurch verliert er Leistung. Wenn du stehst, such dir einen Platz mit Luftzug.
+Carga combustible en la próxima estación. En la montaña puede no haber más adelante.	Tanke an der nächsten Tankstelle. In den Bergen gibt es vielleicht keine weitere.
+El motor recibe menos combustible del que necesita: puede ser una fuga de vacío, el filtro de combustible o el sensor MAF. Puede perder fuerza en subidas.	Der Motor bekommt weniger Kraftstoff als nötig: Falschluft, Kraftstofffilter oder MAF-Sensor. Er kann am Berg Leistung verlieren.
+El motor recibe más combustible del necesario: revisa el filtro de aire, el sensor MAF o un inyector que gotee.	Der Motor bekommt mehr Kraftstoff als nötig: prüfe Luftfilter, MAF-Sensor oder eine undichte Einspritzdüse.
+Baja la exigencia y revisa el nivel de aceite cuando puedas parar.	Weniger Last und den Ölstand prüfen, sobald du halten kannst.
+código	Code
+códigos	Codes
+Carrocería (airbag, cinturones, luces, cierre…)	Karosserie (Airbag, Gurte, Licht, Schlösser…)
+Chasis (frenos ABS, dirección, suspensión, 4x4)	Fahrwerk (ABS, Lenkung, Federung, 4x4)
+Comunicación entre computadores del auto	Kommunikation zwischen den Steuergeräten
+Motor: mezcla de aire y combustible	Motor: Luft-Kraftstoff-Gemisch
+Motor: encendido y fallas de encendido	Motor: Zündung und Zündaussetzer
+Control de emisiones	Abgasregelung
+Velocidad, ralentí y entradas auxiliares	Geschwindigkeit, Leerlauf und Zusatzeingänge
+Computador del motor y sus salidas	Motorsteuergerät und seine Ausgänge
+Caja de cambios	Getriebe
+Motor o caja (sistema híbrido u otro)	Motor oder Getriebe (Hybrid oder anderes)
+código propio de la marca	herstellerspezifischer Code
+La API key no es válida	Der API-Schlüssel ist ungültig
+La IA está ocupada o sin saldo. Intenta más tarde.	Die KI ist ausgelastet oder ohne Guthaben. Versuche es später.
+La IA no quiso responder	Die KI hat die Antwort verweigert
+La IA respondió vacío	Die KI hat eine leere Antwort geliefert
+Luz del motor	Motorkontrolle
+Conectar	Verbinden
+Auto simulado	Simuliertes Auto
+Apagado	Aus
+En vivo	Live
+Alertas	Warnungen
+Códigos de falla	Fehlercodes
+Pendiente	Ausstehend
+Grave	Ernst
+Leve	Leicht
+Revisar	Prüfen
+Borrar códigos	Codes löschen
+Qué hacer	Was tun
+Explicación de la IA	Erklärung der KI
+Este código no está en la tabla sin conexión: suele ser un código propio de la marca. La IA puede explicarlo.	Dieser Code steht nicht in der Offline-Tabelle: Meist ist es ein herstellerspezifischer Code. Die KI kann ihn erklären.
+Ojo: los códigos de airbag, ABS y carrocería normalmente no se leen con OBD-II genérico; si aparece aquí es porque el auto lo reporta al computador del motor.	Hinweis: Airbag-, ABS- und Karosseriecodes lassen sich mit generischem OBD-II meist nicht lesen; erscheint er hier, meldet das Auto ihn an das Motorsteuergerät.
+Volver a preguntar a la IA	Die KI erneut fragen
+Explicar con IA	Mit KI erklären
+Preguntando a la IA…	Frage die KI…
+No se pudo consultar la IA	KI nicht erreichbar
+Apaga el motor y deja solo el contacto puesto para borrar los códigos.	Stelle den Motor ab und lass nur die Zündung an, um die Codes zu löschen.
+¿Borrar los códigos de falla?	Fehlercodes löschen?
+Escáner	Scanner
+Inteligencia artificial	Künstliche Intelligenz
+Sin configurar	Nicht eingerichtet
+Avisos por voz	Sprachwarnungen
+Sí	Ja
+Registro de la conexión	Verbindungsprotokoll
+Ajustes del vehículo	Fahrzeugeinstellungen
+Tu vehículo: marca, modelo, año, motor y caja	Dein Fahrzeug: Marke, Modell, Jahr, Motor und Getriebe
+Escáner Wi-Fi (escribir IP y puerto)	WLAN-Scanner (IP und Port eingeben)
+Auto simulado (para probar)	Simuliertes Auto (zum Testen)
+No hay escáneres Bluetooth emparejados: emparéjalo en los ajustes del equipo	Keine gekoppelten Bluetooth-Scanner: koppele ihn in den Einstellungen des Autoradios
+Elige tu escáner	Wähle deinen Scanner
+IP y puerto del escáner Wi-Fi	IP und Port des WLAN-Scanners
+Escribe IP:puerto, por ejemplo 192.168.0.10:35000	Gib IP:Port ein, zum Beispiel 192.168.0.10:35000
+Proveedor	Anbieter
+Modelo	Modell
+Dirección de la API	API-Adresse
+Borrar la API key	API-Schlüssel löschen
+Aviso sobre	Warnung über
+Aviso bajo	Warnung unter
+Aviso sobre ±	Warnung über ±
+Otra compatible con OpenAI	Andere OpenAI-kompatible
+elegir…	wählen…
+Probar la IA	KI testen
+Primero escribe la API key	Gib zuerst den API-Schlüssel ein
+Buscando los modelos del proveedor…	Suche die Modelle des Anbieters…
+recomendado	empfohlen
+Escribir otro…	Anderes eingeben…
+Preguntando por el código de ejemplo P0711…	Frage nach dem Beispielcode P0711…
+La IA funciona · P0711 de ejemplo	Die KI funktioniert · Beispiel P0711
+Volver	Zurück
+Elige el modelo de la IA en los ajustes	Wähle das KI-Modell in den Einstellungen
+Escribe la dirección de la API en los ajustes	Gib die API-Adresse in den Einstellungen ein
+Escaneando	Scan läuft
+Escaneo terminado.	Scan abgeschlossen.
+El escaneo se cortó	Der Scan wurde unterbrochen
+Escanear todo lo que entrega el auto	Alles scannen, was das Auto liefert
+Conecta el escáner con el contacto puesto (mejor con el motor en marcha) y vuelve a intentarlo.	Verbinde den Scanner bei eingeschalteter Zündung (besser bei laufendem Motor) und versuche es erneut.
+Pregunta al auto por cada dato estándar y por los datos propios de la marca del motor y la caja. Tarda hasta 2 minutos y mientras tanto las alertas se pausan: hazlo detenido. Solo lee, no cambia nada en el auto.	Fragt das Auto nach jedem Standardwert und nach den markeneigenen Motor- und Getriebedaten. Dauert bis zu 2 Minuten, Warnungen pausieren so lange: im Stand durchführen. Liest nur, ändert nichts am Auto.
+Escanear	Scannen
+Guardado en	Gespeichert in
+Lo que entrega tu auto	Was dein Auto liefert
+Consumo	Verbrauch
+calculado	berechnet
+Panel	Übersicht
+Todos los datos	Alle Daten
+Datos en vivo	Live-Daten
+Monitores de emisiones	Abgasmonitore
+✓ listo · ✗ aún no termina su prueba (normal después de borrar códigos o desconectar la batería).	✓ bereit · ✗ Test noch nicht fertig (normal nach dem Löschen der Codes oder Abklemmen der Batterie).
+Catalizador	Katalysator
+Preguntar a la IA	Die KI fragen
+Ajustar esta alerta	Diese Warnung anpassen
+Alertas a vigilar	Zu überwachende Warnungen
+Subida rápida del refrigerante	Schneller Kühlmittelanstieg
+Códigos de falla nuevos (aviso por voz)	Neue Fehlercodes (Sprachwarnung)
+aviso	Warnung
+alerta	Alarm
+bajo	niedrig
+Vigilar	Überwachen
+Valores de fábrica	Werkswerte
+Escribe un número	Gib eine Zahl ein
+Datos del motor cuando se registró la falla	Motordaten beim Auftreten des Fehlers
+Buscar escáneres Bluetooth cercanos	Bluetooth-Scanner in der Nähe suchen
+Emparejado	Gekoppelt
+emparejado	gekoppelt
+No se pudo emparejar. Prueba con la clave 1234 o 0000.	Koppeln fehlgeschlagen. Versuche PIN 1234 oder 0000.
+Sin el permiso de ubicación Android no deja buscar equipos Bluetooth	Ohne Standortberechtigung lässt Android keine Suche nach Bluetooth-Geräten zu
+No se encontraron equipos. ¿Está el escáner enchufado y el contacto puesto?	Keine Geräte gefunden. Steckt der Scanner und ist die Zündung an?
+Buscando… (enchufa el escáner y pon el contacto)	Suche… (Scanner einstecken und Zündung einschalten)
+Emparejando… si pide clave, escribe 1234 o 0000	Koppeln… bei PIN-Abfrage 1234 oder 0000 eingeben
+Emparéjalo en los ajustes de Bluetooth del equipo	Koppele ihn in den Bluetooth-Einstellungen des Autoradios
+Los escáneres suelen llamarse OBDII, OBD2, V-LINK o Vgate.	Scanner heißen meist OBDII, OBD2, V-LINK oder Vgate.
+Buscar de nuevo	Erneut suchen
+Gráficos en vivo	Live-Diagramme
+Desliza el dedo sobre un gráfico para ver el valor de cada momento. Toca los datos de arriba para comparar hasta 3.	Fahre mit dem Finger über ein Diagramm, um den Wert jedes Moments zu sehen. Tippe oben auf Werte, um bis zu 3 zu vergleichen.
+mín	min
+máx	max
+prom	Ø
+ahora	jetzt
+hace	vor
+Esperando datos…	Warte auf Daten…
+Monitor apagado · toca para conectar	Monitor aus · zum Verbinden tippen
+monitor apagado	Monitor aus
+Monitor apagado	Monitor aus
+Listo	Fertig
+límite	Grenze
+ancho	Breite
+APPS	APPS
+normal	normal
+Avance del encendido	Zündzeitpunkt
+Sonda O2 banco 1	Lambdasonde Bank 1
+Sonda O2 banco 1 sensor 2	Lambdasonde Bank 1 Sensor 2
+Tiempo de marcha	Laufzeit
+Distancia con la luz del motor	Strecke mit Motorkontrollleuchte
+EGR comandada	AGR-Sollwert
+Arranques desde borrar códigos	Warmläufe seit dem Löschen
+Distancia desde borrar códigos	Strecke seit dem Löschen
+Presión barométrica	Luftdruck
+Catalizador banco 1	Katalysator Bank 1
+Catalizador banco 1 sensor 2	Katalysator Bank 1 Sensor 2
+Carga absoluta	Absolute Last
+Mezcla comandada	Soll-Lambda
+Acelerador relativo	Relative Drosselklappe
+Acelerador B	Drosselklappe B
+Pedal D	Pedal D
+Pedal E	Pedal E
+Acelerador comandado	Drosselklappen-Sollwert
+Tiempo con la luz del motor	Zeit mit Motorkontrollleuchte
+Tiempo desde borrar códigos	Zeit seit dem Löschen
+Mezcla O2 banco 1	Lambdakorrektur Bank 1
+Mezcla O2 banco 1 sensor 2	Lambdakorrektur Bank 1 Sensor 2
+API key	API-Schlüssel
+Enviar el VIN a la IA	VIN an die KI senden
+RPM	Drehzahl
+
+# 2.26: alertas de mezcla y explicación de los códigos de falla más comunes (assets/obd/dtc_es.tsv)
+Mezcla pobre ({}): {}	Mageres Gemisch ({}): {}
+Mezcla rica ({}): {}	Fettes Gemisch ({}): {}
+Árbol de levas de admisión adelantado más de lo esperado (variador CVVT).	Einlassnockenwelle weiter verstellt (früh) als erwartet (CVVT-Versteller).
+Revisa nivel y estado del aceite: el variador funciona con presión de aceite. Si el aceite está bien, revisar la válvula solenoide OCV.	Ölstand und Ölzustand prüfen: Der Versteller arbeitet mit Öldruck. Ist das Öl in Ordnung, das OCV-Magnetventil prüfen.
+Árbol de levas de admisión atrasado más de lo esperado (variador CVVT).	Einlassnockenwelle weiter verstellt (spät) als erwartet (CVVT-Versteller).
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV y la cadena de distribución.	Ölstand und Ölzustand prüfen. Bleibt der Fehler, das OCV-Ventil und die Steuerkette prüfen.
+Árbol de levas de escape adelantado más de lo esperado.	Auslassnockenwelle weiter verstellt (früh) als erwartet.
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV de escape.	Ölstand und Ölzustand prüfen. Bleibt der Fehler, das OCV-Ventil der Auslassseite prüfen.
+La posición del cigüeñal y del árbol de levas no coinciden.	Kurbelwellen- und Nockenwellenposition stimmen nicht überein.
+Puede ser la cadena de distribución estirada o saltada. Evita exigir el motor y llévalo al taller pronto.	Die Steuerkette kann gelängt oder übergesprungen sein. Motor schonen und bald in die Werkstatt.
+El sensor de flujo de aire (MAF) marca fuera de lo esperado.	Der Luftmassenmesser (MAF) zeigt unplausible Werte.
+Revisa el filtro de aire y que no haya mangueras sueltas después del sensor. Limpiar el MAF con limpiador especial.	Luftfilter prüfen und nach losen Schläuchen hinter dem Sensor suchen. Den MAF mit Spezialreiniger säubern.
+Señal baja del sensor de flujo de aire (MAF).	Signal des Luftmassenmessers (MAF) zu niedrig.
+Revisa el conector y el cableado del MAF.	Stecker und Kabel des MAF prüfen.
+Señal alta del sensor de flujo de aire (MAF).	Signal des Luftmassenmessers (MAF) zu hoch.
+El sensor de presión del múltiple (MAP) marca fuera de lo esperado.	Der Saugrohrdrucksensor (MAP) zeigt unplausible Werte.
+Revisa mangueras de vacío y el conector del sensor MAP.	Unterdruckschläuche und den Stecker des MAP-Sensors prüfen.
+El sensor de temperatura del aire de admisión marca fuera de lo esperado.	Der Ansauglufttemperatursensor zeigt unplausible Werte.
+Revisa el conector del sensor. No suele dejarte botado.	Stecker des Sensors prüfen. Damit bleibt man selten liegen.
+Señal baja del sensor de temperatura del aire de admisión.	Signal des Ansauglufttemperatursensors zu niedrig.
+Revisa el conector y el cableado del sensor.	Stecker und Kabel des Sensors prüfen.
+Señal alta del sensor de temperatura del aire de admisión.	Signal des Ansauglufttemperatursensors zu hoch.
+El sensor de temperatura del refrigerante marca fuera de lo esperado.	Der Kühlmitteltemperatursensor zeigt unplausible Werte.
+No confíes en el indicador de temperatura hasta revisarlo. Vigila que el electroventilador encienda.	Der Temperaturanzeige nicht trauen, bis es geprüft ist. Darauf achten, dass der Kühlerlüfter anläuft.
+Señal baja del sensor de temperatura del refrigerante.	Signal des Kühlmitteltemperatursensors zu niedrig.
+Sin este dato el motor puede sobrecalentarse sin avisar. Revisa nivel de refrigerante y el conector del sensor.	Ohne diesen Wert kann der Motor ohne Warnung überhitzen. Kühlmittelstand und den Stecker des Sensors prüfen.
+Señal alta del sensor de temperatura del refrigerante.	Signal des Kühlmitteltemperatursensors zu hoch.
+El sensor de posición del acelerador marca fuera de lo esperado.	Der Drosselklappensensor zeigt unplausible Werte.
+El motor puede entrar en modo de emergencia (poca potencia). Revisa el cuerpo de aceleración y su conector.	Der Motor kann ins Notlaufprogramm gehen (wenig Leistung). Drosselklappe und ihren Stecker prüfen.
+Señal baja del sensor de posición del acelerador.	Signal des Drosselklappensensors zu niedrig.
+Puede entrar en modo de emergencia. Revisa el conector del cuerpo de aceleración.	Kann ins Notlaufprogramm gehen. Den Stecker der Drosselklappe prüfen.
+Señal alta del sensor de posición del acelerador.	Signal des Drosselklappensensors zu hoch.
+El motor tarda mucho en llegar a temperatura para el control de mezcla.	Der Motor braucht zu lange bis zur Temperatur für die Gemischregelung.
+Suele ser el termostato abierto o el sensor de temperatura. Revisa en el taller.	Meist ein offen hängendes Thermostat oder der Temperatursensor. In der Werkstatt prüfen lassen.
+El refrigerante no llega a la temperatura del termostato.	Das Kühlmittel erreicht die Thermostattemperatur nicht.
+Casi siempre es el termostato pegado abierto. Gasta más combustible y calienta poco la cabina; cámbialo cuando puedas.	Fast immer ein offen hängendes Thermostat. Mehr Verbrauch und die Heizung wird kaum warm; bei Gelegenheit tauschen.
+Falla en el circuito del sensor de oxígeno delantero (banco 1).	Fehler im Stromkreis der vorderen Lambdasonde (Bank 1).
+Revisa el conector del sensor. Gastarás algo más de combustible.	Stecker des Sensors prüfen. Der Verbrauch steigt etwas.
+El sensor de oxígeno delantero responde lento.	Die vordere Lambdasonde reagiert zu langsam.
+El sensor está viejo. Cámbialo cuando puedas.	Die Sonde ist verschlissen. Bei Gelegenheit tauschen.
+Falla en el calentador del sensor de oxígeno delantero.	Fehler in der Heizung der vorderen Lambdasonde.
+Revisa el fusible y el conector del sensor. Se puede seguir.	Sicherung und Stecker des Sensors prüfen. Weiterfahren ist möglich.
+Falla en el calentador del sensor de oxígeno trasero.	Fehler in der Heizung der hinteren Lambdasonde.
+Mezcla pobre: entra más aire o llega menos combustible de lo que debería.	Mageres Gemisch: Es kommt mehr Luft oder weniger Kraftstoff an als vorgesehen.
+Busca fugas de vacío (mangueras, junta de admisión), revisa el MAF, la presión de combustible y el filtro. En subidas largas puede perder fuerza.	Nach Falschluft suchen (Schläuche, Ansaugdichtung), MAF, Kraftstoffdruck und Filter prüfen. An langen Steigungen kann Leistung fehlen.
+Mezcla rica: llega más combustible del que debería.	Fettes Gemisch: Es kommt mehr Kraftstoff an als vorgesehen.
+Revisa el filtro de aire, el MAF, inyectores que goteen y el regulador de presión.	Luftfilter, MAF, tropfende Einspritzdüsen und den Druckregler prüfen.
+Temperatura del motor excesiva.	Motortemperatur zu hoch.
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Revisa refrigerante, ventilador y correa.	An einem sicheren Ort anhalten und den Motor abstellen. Den Kühlerdeckel nicht heiß öffnen. Kühlmittel, Lüfter und Riemen prüfen.
+Falla en el circuito del relé de la bomba de combustible.	Fehler im Stromkreis des Kraftstoffpumpenrelais.
+El motor puede apagarse sin aviso. Revisa relé y fusible de la bomba.	Der Motor kann ohne Vorwarnung ausgehen. Relais und Sicherung der Pumpe prüfen.
+Falla en el inyector del cilindro {}.	Fehler an der Einspritzdüse von Zylinder {}.
+Puede fallar el cilindro {}. Revisa el conector del inyector.	Zylinder {} kann aussetzen. Den Stecker der Einspritzdüse prüfen.
+Fallas de encendido en varios cilindros.	Zündaussetzer in mehreren Zylindern.
+Si la luz del motor parpadea, baja la velocidad y no exijas el motor: el catalizador se puede dañar. Revisa bujías, bobinas, combustible y fugas de vacío.	Blinkt die Motorkontrollleuchte, langsamer fahren und den Motor nicht belasten: Der Katalysator kann Schaden nehmen. Zündkerzen, Zündspulen, Kraftstoff und Falschluft prüfen.
+Falla de encendido en el cilindro {}.	Zündaussetzer in Zylinder {}.
+Si la luz parpadea, no exijas el motor. Intercambia la bobina del cilindro {} con otra para ver si la falla se mueve; revisa la bujía.	Blinkt die Leuchte, den Motor nicht belasten. Die Zündspule von Zylinder {} mit einer anderen tauschen und sehen, ob der Fehler mitwandert; die Zündkerze prüfen.
+Falla en el circuito del sensor de detonación.	Fehler im Stromkreis des Klopfsensors.
+El motor se protege atrasando el encendido: tendrá menos fuerza. Usa el combustible recomendado y revisa el conector del sensor.	Der Motor schützt sich mit späterer Zündung: Er hat weniger Leistung. Den empfohlenen Kraftstoff tanken und den Stecker des Sensors prüfen.
+Falla en el sensor de posición del cigüeñal.	Fehler am Kurbelwellensensor.
+El motor puede apagarse o no volver a arrancar. Evita lugares aislados y revisa el sensor y su conector.	Der Motor kann ausgehen oder nicht wieder anspringen. Abgelegene Orte meiden und den Sensor und seinen Stecker prüfen.
+El sensor de posición del cigüeñal marca fuera de lo esperado.	Der Kurbelwellensensor zeigt unplausible Werte.
+El motor puede apagarse o no volver a arrancar. Revisa el sensor y su conector.	Der Motor kann ausgehen oder nicht wieder anspringen. Den Sensor und seinen Stecker prüfen.
+Falla en el sensor de posición del árbol de levas.	Fehler am Nockenwellensensor.
+Puede costar arrancar o apagarse. Revisa el sensor y su conector.	Kann schlecht anspringen oder ausgehen. Den Sensor und seinen Stecker prüfen.
+El sensor del árbol de levas marca fuera de lo esperado.	Der Nockenwellensensor zeigt unplausible Werte.
+Revisa el sensor, su conector y la distribución.	Den Sensor, seinen Stecker und die Steuerzeiten prüfen.
+Falla en el circuito de la bobina del cilindro {}.	Fehler im Stromkreis der Zündspule von Zylinder {}.
+Puede fallar el cilindro {}. Revisa la bobina y su conector.	Zylinder {} kann aussetzen. Die Zündspule und ihren Stecker prüfen.
+El catalizador (banco 1) ya no limpia los gases como debería.	Der Katalysator (Bank 1) reinigt die Abgase nicht mehr ausreichend.
+Se puede seguir manejando. Antes de cambiarlo, descarta fallas de encendido, fugas de escape y sensores de oxígeno.	Weiterfahren ist möglich. Vor dem Tausch Zündaussetzer, Undichtigkeiten im Auspuff und die Lambdasonden ausschließen.
+Flujo incorrecto en el sistema de vapores de combustible (EVAP).	Falscher Durchfluss im Kraftstoffdampfsystem (EVAP).
+No afecta cómo maneja. Revisa la válvula de purga.	Beeinflusst das Fahren nicht. Das Spülventil prüfen.
+Pequeña fuga en el sistema de vapores de combustible (EVAP).	Kleines Leck im Kraftstoffdampfsystem (EVAP).
+Revisa que la tapa del estanque cierre bien. No afecta cómo maneja.	Prüfen, ob der Tankdeckel richtig schließt. Beeinflusst das Fahren nicht.
+Fuga grande en el sistema de vapores de combustible (EVAP).	Großes Leck im Kraftstoffdampfsystem (EVAP).
+Revisa que la tapa del estanque esté puesta y bien cerrada.	Prüfen, ob der Tankdeckel aufgesetzt und richtig geschlossen ist.
+Fuga muy pequeña en el sistema de vapores de combustible (EVAP).	Sehr kleines Leck im Kraftstoffdampfsystem (EVAP).
+Revisa la tapa del estanque. No afecta cómo maneja.	Den Tankdeckel prüfen. Beeinflusst das Fahren nicht.
+Falla en el sensor de velocidad del vehículo.	Fehler am Fahrzeuggeschwindigkeitssensor.
+La caja automática puede cambiar mal y el velocímetro fallar. Revisa el sensor y su conector.	Das Automatikgetriebe kann schlecht schalten und der Tacho ausfallen. Den Sensor und seinen Stecker prüfen.
+Falla en el control de ralentí.	Fehler in der Leerlaufregelung.
+El motor puede quedar acelerado o apagarse en ralentí. Limpia el cuerpo de aceleración.	Der Motor kann mit erhöhter Drehzahl laufen oder im Leerlauf ausgehen. Die Drosselklappe reinigen.
+Ralentí más bajo de lo esperado.	Leerlaufdrehzahl niedriger als erwartet.
+Limpia el cuerpo de aceleración y revisa fugas de vacío.	Die Drosselklappe reinigen und nach Falschluft suchen.
+Ralentí más alto de lo esperado.	Leerlaufdrehzahl höher als erwartet.
+Suele ser una fuga de vacío o el cuerpo de aceleración sucio.	Meist Falschluft oder eine verschmutzte Drosselklappe.
+Voltaje del sistema bajo.	Bordspannung zu niedrig.
+El alternador puede no estar cargando. Revisa la correa, los bornes de la batería y el alternador antes de un viaje largo.	Die Lichtmaschine lädt möglicherweise nicht. Vor einer langen Fahrt Riemen, Batteriepole und Lichtmaschine prüfen.
+Voltaje del sistema alto.	Bordspannung zu hoch.
+El regulador del alternador puede estar fallando y dañar la batería. Revísalo pronto.	Der Regler der Lichtmaschine kann defekt sein und die Batterie beschädigen. Bald prüfen lassen.
+Falla de comunicación interna del computador del motor.	Interner Kommunikationsfehler des Motorsteuergeräts.
+Revisa masas (tierras) y conectores del computador.	Masseverbindungen und Stecker des Steuergeräts prüfen.
+Falla de memoria del computador del motor.	Speicherfehler des Motorsteuergeräts.
+Llévalo al taller.	Ab in die Werkstatt.
+La caja automática registró una falla (pide leer el computador de la caja).	Das Automatikgetriebe hat einen Fehler gespeichert (Getriebesteuergerät auslesen).
+Hay otro código guardado en el computador de la caja. Si la caja queda en un solo cambio (modo de emergencia), maneja suave hasta el taller.	Im Getriebesteuergerät ist ein weiterer Code gespeichert. Bleibt das Getriebe in einem Gang (Notlauf), sanft bis zur Werkstatt fahren.
+Falla en el sensor de posición de la palanca de cambios.	Fehler am Wählhebel-Positionssensor.
+Puede no arrancar en P o N o mostrar mal el cambio. Revisa el interruptor de rango.	Springt in P oder N eventuell nicht an oder zeigt den falschen Gang. Den Wählbereichsschalter prüfen.
+Falla en el circuito del sensor de temperatura del aceite de la caja automática.	Fehler im Stromkreis des Getriebeöl-Temperatursensors (Automatik).
+La caja puede cambiar brusco. Revisa el nivel y el color del aceite de la caja y el conector del sensor. Evita remolcar o subir pendientes largas exigiendo la caja.	Das Getriebe kann hart schalten. Stand und Farbe des Getriebeöls und den Stecker des Sensors prüfen. Anhängerbetrieb und lange Steigungen unter Last vermeiden.
+El sensor de temperatura del aceite de la caja automática marca fuera de lo esperado.	Der Getriebeöl-Temperatursensor (Automatik) zeigt unplausible Werte.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa nivel y color del aceite de la caja (oscuro u olor a quemado es mala señal) y el conector del sensor. En subidas largas usa una marcha baja y descansa la caja.	Das Getriebe kann hart schalten oder in den Notlauf gehen. Stand und Farbe des Getriebeöls (dunkel oder verbrannter Geruch ist ein schlechtes Zeichen) und den Stecker des Sensors prüfen. An langen Steigungen einen kleinen Gang nutzen und das Getriebe schonen.
+Señal baja del sensor de temperatura del aceite de la caja automática.	Signal des Getriebeöl-Temperatursensors (Automatik) zu niedrig.
+Revisa el conector y el cableado del sensor. La caja puede cambiar brusco.	Stecker und Kabel des Sensors prüfen. Das Getriebe kann hart schalten.
+Señal alta del sensor de temperatura del aceite de la caja automática.	Signal des Getriebeöl-Temperatursensors (Automatik) zu hoch.
+Falla en el sensor de velocidad de entrada de la caja.	Fehler am Eingangsdrehzahlsensor des Getriebes.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa el sensor y su conector.	Das Getriebe kann hart schalten oder in den Notlauf gehen. Den Sensor und seinen Stecker prüfen.
+Falla en el sensor de velocidad de salida de la caja.	Fehler am Ausgangsdrehzahlsensor des Getriebes.
+La caja puede cambiar brusco y el velocímetro fallar. Revisa el sensor y su conector.	Das Getriebe kann hart schalten und der Tacho ausfallen. Den Sensor und seinen Stecker prüfen.
+La relación de cambios no es la correcta (la caja patina).	Falsches Übersetzungsverhältnis (das Getriebe rutscht).
+Revisa el nivel del aceite de la caja de inmediato. Maneja suave: seguir exigiéndola puede dañarla.	Sofort den Getriebeölstand prüfen. Sanft fahren: Weitere Belastung kann es beschädigen.
+Relación incorrecta en 1ª: la caja patina en primera.	Falsche Übersetzung im 1. Gang: Das Getriebe rutscht im ersten Gang.
+Revisa el nivel del aceite de la caja. Maneja suave hasta el taller.	Den Getriebeölstand prüfen. Sanft bis zur Werkstatt fahren.
+Relación incorrecta en 2ª: la caja patina en segunda.	Falsche Übersetzung im 2. Gang: Das Getriebe rutscht im zweiten Gang.
+Relación incorrecta en 3ª: la caja patina en tercera.	Falsche Übersetzung im 3. Gang: Das Getriebe rutscht im dritten Gang.
+Relación incorrecta en 4ª: la caja patina en cuarta.	Falsche Übersetzung im 4. Gang: Das Getriebe rutscht im vierten Gang.
+Falla en el circuito del embrague del convertidor de torque.	Fehler im Stromkreis der Wandlerüberbrückungskupplung.
+Gastará más combustible y la caja se calentará más. Revisa el aceite de la caja.	Höherer Verbrauch und das Getriebe wird heißer. Das Getriebeöl prüfen.
+El embrague del convertidor de torque no acopla o patina.	Die Wandlerüberbrückungskupplung schließt nicht oder rutscht.
+La caja se calienta más: evita subidas largas exigentes y revisa el aceite de la caja.	Das Getriebe wird heißer: lange, anstrengende Steigungen meiden und das Getriebeöl prüfen.
+Falla eléctrica en el embrague del convertidor de torque.	Elektrischer Fehler der Wandlerüberbrückungskupplung.
+Revisa el conector de la caja. Gastará más combustible.	Den Getriebestecker prüfen. Der Verbrauch steigt.
+Falla en el solenoide de cambio {}.	Fehler am Schaltmagnetventil {}.
+La caja puede quedar en un solo cambio. Maneja suave hasta el taller.	Das Getriebe kann in einem Gang bleiben. Sanft bis zur Werkstatt fahren.
+El sensor de oxígeno trasero ve mezcla pobre después del catalizador.	Die hintere Lambdasonde sieht nach dem Katalysator ein mageres Gemisch.
+Revisa fugas de escape antes del sensor.	Vor dem Sensor nach Undichtigkeiten im Auspuff suchen.
+El sensor de oxígeno trasero ve mezcla rica después del catalizador.	Die hintere Lambdasonde sieht nach dem Katalysator ein fettes Gemisch.
+Revisa sensores de oxígeno y el catalizador.	Die Lambdasonden und den Katalysator prüfen.
+Mezcla pobre en ralentí.	Mageres Gemisch im Leerlauf.
+Suele ser una fuga de vacío. Revisa mangueras y la válvula PCV.	Meist Falschluft. Die Schläuche und das PCV-Ventil prüfen.
+Mezcla rica en ralentí.	Fettes Gemisch im Leerlauf.
+Revisa inyectores y la válvula de purga del EVAP.	Die Einspritzdüsen und das EVAP-Spülventil prüfen.
+
+# 2.26: monitores de emisiones y avance del escaneo
+Fallas de encendido	Zündaussetzer
+Sistema de combustible	Kraftstoffsystem
+Componentes	Bauteile
+Catalizador calefaccionado	Beheizter Katalysator
+Vapores de combustible (EVAP)	Kraftstoffdampf (EVAP)
+Aire secundario	Sekundärluft
+Sensores de oxígeno	Lambdasonden
+Calefactor de sensores de oxígeno	Lambdasondenheizung
+Recirculación de gases (EGR)	Abgasrückführung (AGR)
+Escaneando: {}	Scan läuft: {}
+Datos estándar (modo 01)…	Standarddaten (Modus 01)…
+Información del vehículo (modo 09)…	Fahrzeuginformationen (Modus 09)…
+Modo 01 · PID {}	Modus 01 · PID {}
+Sin conexión	Keine Verbindung
+Interrumpido	Unterbrochen
+Dirección no válida: {}	Ungültige Adresse: {}
+Apps	Apps
+Guía del escáner	Scanner-Anleitung
+Guía	Anleitung
+Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	Was du kaufen solltest, wie du ihn verbindest und was alles bedeutet · ohne Internet
+Desbloquear	Freischalten
+Se desbloquea con una donación. Todas las funciones de StradaOS siguen siendo gratis.	Wird mit einer Spende freigeschaltet. Alle Funktionen von StradaOS bleiben kostenlos.
+Desbloqueado en esta pantalla. ¡Gracias por tu donación!	Auf diesem Bildschirm freigeschaltet. Danke für deine Spende!
+Prueba: volver a aplicar sin código	Test: wieder ohne Code anwenden
+Prueba: desbloquear como en la versión normal	Test: freischalten wie in der normalen Version
+1. Dona 5 USD en Ko-fi: escanea el código con tu celular o entra a {}.	1. Spende 5 USD auf Ko-fi: Scanne den Code mit dem Handy oder geh auf {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla:	2. Schreib in die Nachricht zur Spende die ID dieses Bildschirms:
+3. Te enviamos un código STRD-XXXX-XXXX, casi siempre el mismo día. Escríbelo en «Tengo un código».	3. Wir schicken dir einen Code STRD-XXXX-XXXX, meist am selben Tag. Gib ihn unter „Ich habe einen Code“ ein.
+El tema queda en esta pantalla. Si cambias de radio o la restableces, escríbenos con el ID nuevo y te enviamos otro código sin costo.	Das Design bleibt auf diesem Bildschirm. Wenn du das Radio wechselst oder es zurücksetzt, schreib uns mit der neuen ID und du bekommst kostenlos einen neuen Code.
+Desbloquear {}	{} freischalten
+Tengo un código	Ich habe einen Code
+Archivo por USB	Datei per USB
+ID de esta pantalla: {}. Necesitas internet solo esta vez.	ID dieses Bildschirms: {}. Internet brauchst du nur dieses eine Mal.
+Escribe tu código	Gib deinen Code ein
+El código tiene 8 letras o números después de STRD, por ejemplo STRD-7KQ2-M9XA.	Der Code hat 8 Buchstaben oder Ziffern nach STRD, zum Beispiel STRD-7KQ2-M9XA.
+Comprobando el código…	Code wird geprüft…
+No hay internet. Conéctate un momento (por ejemplo, con el celular como módem) y vuelve a intentarlo, o pide el archivo de licencia y pásalo por USB.	Kein Internet. Verbinde dich kurz (zum Beispiel über den Hotspot deines Handys) und versuch es noch einmal, oder lass dir die Lizenzdatei schicken und kopiere sie per USB.
+No encontramos ese código para esta pantalla. Revisa que esté bien escrito y que el ID que enviaste sea {}.	Diesen Code finden wir für diesen Bildschirm nicht. Prüfe, ob er richtig geschrieben ist und ob die gesendete ID {} ist.
+No se pudo desbloquear	Freischalten nicht möglich
+Intentar de nuevo	Noch einmal versuchen
+Buscando la licencia en la pantalla y en las USB…	Lizenz wird auf dem Bildschirm und auf USB-Sticks gesucht…
+No encontramos la licencia	Lizenz nicht gefunden
+Copia el archivo que te enviamos (stradaos-licencia.txt) en la raíz de una USB, conéctala y vuelve a intentarlo. Tiene que ser para el ID {}.	Kopiere die Datei, die wir dir geschickt haben (stradaos-licencia.txt), ins Hauptverzeichnis eines USB-Sticks, steck ihn ein und versuch es noch einmal. Sie muss für die ID {} sein.
+¡Listo!	Fertig!
+{} quedó desbloqueado en esta pantalla. Gracias por apoyar StradaOS.	{} ist auf diesem Bildschirm freigeschaltet. Danke, dass du StradaOS unterstützt.
+Aplicar ahora	Jetzt anwenden
+1. Dona en Ko-fi 5 USD por un tema o 8 USD por dos: escanea el código con tu celular o entra a {}.	1. Spende auf Ko-fi 5 USD für ein Design oder 8 USD für zwei: Scanne den Code mit dem Handy oder geh auf {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla y qué temas quieres:	2. Schreib in die Nachricht zur Spende die ID dieses Bildschirms und welche Designs du möchtest:
+Se desbloquea con una donación de 5 USD, o 8 USD por dos temas. Todas las funciones de StradaOS siguen siendo gratis.	Wird mit einer Spende von 5 USD freigeschaltet, oder 8 USD für zwei Designs. Alle Funktionen von StradaOS bleiben kostenlos.
+Usar la velocidad del escáner	Geschwindigkeit vom Scanner verwenden
+Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso	Mit verbundenem Scanner zeigt der Startbildschirm die Geschwindigkeit des Autos statt der GPS-Geschwindigkeit: genauer und ohne Verzögerung

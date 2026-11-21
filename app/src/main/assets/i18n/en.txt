@@ -1157,3 +1157,640 @@ Irlanda del Norte	Northern Ireland
 Islas Canarias	Canary Islands
 Tiempo en StradaOS: {}	Time in StradaOS: {}
 Último tiempo por Bluetooth: {}	Last time from Bluetooth: {}
+# Bloque 16 (2.25): tema premium Faro
+Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.	Charcoal background (pearl in light mode) with a diagonal beam of light. On the left, the speedometer and a top-down car that turns its headlights on at night; in the center, the map blended into the background; on the right, the hourly weather and your upcoming maintenance, with the player and the app bar below.
+Color del carro	Car color
+El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.	The car in the Faro theme, seen from above. You can also change it by long-pressing the car.
+Intensidad del mapa	Map intensity
+Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.	How visible the map is over the background. Auto makes it stronger on the simple screens of car radios and softer on high-end screens. Turn it up if it's hard to see in the sun.
+Baja	Low
+Media	Medium
+Alta	High
+Negro	Black
+Sin mantenimientos programados	No maintenance scheduled
+Toca para agregar uno	Tap to add one
+Navegar	Navigate
+# 2.25: canción de las apps (acceso a notificaciones)
+Música sonando	Music playing
+Toca para ver la canción	Tap to see the song
+Ver la canción de tus apps	See the song from your apps
+Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.	To show the song, artist and cover from Spotify, YouTube Music and other apps, StradaOS needs “Notification access”. It only uses it to read what's playing: nothing is stored or sent.
+No volver a mostrar	Don't show again
+Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:	This screen doesn't have the “Notification access” setting. You can turn it on once from a computer with ADB:
+Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)	Spotify, YouTube Music and other apps on the screen (notification access)
+# Pantallas FYT: tema según las luces, espera para cambiar de tema y datos del carro
+Encendidas	On
+Apagadas	Off
+Espera para pasar a oscuro	Delay before switching to dark
+Cuánto debe durar el cambio (luces encendidas, poco brillo…) antes de oscurecer	How long the change (lights on, low brightness…) must last before going dark
+Espera para pasar a claro	Delay before switching to light
+Útil si al apagar el carro de noche se apagan las luces y la pantalla pasa a claro de golpe	Useful if, when you turn off the car at night, the lights go off and the screen suddenly turns light
+Sin espera	No delay
+Marca de la pantalla	Head unit brand
+Genérica	Generic
+Detectada:	Detected:
+No se detectó una marca con funciones propias	No brand with its own features was detected
+Datos del carro	Car data
+Lectura actual	Current reading
+Servicio com.syu.ms:	com.syu.ms service:
+sin caja CAN	no CAN box
+Esperando datos	Waiting for data
+Luces del carro	Car lights
+Sin datos	No data
+sin conectar	not connected
+conectando	connecting
+conectado	connected
+desconectado	disconnected
+no se encontró com.syu.ms	com.syu.ms not found
+com.syu.ms no respondió	com.syu.ms didn't respond
+com.syu.ms se reinició	com.syu.ms restarted
+Tema según las luces, batería y temperatura exterior	Theme by the lights, battery and outside temperature
+Pantallas FYT (com.syu.ms)	FYT head units (com.syu.ms)
+luces detectadas	lights detected
+Auto: por horario. Sistema: sigue las luces del carro (pantalla FYT)	Auto: by schedule. System: follows the car's lights (FYT head unit)
+Espera para cambiar de tema	Delay theme changes
+Evita cambios de golpe, p. ej. al apagar el carro de noche	Avoids sudden changes, e.g. when turning off the car at night
+Para seguirlas, elige Apariencia → Tema → Modo → Sistema	To follow them, choose Appearance → Theme → Mode → System
+Elige qué datos del carro se ven arriba, junto al Wi-Fi	Choose which car data appears at the top, next to Wi-Fi
+Tensión de la batería	Battery voltage
+Medida por la pantalla; no necesita la caja CAN	Measured by the head unit; doesn't need the CAN box
+Temperatura exterior	Outside temperature
+Del sensor del carro; necesita la caja CAN	From the car's sensor; needs the CAN box
+pantalla FYT detectada: elígela en Tu vehículo → Equipo	FYT screen detected: choose it in Your vehicle → Head unit
+esta pantalla no informa las luces	this screen doesn't report the lights
+# OBD-II (PR #42, Jaacern)
+Vehículo	Vehicle
+Monitor del vehículo	Vehicle monitor
+Batería	Battery
+Carga del motor	Engine load
+Acelerador	Throttle
+Aire de admisión	Intake air
+Combustible	Fuel
+Mezcla corta	Short fuel trim
+Mezcla larga	Long fuel trim
+Flujo de aire	Air flow
+Presión del múltiple	Manifold pressure
+Consumo del motor	Engine fuel rate
+Consumo por hora	Fuel rate
+Aceite del motor	Engine oil
+Panel de datos	Data panel
+Datos del panel	Panel data
+Datos del motor	Engine data
+Cilindrada del motor	Engine displacement
+Cilindrada del motor (litros)	Engine displacement (liters)
+Protocolo	Protocol
+CAN 11 bits · 500 kbps	CAN 11-bit · 500 kbps
+CAN 29 bits · 500 kbps	CAN 29-bit · 500 kbps
+CAN 11 bits · 250 kbps	CAN 11-bit · 250 kbps
+CAN 29 bits · 250 kbps	CAN 29-bit · 250 kbps
+Escribe un número entre 0,5 y 8	Enter a number between 0.5 and 8
+Máximo 6 datos	Maximum 6 values
+Hasta 6 datos del escáner, por ejemplo RPM, velocidad, refrigerante y consumo	Up to 6 scanner values, for example RPM, speed, coolant and fuel consumption
+Conectando con el escáner…	Connecting to the scanner…
+Conectado	Connected
+Esperando al auto (¿contacto apagado?)	Waiting for the car (ignition off?)
+Escáner conectado. Vigilando el motor.	Scanner connected. Watching the engine.
+Se perdió la conexión con el escáner.	Lost connection to the scanner.
+Códigos borrados.	Codes cleared.
+El auto no aceptó borrar los códigos.	The car didn't accept clearing the codes.
+El escáner no logra hablar con el auto. ¿Está el contacto puesto?	The scanner can't talk to the car. Is the ignition on?
+El escáner no responde	The scanner isn't responding
+El escáner cerró la conexión	The scanner closed the connection
+El Bluetooth está apagado	Bluetooth is off
+Este equipo no tiene Bluetooth	This device has no Bluetooth
+No se pudo conectar	Couldn't connect
+Motor sobrecalentado: {}	Engine overheating: {}
+Refrigerante alto: {}	Coolant high: {}
+El refrigerante sube rápido: {} °C	Coolant rising fast: {} °C
+Voltaje alto: {}	Voltage high: {}
+Voltaje bajo: {}	Voltage low: {}
+RPM muy altas: {}	RPM very high: {}
+Motor muy exigido: {}	Engine working very hard: {}
+Aire de admisión muy caliente: {}	Intake air very hot: {}
+Poco combustible: {}	Low fuel: {}
+Mezcla pobre ({}): {}	Lean mixture ({}): {}
+Mezcla rica ({}): {}	Rich mixture ({}): {}
+Aceite del motor muy caliente: {}	Engine oil very hot: {}
+Código de falla {}	Trouble code {}
+Código pendiente {}	Pending code {}
+revisa el detalle en la pantalla	check the details on the screen
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Espera que enfríe y revisa el nivel de refrigerante, el electroventilador y la correa.	Stop somewhere safe and turn off the engine. Don't open the radiator cap while hot. Let it cool, then check the coolant level, the radiator fan and the belt.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y, si sigue subiendo, pon la calefacción al máximo y busca dónde parar.	Ease off: use a lower gear, turn off the A/C and, if it keeps rising, set the heater to maximum and find a place to stop.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y vigila que el electroventilador encienda.	Ease off: use a lower gear, turn off the A/C and check that the radiator fan turns on.
+El alternador está cargando de más y puede dañar la batería. Revísalo pronto.	The alternator is overcharging and may damage the battery. Have it checked soon.
+El alternador no está cargando bien: apaga lo que no necesites (aire, luces extra) y ve a un taller antes de que se descargue la batería. Revisa la correa.	The alternator isn't charging properly: turn off what you don't need (A/C, extra lights) and get to a garage before the battery runs flat. Check the belt.
+Baja la velocidad o usa una marcha más alta. En bajadas, frena con motor sin pasar la zona roja.	Slow down or use a higher gear. On descents, engine-brake without entering the red zone.
+El motor va al máximo hace rato. En cuestas largas usa una marcha más baja y deja descansar el motor y la caja.	The engine has been at full load for a while. On long climbs use a lower gear and let the engine and transmission rest.
+El aire que entra al motor está muy caliente: pierde potencia. Si estás detenido, avanza para que circule aire.	The air entering the engine is very hot, so it loses power. If you're stopped, move so air can flow.
+Carga combustible en la próxima estación. En la montaña puede no haber más adelante.	Refuel at the next station. In the mountains there may be none further on.
+El motor recibe menos combustible del que necesita: puede ser una fuga de vacío, el filtro de combustible o el sensor MAF. Puede perder fuerza en subidas.	The engine is getting less fuel than it needs: it could be a vacuum leak, the fuel filter or the MAF sensor. It may lose power on climbs.
+El motor recibe más combustible del necesario: revisa el filtro de aire, el sensor MAF o un inyector que gotee.	The engine is getting more fuel than it needs: check the air filter, the MAF sensor or a leaking injector.
+Baja la exigencia y revisa el nivel de aceite cuando puedas parar.	Ease off and check the oil level when you can stop.
+código	code
+códigos	codes
+Carrocería (airbag, cinturones, luces, cierre…)	Body (airbag, seat belts, lights, locks…)
+Chasis (frenos ABS, dirección, suspensión, 4x4)	Chassis (ABS brakes, steering, suspension, 4x4)
+Comunicación entre computadores del auto	Communication between the car's computers
+Motor: mezcla de aire y combustible	Engine: air and fuel mixture
+Motor: encendido y fallas de encendido	Engine: ignition and misfires
+Control de emisiones	Emission control
+Velocidad, ralentí y entradas auxiliares	Speed, idle and auxiliary inputs
+Computador del motor y sus salidas	Engine computer and its outputs
+Caja de cambios	Transmission
+Motor o caja (sistema híbrido u otro)	Engine or transmission (hybrid or other)
+código propio de la marca	manufacturer-specific code
+La API key no es válida	The API key isn't valid
+La IA está ocupada o sin saldo. Intenta más tarde.	The AI is busy or out of credit. Try again later.
+La IA no quiso responder	The AI declined to answer
+La IA respondió vacío	The AI returned an empty answer
+Luz del motor	Check engine
+Conectar	Connect
+Auto simulado	Simulated car
+Apagado	Off
+En vivo	Live
+Conecta tu escáner OBD-II	Connect your OBD-II scanner
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Si es Bluetooth, emparéjalo primero en los ajustes de Bluetooth del equipo (clave 1234 o 0000).\n3. Toca ⚙ para elegirlo y luego Conectar.\n\nStradaOS vigila la temperatura, el voltaje, la mezcla y los códigos de falla, y te avisa por voz aunque estés en otra app.	1. Plug the ELM327 scanner into the OBD port (under the steering wheel) and turn the ignition on.\n2. If it's Bluetooth, pair it first in the head unit's Bluetooth settings (PIN 1234 or 0000).\n3. Tap ⚙ to choose it, then Connect.\n\nStradaOS watches temperature, voltage, fuel mixture and trouble codes, and warns you by voice even while you use another app.
+Elegir escáner	Choose scanner
+Probar con un auto simulado	Try with a simulated car
+Alertas	Alerts
+Todo normal por ahora.	All normal for now.
+Sin monitor activo.	Monitor not running.
+Códigos de falla	Trouble codes
+El auto no tiene códigos guardados.	The car has no stored codes.
+Se revisan al conectar y cada 30 segundos.	Checked on connect and every 30 seconds.
+Pendiente	Pending
+Grave	Serious
+Leve	Minor
+Revisar	Check
+Toca para ver qué hacer	Tap to see what to do
+Borrar códigos	Clear codes
+Hace {} min	{} min ago
+Qué hacer	What to do
+Explicación de la IA	AI explanation
+Este código no está en la tabla sin conexión: suele ser un código propio de la marca. La IA puede explicarlo.	This code isn't in the offline table: it's usually a manufacturer-specific code. The AI can explain it.
+Ojo: los códigos de airbag, ABS y carrocería normalmente no se leen con OBD-II genérico; si aparece aquí es porque el auto lo reporta al computador del motor.	Note: airbag, ABS and body codes usually can't be read with generic OBD-II; if it shows here, the car reports it to the engine computer.
+Volver a preguntar a la IA	Ask the AI again
+Explicar con IA	Explain with AI
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en ⚙ → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	To have an AI explain the codes, add your API key (Claude, Groq, Gemini or another) in ⚙ → Artificial intelligence. Explanations are saved on the device and then work offline.
+Preguntando a la IA…	Asking the AI…
+No se pudo consultar la IA	Couldn't reach the AI
+Apaga el motor y deja solo el contacto puesto para borrar los códigos.	Turn off the engine and leave only the ignition on to clear the codes.
+¿Borrar los códigos de falla?	Clear the trouble codes?
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar. Si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	The check-engine light turns off and the data the garage uses for diagnosis is erased. If the fault persists, the code will come back. Write the codes down first.
+Escáner	Scanner
+Mi vehículo (para la IA)	My vehicle (for the AI)
+Inteligencia artificial	Artificial intelligence
+Sin configurar	Not set up
+Avisos por voz	Voice alerts
+Sí	Yes
+Encender el monitor al iniciar StradaOS	Start the monitor when StradaOS starts
+Registro de la conexión	Connection log
+Ajustes del vehículo	Vehicle settings
+Tu vehículo: marca, modelo, año, motor y caja	Your vehicle: make, model, year, engine and transmission
+Ej.: Kia Sorento 2010 2.4 bencina 4x4 automático	E.g.: Kia Sorento 2010 2.4 petrol 4x4 automatic
+Escáner Wi-Fi (escribir IP y puerto)	Wi-Fi scanner (enter IP and port)
+Auto simulado (para probar)	Simulated car (for testing)
+No hay escáneres Bluetooth emparejados: emparéjalo en los ajustes del equipo	No paired Bluetooth scanners: pair it in the head unit's settings
+Elige tu escáner	Choose your scanner
+IP y puerto del escáner Wi-Fi	Wi-Fi scanner IP and port
+Escribe IP:puerto, por ejemplo 192.168.0.10:35000	Enter IP:port, for example 192.168.0.10:35000
+Proveedor	Provider
+Modelo	Model
+Dirección de la API	API address
+Borrar la API key	Delete the API key
+La IA recibe solo el código, el vehículo que escribiste y los datos del motor; nunca tu ubicación. Cada consulta la cobra tu proveedor con tu API key.	The AI only receives the code, the vehicle you entered and the engine data; never your location. Each request is billed by your provider to your API key.
+Aviso sobre	Warning above
+alerta sobre	alert above
+Aviso bajo	Warning below
+alerta bajo	alert below
+Aviso sobre ±	Warning above ±
+alerta sobre ±	alert above ±
+Con el motor en marcha debe estar entre 13,5 y 14,8 V. Con el motor apagado, 12,4 a 12,8 V es normal.	With the engine running it should be 13.5 to 14.8 V. With the engine off, 12.4 to 12.8 V is normal.
+Normal en marcha: 85 a 98 °C. También avisa si sube más de 4 °C por minuto sobre 95 °C.	Normal when running: 85 to 98 °C. It also warns if it rises more than 4 °C per minute above 95 °C.
+Cuánto corrige el computador la mezcla. Positivo = le falta combustible (fuga de aire); negativo = le sobra.	How much the computer corrects the mixture. Positive = short of fuel (air leak); negative = too much fuel.
+Solo informativo: este dato no genera alertas.	Information only: this value doesn't trigger alerts.
+Otra compatible con OpenAI	Other OpenAI-compatible
+elegir…	choose…
+Probar la IA	Test the AI
+Primero escribe la API key	Enter the API key first
+Buscando los modelos del proveedor…	Fetching the provider's models…
+recomendado	recommended
+Escribir otro…	Type another…
+Preguntando por el código de ejemplo P0711…	Asking about sample code P0711…
+La IA funciona · P0711 de ejemplo	The AI works · sample P0711
+Volver	Back
+Elige el modelo de la IA en los ajustes	Choose the AI model in the settings
+Escribe la dirección de la API en los ajustes	Enter the API address in the settings
+Escaneando	Scanning
+Escaneo terminado.	Scan finished.
+El escaneo se cortó	The scan was interrupted
+Escanear todo lo que entrega el auto	Scan everything the car provides
+Conecta el escáner con el contacto puesto (mejor con el motor en marcha) y vuelve a intentarlo.	Connect the scanner with the ignition on (ideally with the engine running) and try again.
+Pregunta al auto por cada dato estándar y por los datos propios de la marca del motor y la caja. Tarda hasta 2 minutos y mientras tanto las alertas se pausan: hazlo detenido. Solo lee, no cambia nada en el auto.	Asks the car for every standard value and for the manufacturer's own engine and transmission data. Takes up to 2 minutes and alerts pause meanwhile, so do it while stopped. It only reads; it changes nothing in the car.
+Escanear	Scan
+Guardado en	Saved to
+Lo que entrega tu auto	What your car provides
+Consumo	Fuel consumption
+calculado	calculated
+Panel	Dashboard
+Todos los datos	All data
+Datos en vivo	Live data
+Monitores de emisiones	Emission monitors
+✓ listo · ✗ aún no termina su prueba (normal después de borrar códigos o desconectar la batería).	✓ ready · ✗ test not finished yet (normal after clearing codes or disconnecting the battery).
+Fallas de encendido	Misfire
+Sistema de combustible	Fuel system
+Componentes	Components
+Catalizador	Catalyst
+Catalizador calefaccionado	Heated catalyst
+Vapores de combustible (EVAP)	Fuel vapor (EVAP)
+Aire secundario	Secondary air
+Sensores de oxígeno	Oxygen sensors
+Calefactor de sensores de oxígeno	Oxygen sensor heater
+Recirculación de gases (EGR)	Exhaust gas recirculation (EGR)
+Preguntar a la IA	Ask the AI
+Ajustar esta alerta	Adjust this alert
+Alertas a vigilar	Alerts to watch
+Subida rápida del refrigerante	Fast coolant rise
+Códigos de falla nuevos (aviso por voz)	New trouble codes (voice alert)
+aviso	warning
+alerta	alert
+bajo	low
+Vigilar	Watch
+Valores de fábrica	Factory values
+Escribe un número	Enter a number
+Datos del motor cuando se registró la falla	Engine data when the fault was recorded
+Buscar escáneres Bluetooth cercanos	Search for nearby Bluetooth scanners
+Emparejado	Paired
+emparejado	paired
+No se pudo emparejar. Prueba con la clave 1234 o 0000.	Couldn't pair. Try PIN 1234 or 0000.
+Sin el permiso de ubicación Android no deja buscar equipos Bluetooth	Without location permission Android won't allow searching for Bluetooth devices
+No se encontraron equipos. ¿Está el escáner enchufado y el contacto puesto?	No devices found. Is the scanner plugged in and the ignition on?
+Buscando… (enchufa el escáner y pon el contacto)	Searching… (plug in the scanner and turn the ignition on)
+Emparejando… si pide clave, escribe 1234 o 0000	Pairing… if asked for a PIN, enter 1234 or 0000
+Emparéjalo en los ajustes de Bluetooth del equipo	Pair it in the head unit's Bluetooth settings
+Los escáneres suelen llamarse OBDII, OBD2, V-LINK o Vgate.	Scanners are usually called OBDII, OBD2, V-LINK or Vgate.
+Buscar de nuevo	Search again
+Gráficos en vivo	Live charts
+Desliza el dedo sobre un gráfico para ver el valor de cada momento. Toca los datos de arriba para comparar hasta 3.	Slide your finger over a chart to see the value at each moment. Tap the items above to compare up to 3.
+mín	min
+máx	max
+prom	avg
+ahora	now
+hace	ago
+Esperando datos…	Waiting for data…
+Monitor apagado · toca para conectar	Monitor off · tap to connect
+monitor apagado	monitor off
+VEHÍCULO	VEHICLE
+Qué muestra cada tarjeta	What each card shows
+Música, el monitor del vehículo (temperatura, voltaje, RPM y alertas) o un gráfico en vivo	Music, the vehicle monitor (temperature, voltage, RPM and alerts) or a live chart
+Gráfico en vivo	Live chart
+Gráfico del reproductor	Player card chart
+Dato del escáner que se grafica (últimos 5 minutos)	Scanner value to chart (last 5 minutes)
+Tarjeta del centro	Center card
+El mapa, el monitor del vehículo o un gráfico en vivo. Sin el mapa, Android Auto y CarPlay se abren desde la barra de botones	The map, the vehicle monitor or a live chart. Without the map, Android Auto and CarPlay open from the button bar
+Gráfico del centro	Center card chart
+Velocidad (GPS)	Speed (GPS)
+Recuadro de la velocidad	Speed box
+La velocidad del GPS o, en grande, otro dato del escáner (por ejemplo la temperatura del refrigerante)	GPS speed or, in large type, another scanner value (for example coolant temperature)
+Esta tarjeta	This card
+Cambiar esta tarjeta…	Change this card…
+¿Qué dato graficar?	Which value to chart?
+Monitor apagado	Monitor off
+Cambiar qué muestra…	Change what it shows…
+◀  Mover a la izquierda	◀  Move left
+Mover a la derecha  ▶	Move right  ▶
+Ancho de la tarjeta…	Card width…
+Ancho de la tarjeta	Card width
+Volver al orden y tamaño de siempre	Back to the default order and size
+Ya está a la izquierda	It's already on the left
+Ya está a la derecha	It's already on the right
+Ancha	Wide
+Muy ancha	Extra wide
+✋  Ajustar con el dedo (mover y cambiar tamaño)	✋  Adjust by touch (move and resize)
+Arrastra la manija entre dos tarjetas para cambiar el ancho · arrastra una tarjeta para moverla	Drag the handle between two cards to resize · drag a card to move it
+Listo	Done
+límite	limit
+se ajusta solo	adjusts itself
+ancho	width
+VIAJE	TRIP
+ALTITUD	ALTITUDE
+APPS	APPS
+pendiente —	grade —
+normal	normal
+Mantén presionado para reiniciar el viaje o cambiar los widgets	Long-press to reset the trip or change the widgets
+Quitar este acceso	Remove this shortcut
+Acceso directo {}	Shortcut {}
+Altitud, pendiente y rumbo	Altitude, grade and heading
+Viaje (km, tiempo, consumo)	Trip (km, time, consumption)
+Dato del vehículo…	Vehicle value…
+Accesos directos (3 apps)	Shortcuts (3 apps)
+Dato del vehículo	Vehicle value
+Widget	Widget
+Reiniciar el viaje	Reset trip
+Quitar la franja	Remove the strip
+Franja de widgets	Widget strip
+¿Qué dato mostrar?	Which value to show?
+Viaje reiniciado	Trip reset
+Quitar la franja de widgets de abajo	Remove the widget strip below
+Franja de widgets debajo (altitud, viaje, apps…)	Widget strip below (altitude, trip, apps…)
+Arrastra las manijas para cambiar tamaños · arrastra una tarjeta para moverla · toca un widget para cambiarlo	Drag the handles to resize · drag a card to move it · tap a widget to change it
+Agregar franja de widgets	Add widget strip
+Agregar un widget	Add a widget
+Ajustar tamaños con el dedo	Adjust sizes by touch
+Quitar este widget	Remove this widget
+Accesos directos (apps)	Shortcuts (apps)
+MÚSICA	MUSIC
+Música (canción y controles)	Music (song and controls)
+Arrastra las manijas para cambiar tamaños · arrastra una tarjeta para moverla · toca un widget para cambiarlo · ✕ oculta una tarjeta	Drag the handles to resize · drag a card to move it · tap a widget to change it · ✕ hides a card
+Ocultar la tarjeta del vehículo	Hide the vehicle card
+Ocultar la tarjeta de música	Hide the music card
+Mostrar la tarjeta del vehículo	Show the vehicle card
+Mostrar la tarjeta de música	Show the music card
+Avance del encendido	Ignition timing
+Sonda O2 banco 1	O2 sensor bank 1
+Sonda O2 banco 1 sensor 2	O2 sensor bank 1 sensor 2
+Tiempo de marcha	Run time
+Distancia con la luz del motor	Distance with check engine light
+EGR comandada	Commanded EGR
+Arranques desde borrar códigos	Warm-ups since codes cleared
+Distancia desde borrar códigos	Distance since codes cleared
+Presión barométrica	Barometric pressure
+Catalizador banco 1	Catalyst bank 1
+Catalizador banco 1 sensor 2	Catalyst bank 1 sensor 2
+Carga absoluta	Absolute load
+Mezcla comandada	Commanded equivalence ratio
+Acelerador relativo	Relative throttle
+Acelerador B	Throttle B
+Pedal D	Pedal D
+Pedal E	Pedal E
+Acelerador comandado	Commanded throttle
+Tiempo con la luz del motor	Time with check engine light
+Tiempo desde borrar códigos	Time since codes cleared
+Mezcla O2 banco 1	O2 trim bank 1
+Mezcla O2 banco 1 sensor 2	O2 trim bank 1 sensor 2
+API key	API key
+Enviar el VIN a la IA	Send the VIN to the AI
+La IA recibe solo el código, el vehículo que escribiste y los datos del motor; nunca tu ubicación. El VIN solo se envía si lo activas aquí. Cada consulta la cobra tu proveedor con tu API key.	The AI receives only the code, the vehicle you typed and the engine data; never your location. The VIN is sent only if you enable it here. Each query is charged by your provider with your API key.
+RPM	RPM
+# 2.26: escáner OBD-II (panel del vehículo y ajustes)
+Escáner OBD-II	OBD-II scanner
+Enciende el monitor del motor en «Escáner OBD-II»	Turn on the engine monitor in “OBD-II scanner”
+Conectando…	Connecting…
+Monitor del motor	Engine monitor
+Está apagado: enciéndelo para conectar el escáner	It's off: turn it on to connect the scanner
+Estado	Status
+Abrir el panel del vehículo	Open the vehicle panel
+Medidores, alertas y códigos encima del tema que tengas	Gauges, alerts and codes on top of your theme
+Diagnóstico	Diagnostics
+Qué vigila StradaOS y cuándo avisa por voz	What StradaOS watches and when it speaks up
+Todo normal	All normal
+Qué significan y qué hacer; borrarlos con el motor apagado	What they mean and what to do; clear them with the engine off
+Cada dato que entrega tu auto, con gráficos	Every value your car provides, with charts
+Más	More
+Opcional: explica los códigos para tu auto en particular	Optional: explains codes for your specific car
+Motor, protocolo, panel y escaneo completo	Engine, protocol, panel and full scan
+Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar	Paired Bluetooth, Wi-Fi (IP and port) or a simulated car for testing
+Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)	Pair the scanner without leaving StradaOS (PIN 1234 or 0000)
+Reconectar	Reconnect
+Conectar al iniciar StradaOS	Connect when StradaOS starts
+Las alertas funcionan aunque estés en otra app (con una notificación fija)	Alerts work even while you're in another app (with a persistent notification)
+Cómo conectar el escáner	How to connect the scanner
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».	1. Plug the ELM327 scanner into the OBD port (under the steering wheel) and turn the ignition on.\n2. Bluetooth: pair it with PIN 1234 or 0000. Wi-Fi: connect the head unit to the scanner's network and enter its IP and port (almost always 192.168.0.10:35000).\n3. Choose it above in “Scanner”.
+Lo que respondió el escáner (para reportar un problema)	What the scanner replied (to report a problem)
+Todo normal por ahora	All normal for now
+Alerta	Alert
+Aviso	Warning
+Avisos	Notices
+Habla aunque estés en Waze o con música	Speaks even while you're in Waze or playing music
+Abrir el panel con una alerta grave	Open the panel on a serious alert
+Por ejemplo, el motor muy caliente o la batería que no carga	For example, the engine very hot or the battery not charging
+Más de 4 °C por minuto con el motor caliente	More than 4 °C per minute with the engine warm
+Cuándo avisa cada dato	When each value alerts
+Códigos guardados en el auto	Codes stored in the car
+El auto no tiene códigos guardados	The car has no stored codes
+Se revisan al conectar y cada 30 segundos	Checked when connecting and every 30 seconds
+Luz del motor encendida	Check engine light on
+El computador del motor confirmó una falla	The engine computer confirmed a fault
+Con el motor apagado y el contacto puesto. Anota los códigos antes: no se puede deshacer	With the engine off and the ignition on. Write the codes down first: it can't be undone
+Conecta el escáner para ver los datos	Connect the scanner to see the data
+Gráficos	Charts
+Hasta 3 datos a la vez, de 1 a 30 minutos	Up to 3 values at a time, from 1 to 30 minutes
+La tuya: cada consulta la cobra tu proveedor	Your own: each request is billed by your provider
+Privacidad	Privacy
+Qué se envía	What is sent
+Solo el código, el vehículo que escribas y los datos del motor de ese momento; nunca tu ubicación. Las respuestas se guardan en la pantalla	Only the code, the vehicle you enter and the engine data at that moment; never your location. Answers are saved on the head unit
+Tu vehículo (para la IA)	Your vehicle (for the AI)
+Marca, modelo, año, motor y caja	Make, model, year, engine and transmission
+Identifica tu auto de forma única. Apagado por defecto	Uniquely identifies your car. Off by default
+Probar	Test
+Pregunta por un código de ejemplo	Asks about a sample code
+Motor	Engine
+Para calcular el consumo en motores sin sensor MAF	To calculate fuel consumption on engines without a MAF sensor
+Automático casi siempre; fuerza uno si el escáner no lo detecta	Automatic almost always; force one if the scanner doesn't detect it
+Panel del vehículo	Vehicle panel
+Lado del panel	Panel side
+Pestaña en el borde	Edge tab
+Toca o desliza la pestaña para abrir el panel. Sin ella, ábrelo con un botón de la barra	Tap or swipe the tab to open the panel. Without it, open it with a bar button
+Informe de cada dato estándar y los propios de la marca. Solo lee	Report of every standard value and the manufacturer's own. Read-only
+Ver el último informe	View the last report
+Con un escáner ELM327 por Wi-Fi o Bluetooth: temperatura, batería, alertas por voz y códigos de falla	With an ELM327 scanner over Wi-Fi or Bluetooth: temperature, battery, voice alerts and trouble codes
+También con la pestaña del borde o con un botón de la barra	Also with the edge tab or a bar button
+Vehículo (OBD-II)	Vehicle (OBD-II)
+Sin elegir	Not chosen
+Apagada	Off
+Alerta sobre	Alert above
+Alerta bajo	Alert below
+Alerta sobre ±	Alert above ±
+No	No
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en Ajustes → Tu vehículo → Escáner OBD-II → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	For an AI to explain the codes, enter your API key (Claude, Groq, Gemini or another) in Settings → Your vehicle → OBD-II scanner → Artificial intelligence. Explanations are saved on the device and then work offline.
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar; también se reinician los monitores de emisiones. No se puede deshacer y, si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	The check engine light turns off and the data the garage uses for diagnosis is erased; emission monitors are reset too. It can't be undone and, if the fault persists, the code will come back. Write the codes down first.
+Ej.: Kia Picanto 2019 1.2 gasolina mecánico	E.g.: Kia Picanto 2019 1.2 petrol manual
+Sin poner	Not set
+Escaneando… el avance se ve en el estado del escáner	Scanning… progress shows in the scanner status
+Todavía no hay un informe	There's no report yet
+Sin monitor activo	No active monitor
+Sin códigos guardados	No stored codes
+Se revisan al conectar	Checked when connecting
+Ver todo	See all
+1 activa	1 active
+{} activas	{} active
+
+# 2.26: textos del escáner que faltaban
+Parada intermedia	Stopover
+
+# 2.26: alertas de mezcla y explicación de los códigos de falla más comunes (assets/obd/dtc_es.tsv)
+Árbol de levas de admisión adelantado más de lo esperado (variador CVVT).	Intake camshaft more advanced than expected (CVVT phaser).
+Revisa nivel y estado del aceite: el variador funciona con presión de aceite. Si el aceite está bien, revisar la válvula solenoide OCV.	Check the oil level and condition: the phaser works on oil pressure. If the oil is fine, check the OCV solenoid valve.
+Árbol de levas de admisión atrasado más de lo esperado (variador CVVT).	Intake camshaft more retarded than expected (CVVT phaser).
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV y la cadena de distribución.	Check the oil level and condition. If it persists, check the OCV valve and the timing chain.
+Árbol de levas de escape adelantado más de lo esperado.	Exhaust camshaft more advanced than expected.
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV de escape.	Check the oil level and condition. If it persists, check the exhaust OCV valve.
+La posición del cigüeñal y del árbol de levas no coinciden.	Crankshaft and camshaft positions don't match.
+Puede ser la cadena de distribución estirada o saltada. Evita exigir el motor y llévalo al taller pronto.	The timing chain may be stretched or have jumped a tooth. Avoid pushing the engine and take it to a shop soon.
+El sensor de flujo de aire (MAF) marca fuera de lo esperado.	The mass air flow sensor (MAF) reads out of range.
+Revisa el filtro de aire y que no haya mangueras sueltas después del sensor. Limpiar el MAF con limpiador especial.	Check the air filter and look for loose hoses after the sensor. Clean the MAF with a dedicated cleaner.
+Señal baja del sensor de flujo de aire (MAF).	Mass air flow sensor (MAF) signal low.
+Revisa el conector y el cableado del MAF.	Check the MAF connector and wiring.
+Señal alta del sensor de flujo de aire (MAF).	Mass air flow sensor (MAF) signal high.
+El sensor de presión del múltiple (MAP) marca fuera de lo esperado.	The manifold pressure sensor (MAP) reads out of range.
+Revisa mangueras de vacío y el conector del sensor MAP.	Check the vacuum hoses and the MAP sensor connector.
+El sensor de temperatura del aire de admisión marca fuera de lo esperado.	The intake air temperature sensor reads out of range.
+Revisa el conector del sensor. No suele dejarte botado.	Check the sensor connector. It rarely leaves you stranded.
+Señal baja del sensor de temperatura del aire de admisión.	Intake air temperature sensor signal low.
+Revisa el conector y el cableado del sensor.	Check the sensor connector and wiring.
+Señal alta del sensor de temperatura del aire de admisión.	Intake air temperature sensor signal high.
+El sensor de temperatura del refrigerante marca fuera de lo esperado.	The coolant temperature sensor reads out of range.
+No confíes en el indicador de temperatura hasta revisarlo. Vigila que el electroventilador encienda.	Don't trust the temperature gauge until it's checked. Make sure the radiator fan turns on.
+Señal baja del sensor de temperatura del refrigerante.	Coolant temperature sensor signal low.
+Sin este dato el motor puede sobrecalentarse sin avisar. Revisa nivel de refrigerante y el conector del sensor.	Without this reading the engine can overheat without warning. Check the coolant level and the sensor connector.
+Señal alta del sensor de temperatura del refrigerante.	Coolant temperature sensor signal high.
+El sensor de posición del acelerador marca fuera de lo esperado.	The throttle position sensor reads out of range.
+El motor puede entrar en modo de emergencia (poca potencia). Revisa el cuerpo de aceleración y su conector.	The engine may go into limp mode (low power). Check the throttle body and its connector.
+Señal baja del sensor de posición del acelerador.	Throttle position sensor signal low.
+Puede entrar en modo de emergencia. Revisa el conector del cuerpo de aceleración.	It may go into limp mode. Check the throttle body connector.
+Señal alta del sensor de posición del acelerador.	Throttle position sensor signal high.
+El motor tarda mucho en llegar a temperatura para el control de mezcla.	The engine takes too long to warm up for fuel control.
+Suele ser el termostato abierto o el sensor de temperatura. Revisa en el taller.	Usually a thermostat stuck open or the temperature sensor. Have it checked at a shop.
+El refrigerante no llega a la temperatura del termostato.	The coolant doesn't reach thermostat temperature.
+Casi siempre es el termostato pegado abierto. Gasta más combustible y calienta poco la cabina; cámbialo cuando puedas.	Almost always a thermostat stuck open. It uses more fuel and heats the cabin poorly; replace it when you can.
+Falla en el circuito del sensor de oxígeno delantero (banco 1).	Front oxygen sensor circuit fault (bank 1).
+Revisa el conector del sensor. Gastarás algo más de combustible.	Check the sensor connector. Fuel use will be a bit higher.
+El sensor de oxígeno delantero responde lento.	The front oxygen sensor responds slowly.
+El sensor está viejo. Cámbialo cuando puedas.	The sensor is worn out. Replace it when you can.
+Falla en el calentador del sensor de oxígeno delantero.	Front oxygen sensor heater fault.
+Revisa el fusible y el conector del sensor. Se puede seguir.	Check the fuse and the sensor connector. You can keep driving.
+Falla en el calentador del sensor de oxígeno trasero.	Rear oxygen sensor heater fault.
+Mezcla pobre: entra más aire o llega menos combustible de lo que debería.	Lean mixture: more air is getting in or less fuel is arriving than it should.
+Busca fugas de vacío (mangueras, junta de admisión), revisa el MAF, la presión de combustible y el filtro. En subidas largas puede perder fuerza.	Look for vacuum leaks (hoses, intake gasket), check the MAF, fuel pressure and filter. It may lose power on long climbs.
+Mezcla rica: llega más combustible del que debería.	Rich mixture: more fuel is arriving than it should.
+Revisa el filtro de aire, el MAF, inyectores que goteen y el regulador de presión.	Check the air filter, the MAF, leaking injectors and the pressure regulator.
+Temperatura del motor excesiva.	Engine temperature too high.
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Revisa refrigerante, ventilador y correa.	Stop in a safe place and turn off the engine. Don't open the radiator cap while hot. Check the coolant, fan and belt.
+Falla en el circuito del relé de la bomba de combustible.	Fuel pump relay circuit fault.
+El motor puede apagarse sin aviso. Revisa relé y fusible de la bomba.	The engine may stall without warning. Check the pump relay and fuse.
+Falla en el inyector del cilindro {}.	Cylinder {} injector fault.
+Puede fallar el cilindro {}. Revisa el conector del inyector.	Cylinder {} may misfire. Check the injector connector.
+Fallas de encendido en varios cilindros.	Misfires in several cylinders.
+Si la luz del motor parpadea, baja la velocidad y no exijas el motor: el catalizador se puede dañar. Revisa bujías, bobinas, combustible y fugas de vacío.	If the engine light is flashing, slow down and don't push the engine: the catalytic converter can be damaged. Check spark plugs, coils, fuel and vacuum leaks.
+Falla de encendido en el cilindro {}.	Misfire in cylinder {}.
+Si la luz parpadea, no exijas el motor. Intercambia la bobina del cilindro {} con otra para ver si la falla se mueve; revisa la bujía.	If the light is flashing, don't push the engine. Swap the cylinder {} coil with another to see if the misfire moves; check the spark plug.
+Falla en el circuito del sensor de detonación.	Knock sensor circuit fault.
+El motor se protege atrasando el encendido: tendrá menos fuerza. Usa el combustible recomendado y revisa el conector del sensor.	The engine protects itself by retarding ignition: it will have less power. Use the recommended fuel and check the sensor connector.
+Falla en el sensor de posición del cigüeñal.	Crankshaft position sensor fault.
+El motor puede apagarse o no volver a arrancar. Evita lugares aislados y revisa el sensor y su conector.	The engine may stall or not restart. Avoid isolated places and check the sensor and its connector.
+El sensor de posición del cigüeñal marca fuera de lo esperado.	The crankshaft position sensor reads out of range.
+El motor puede apagarse o no volver a arrancar. Revisa el sensor y su conector.	The engine may stall or not restart. Check the sensor and its connector.
+Falla en el sensor de posición del árbol de levas.	Camshaft position sensor fault.
+Puede costar arrancar o apagarse. Revisa el sensor y su conector.	It may be hard to start or may stall. Check the sensor and its connector.
+El sensor del árbol de levas marca fuera de lo esperado.	The camshaft sensor reads out of range.
+Revisa el sensor, su conector y la distribución.	Check the sensor, its connector and the timing.
+Falla en el circuito de la bobina del cilindro {}.	Cylinder {} ignition coil circuit fault.
+Puede fallar el cilindro {}. Revisa la bobina y su conector.	Cylinder {} may misfire. Check the coil and its connector.
+El catalizador (banco 1) ya no limpia los gases como debería.	The catalytic converter (bank 1) no longer cleans the exhaust as it should.
+Se puede seguir manejando. Antes de cambiarlo, descarta fallas de encendido, fugas de escape y sensores de oxígeno.	You can keep driving. Before replacing it, rule out misfires, exhaust leaks and oxygen sensors.
+Flujo incorrecto en el sistema de vapores de combustible (EVAP).	Incorrect flow in the fuel vapor system (EVAP).
+No afecta cómo maneja. Revisa la válvula de purga.	It doesn't affect how the car drives. Check the purge valve.
+Pequeña fuga en el sistema de vapores de combustible (EVAP).	Small leak in the fuel vapor system (EVAP).
+Revisa que la tapa del estanque cierre bien. No afecta cómo maneja.	Make sure the fuel cap closes properly. It doesn't affect how the car drives.
+Fuga grande en el sistema de vapores de combustible (EVAP).	Large leak in the fuel vapor system (EVAP).
+Revisa que la tapa del estanque esté puesta y bien cerrada.	Make sure the fuel cap is on and properly closed.
+Fuga muy pequeña en el sistema de vapores de combustible (EVAP).	Very small leak in the fuel vapor system (EVAP).
+Revisa la tapa del estanque. No afecta cómo maneja.	Check the fuel cap. It doesn't affect how the car drives.
+Falla en el sensor de velocidad del vehículo.	Vehicle speed sensor fault.
+La caja automática puede cambiar mal y el velocímetro fallar. Revisa el sensor y su conector.	The automatic transmission may shift badly and the speedometer may fail. Check the sensor and its connector.
+Falla en el control de ralentí.	Idle control fault.
+El motor puede quedar acelerado o apagarse en ralentí. Limpia el cuerpo de aceleración.	The engine may idle high or stall at idle. Clean the throttle body.
+Ralentí más bajo de lo esperado.	Idle lower than expected.
+Limpia el cuerpo de aceleración y revisa fugas de vacío.	Clean the throttle body and check for vacuum leaks.
+Ralentí más alto de lo esperado.	Idle higher than expected.
+Suele ser una fuga de vacío o el cuerpo de aceleración sucio.	Usually a vacuum leak or a dirty throttle body.
+Voltaje del sistema bajo.	System voltage low.
+El alternador puede no estar cargando. Revisa la correa, los bornes de la batería y el alternador antes de un viaje largo.	The alternator may not be charging. Check the belt, the battery terminals and the alternator before a long trip.
+Voltaje del sistema alto.	System voltage high.
+El regulador del alternador puede estar fallando y dañar la batería. Revísalo pronto.	The alternator regulator may be failing and could damage the battery. Have it checked soon.
+Falla de comunicación interna del computador del motor.	Engine computer internal communication fault.
+Revisa masas (tierras) y conectores del computador.	Check the computer grounds and connectors.
+Falla de memoria del computador del motor.	Engine computer memory fault.
+Llévalo al taller.	Take it to a shop.
+La caja automática registró una falla (pide leer el computador de la caja).	The automatic transmission logged a fault (read the transmission computer).
+Hay otro código guardado en el computador de la caja. Si la caja queda en un solo cambio (modo de emergencia), maneja suave hasta el taller.	There is another code stored in the transmission computer. If it stays in one gear (limp mode), drive gently to a shop.
+Falla en el sensor de posición de la palanca de cambios.	Gear selector position sensor fault.
+Puede no arrancar en P o N o mostrar mal el cambio. Revisa el interruptor de rango.	It may not start in P or N or may show the wrong gear. Check the range switch.
+Falla en el circuito del sensor de temperatura del aceite de la caja automática.	Automatic transmission fluid temperature sensor circuit fault.
+La caja puede cambiar brusco. Revisa el nivel y el color del aceite de la caja y el conector del sensor. Evita remolcar o subir pendientes largas exigiendo la caja.	Shifts may be harsh. Check the transmission fluid level and color and the sensor connector. Avoid towing or long steep climbs that strain the transmission.
+El sensor de temperatura del aceite de la caja automática marca fuera de lo esperado.	The automatic transmission fluid temperature sensor reads out of range.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa nivel y color del aceite de la caja (oscuro u olor a quemado es mala señal) y el conector del sensor. En subidas largas usa una marcha baja y descansa la caja.	Shifts may be harsh or it may go into limp mode. Check the transmission fluid level and color (dark or a burnt smell is a bad sign) and the sensor connector. On long climbs use a low gear and let the transmission rest.
+Señal baja del sensor de temperatura del aceite de la caja automática.	Automatic transmission fluid temperature sensor signal low.
+Revisa el conector y el cableado del sensor. La caja puede cambiar brusco.	Check the sensor connector and wiring. Shifts may be harsh.
+Señal alta del sensor de temperatura del aceite de la caja automática.	Automatic transmission fluid temperature sensor signal high.
+Falla en el sensor de velocidad de entrada de la caja.	Transmission input speed sensor fault.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa el sensor y su conector.	Shifts may be harsh or it may go into limp mode. Check the sensor and its connector.
+Falla en el sensor de velocidad de salida de la caja.	Transmission output speed sensor fault.
+La caja puede cambiar brusco y el velocímetro fallar. Revisa el sensor y su conector.	Shifts may be harsh and the speedometer may fail. Check the sensor and its connector.
+La relación de cambios no es la correcta (la caja patina).	Incorrect gear ratio (the transmission is slipping).
+Revisa el nivel del aceite de la caja de inmediato. Maneja suave: seguir exigiéndola puede dañarla.	Check the transmission fluid level right away. Drive gently: pushing it further can damage it.
+Relación incorrecta en 1ª: la caja patina en primera.	Incorrect ratio in 1st gear: the transmission slips in first.
+Revisa el nivel del aceite de la caja. Maneja suave hasta el taller.	Check the transmission fluid level. Drive gently to a shop.
+Relación incorrecta en 2ª: la caja patina en segunda.	Incorrect ratio in 2nd gear: the transmission slips in second.
+Relación incorrecta en 3ª: la caja patina en tercera.	Incorrect ratio in 3rd gear: the transmission slips in third.
+Relación incorrecta en 4ª: la caja patina en cuarta.	Incorrect ratio in 4th gear: the transmission slips in fourth.
+Falla en el circuito del embrague del convertidor de torque.	Torque converter clutch circuit fault.
+Gastará más combustible y la caja se calentará más. Revisa el aceite de la caja.	It will use more fuel and the transmission will run hotter. Check the transmission fluid.
+El embrague del convertidor de torque no acopla o patina.	The torque converter clutch doesn't engage or slips.
+La caja se calienta más: evita subidas largas exigentes y revisa el aceite de la caja.	The transmission runs hotter: avoid long demanding climbs and check the transmission fluid.
+Falla eléctrica en el embrague del convertidor de torque.	Torque converter clutch electrical fault.
+Revisa el conector de la caja. Gastará más combustible.	Check the transmission connector. It will use more fuel.
+Falla en el solenoide de cambio {}.	Shift solenoid {} fault.
+La caja puede quedar en un solo cambio. Maneja suave hasta el taller.	The transmission may stay in one gear. Drive gently to a shop.
+El sensor de oxígeno trasero ve mezcla pobre después del catalizador.	The rear oxygen sensor sees a lean mixture after the catalytic converter.
+Revisa fugas de escape antes del sensor.	Check for exhaust leaks before the sensor.
+El sensor de oxígeno trasero ve mezcla rica después del catalizador.	The rear oxygen sensor sees a rich mixture after the catalytic converter.
+Revisa sensores de oxígeno y el catalizador.	Check the oxygen sensors and the catalytic converter.
+Mezcla pobre en ralentí.	Lean mixture at idle.
+Suele ser una fuga de vacío. Revisa mangueras y la válvula PCV.	Usually a vacuum leak. Check the hoses and the PCV valve.
+Mezcla rica en ralentí.	Rich mixture at idle.
+Revisa inyectores y la válvula de purga del EVAP.	Check the injectors and the EVAP purge valve.
+
+# 2.26: monitores de emisiones y avance del escaneo
+Escaneando: {}	Scanning: {}
+Datos estándar (modo 01)…	Standard data (mode 01)…
+Información del vehículo (modo 09)…	Vehicle information (mode 09)…
+Modo 01 · PID {}	Mode 01 · PID {}
+Sin conexión	Not connected
+Interrumpido	Interrupted
+Dirección no válida: {}	Invalid address: {}
+Apps	Apps
+Guía del escáner	Scanner guide
+Guía	Guide
+Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	What to buy, how to connect it and what everything means · works offline
+Desbloquear	Unlock
+Se desbloquea con una donación. Todas las funciones de StradaOS siguen siendo gratis.	Unlocks with a donation. Every StradaOS feature stays free.
+Desbloqueado en esta pantalla. ¡Gracias por tu donación!	Unlocked on this screen. Thanks for your donation!
+Prueba: volver a aplicar sin código	Test: apply without a code again
+Prueba: desbloquear como en la versión normal	Test: unlock like the regular version
+1. Dona 5 USD en Ko-fi: escanea el código con tu celular o entra a {}.	1. Donate 5 USD on Ko-fi: scan the code with your phone or go to {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla:	2. In the donation message, write this screen's ID:
+3. Te enviamos un código STRD-XXXX-XXXX, casi siempre el mismo día. Escríbelo en «Tengo un código».	3. We'll send you a code STRD-XXXX-XXXX, usually the same day. Enter it under “I have a code”.
+El tema queda en esta pantalla. Si cambias de radio o la restableces, escríbenos con el ID nuevo y te enviamos otro código sin costo.	The theme stays on this screen. If you change head units or reset it, write to us with the new ID and we'll send you another code at no cost.
+Desbloquear {}	Unlock {}
+Tengo un código	I have a code
+Archivo por USB	File via USB
+ID de esta pantalla: {}. Necesitas internet solo esta vez.	This screen's ID: {}. You only need internet this once.
+Escribe tu código	Enter your code
+El código tiene 8 letras o números después de STRD, por ejemplo STRD-7KQ2-M9XA.	The code has 8 letters or numbers after STRD, for example STRD-7KQ2-M9XA.
+Comprobando el código…	Checking the code…
+No hay internet. Conéctate un momento (por ejemplo, con el celular como módem) y vuelve a intentarlo, o pide el archivo de licencia y pásalo por USB.	No internet. Connect for a moment (for example, using your phone as a hotspot) and try again, or ask for the license file and copy it via USB.
+No encontramos ese código para esta pantalla. Revisa que esté bien escrito y que el ID que enviaste sea {}.	We couldn't find that code for this screen. Check that it's typed correctly and that the ID you sent is {}.
+No se pudo desbloquear	Couldn't unlock
+Intentar de nuevo	Try again
+Buscando la licencia en la pantalla y en las USB…	Looking for the license on the screen and on USB drives…
+No encontramos la licencia	License not found
+Copia el archivo que te enviamos (stradaos-licencia.txt) en la raíz de una USB, conéctala y vuelve a intentarlo. Tiene que ser para el ID {}.	Copy the file we sent you (stradaos-licencia.txt) to the root of a USB drive, plug it in and try again. It has to be for the ID {}.
+¡Listo!	Done!
+{} quedó desbloqueado en esta pantalla. Gracias por apoyar StradaOS.	{} is now unlocked on this screen. Thanks for supporting StradaOS.
+Aplicar ahora	Apply now
+1. Dona en Ko-fi 5 USD por un tema o 8 USD por dos: escanea el código con tu celular o entra a {}.	1. Donate on Ko-fi, 5 USD for one theme or 8 USD for two: scan the code with your phone or go to {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla y qué temas quieres:	2. In the donation message, write this screen's ID and which themes you want:
+Se desbloquea con una donación de 5 USD, o 8 USD por dos temas. Todas las funciones de StradaOS siguen siendo gratis.	Unlocks with a 5 USD donation, or 8 USD for two themes. Every StradaOS feature stays free.
+Usar la velocidad del escáner	Use the scanner's speed
+Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso	With the scanner connected, the home screen shows the car's speed instead of GPS speed: more accurate, no lag

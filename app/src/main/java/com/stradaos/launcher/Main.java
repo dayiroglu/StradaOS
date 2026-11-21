@@ -160,6 +160,7 @@ public class Main extends Activity {
     private final List<Nav.Place> pendingStops = new ArrayList<Nav.Place>();
     private LiveMapView liveMap;
     private MediaWatcher mediaWatcher;
+    private Hcn hcn;   // pantallas HCN / Hengchen (issue #5)
     private boolean askedPerms;
     static final int SDK = android.os.Build.VERSION.SDK_INT;
     private PlayerArt playerArt;
@@ -200,6 +201,10 @@ public class Main extends Activity {
         testHook(getIntent());
         applyTheme();
         applyAccent();
+        // escáner OBD-II: si está encendido y elegido, el monitor arranca con StradaOS (alertas aunque no se mire)
+        if (obdOn() && prefs.contains("obd_addr") && prefs.getBoolean("obd_autostart", true) && !Obd.running()) {
+            try { ObdService.start(this); } catch (Throwable ignored) { }
+        }
 
         root = new FrameLayout(this) {
             @Override
@@ -243,6 +248,10 @@ public class Main extends Activity {
             getContentResolver().registerContentObserver(
                 android.provider.Settings.System.getUriFor(android.provider.Settings.System.SCREEN_BRIGHTNESS), false, brightObs);
         } catch (Throwable ignored) { }
+        try {
+            getContentResolver().registerContentObserver(android.provider.Settings.System.getUriFor(Fyt.CAR_MODE), false, lightsObs);
+        } catch (Throwable ignored) { }
+        startFyt();
         IntentFilter t = new IntentFilter(Intent.ACTION_TIME_TICK);
         t.addAction(Intent.ACTION_TIME_CHANGED);
         t.addAction(Intent.ACTION_TIMEZONE_CHANGED);
@@ -275,6 +284,12 @@ public class Main extends Activity {
         bt = new BtBridge(this, new BtBridge.Listener() {
             public void onBtState(NowPlaying.Track t) { showTrack(t); }
         });
+        try {
+            hcn = new Hcn(this, new NowPlaying.Listener() {
+                public void onTrack(NowPlaying.Track t) { showTrack(t); }
+            });
+            hcn.start();   // en cualquier otra pantalla no hace nada
+        } catch (Throwable e) { hcn = null; }
         clwBt = BtBridge.available(this);
         prefs.registerOnSharedPreferenceChangeListener(backupWatch);
         try {
@@ -410,25 +425,38 @@ public class Main extends Activity {
         h.postDelayed(new Runnable() { public void run() {
             // si el usuario ya cambió de app, no lo movemos
             String now = topPackage();
-            if (now != null && !now.equals(BtBridge.PKG) && !now.equals(btMusicApp() != null ? btMusicApp().getPackageName() : "")) {
+            BtBridge.log("revisando la vuelta: al frente " + now + (hasWindowFocus() ? " (inicio con foco)" : ""));
+            // 2.30 (#47): en Android 5+ el sistema solo deja ver las tareas propias y topPackage() responde StradaOS aunque
+            // la app de música esté al frente; antes eso se leía como «el usuario abrió otra app» y nunca se volvía.
+            boolean self = getPackageName().equals(now);
+            if (self && hasWindowFocus()) { BtBridge.log("no se volvió: ya estás en el inicio"); return; }
+            if (now != null && !(self && SDK >= 21) && !now.equals(BtBridge.PKG) && !now.equals(btMusicApp() != null ? btMusicApp().getPackageName() : "")) {
                 BtBridge.log("no se volvió: el usuario abrió " + now); return;
             }
             try {
                 if (back >= 0) {
                     ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).moveTaskToFront(back, 0);
+                    BtBridge.log("vuelta a " + top);
                     return;
                 }
             } catch (Throwable ignored) { }
+            BtBridge.log("vuelta al inicio");
+            // 2.30: primero se trae al frente la tarea de StradaOS (permiso REORDER_TASKS); el startActivity queda de respaldo
+            try { ((android.app.ActivityManager) getSystemService(ACTIVITY_SERVICE)).moveTaskToFront(getTaskId(), 0); }
+            catch (Throwable e) { BtBridge.log("moveTaskToFront: " + e); }
             try {
                 startActivity(new Intent(Main.this, Main.class)
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT));
-            } catch (Throwable ignored) { }
+            } catch (Throwable e) { BtBridge.log("no se pudo volver: " + e); }
         }}, prefs.getInt("bt_return_ms", clwBt ? 2000 : 2500));
     }
 
     @Override
     protected void onDestroy() {
         try { getContentResolver().unregisterContentObserver(brightObs); } catch (Throwable ignored) { }
+        try { getContentResolver().unregisterContentObserver(lightsObs); } catch (Throwable ignored) { }
+        h.removeCallbacks(themeRecheck);
+        stopFyt();
         try { unregisterReceiver(screenReceiver); } catch (Throwable ignored) { }
         try { prefs.unregisterOnSharedPreferenceChangeListener(backupWatch); } catch (Throwable ignored) { }
         try { unregisterReceiver(pkgReceiver); } catch (Exception ignored) { }
@@ -441,6 +469,7 @@ public class Main extends Activity {
         h.removeCallbacks(btTicker);
         h.removeCallbacks(aaWait);
         try { if (mediaWatcher != null) mediaWatcher.stop(); } catch (Throwable ignored) { }
+        try { if (hcn != null) hcn.stop(); } catch (Throwable ignored) { }
         try { lm.removeUpdates(odoListener); } catch (Throwable ignored) { }
         odoRunning = false;
         if (odoPending > 0) prefs.edit().putFloat("odo_gps_m", prefs.getFloat("odo_gps_m", 0) + odoPending).apply();
@@ -452,6 +481,7 @@ public class Main extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        Obd.addListener(obdWatch);
         if (homeFixing && SDK < 29) h.postDelayed(new Runnable() { public void run() { homeResult(); } }, 700);
         immersive();
         if (SDK >= 23 && !askedPerms) {
@@ -590,6 +620,10 @@ public class Main extends Activity {
 
     /** Android 6+: respuesta a la solicitud de permisos. */
     public void onRequestPermissionsResult(int req, String[] perms, int[] res) {
+        if (req == ObdDialogs.REQ_BT_SCAN) {
+            obdDialogs().onPermission(res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED);
+            return;
+        }
         if (req == REQ_STORAGE_W) {   // con o sin permiso se sigue (sin él, el mapa se guarda en la carpeta de la app)
             h.post(new Runnable() { public void run() { chooseMapToDownload(""); } });
             return;
@@ -614,6 +648,8 @@ public class Main extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        Obd.removeListener(obdWatch);
+        if (obdDlg != null) obdDlg.stopDiscovery();
         h.removeCallbacks(idleRun);
         stopGps();
         h.removeCallbacks(ticker);
@@ -642,13 +678,14 @@ public class Main extends Activity {
     protected void onNewIntent(Intent i) {
         super.onNewIntent(i);
         closeDrawer();
+        if (i != null && i.getBooleanExtra("vehiculo", false)) h.post(new Runnable() { public void run() { openVehiclePanel(); } });
         testHook(i);
     }
 
     /**
      * Solo en la versión de prueba (paquete .debug): permite que las pruebas automáticas abran cada pantalla
      * sin tocar coordenadas. adb shell am start -n com.stradaos.launcher.debug/com.stradaos.launcher.Main --es prueba VALOR
-     * VALOR: saltar (omite el asistente), inicio, ajustes:N, boton:N (menú del botón N), elegir:N (lista de apps del botón N),
+     * VALOR: saltar (omite el asistente), inicio, ajustes:N, fyt-demo:139,1170 (datos del carro de prueba), boton:N (menú del botón N), elegir:N (lista de apps del botón N),
      * cajon (todas las apps), musica (lista de música preferida), asistente, demo-barra (cambia los botones 3 y 4), idioma:es|en|pt|auto,
      * ultimo-aceite / ultimo-alto / unidad-aceite (recordatorio de aceite), ocultas / ocultar-demo / ocultar-limpiar (apps ocultas),
      * salir-fabrica (abre el launcher de fábrica), desactivar (apaga StradaOS; solo lo usa salida.yml),
@@ -670,6 +707,11 @@ public class Main extends Activity {
                 else if (v.startsWith("boton:")) dockMenu(Integer.parseInt(v.substring(6)), null);
                 else if (v.startsWith("elegir:")) pickDock(Integer.parseInt(v.substring(7)), null);
                 else if ("cajon".equals(v)) openDrawer();
+                else if ("obd-demo".equals(v)) obdDialogs().choose("demo", I18n.t("Auto simulado"));
+                else if ("obd-off".equals(v)) obdDialogs().turnOff();
+                else if (v.startsWith("obd-vel-demo:")) { obdSpeedDemo = v.endsWith("1"); showSpeed(); }
+                else if ("obd-panel".equals(v)) openVehiclePanel();
+                else if (v.startsWith("obd-ajustes:")) { settingsSub = v.substring(12); showSettings(C_VEHICLE); }
                 else if ("ocultas".equals(v)) manageHidden(null);
                 else if ("salir-fabrica".equals(v)) openFactoryLauncher();
                 else if (v.startsWith("aa-simular:")) {
@@ -686,6 +728,22 @@ public class Main extends Activity {
                     t.durationMs = a.length > 1 ? Long.parseLong(a[1]) * 1000 : -1; t.playing = true;
                     showTrack(t);
                 }
+                else if (v.startsWith("hcn-sim:")) {
+                    // reproductor de una pantalla HCN: «hcn-sim:ruta,estado,posición_s,duración_s» (ruta vacía = nada)
+                    String[] a = v.substring(8).split(",", -1);
+                    Hcn.simulate(a[0], a.length > 1 ? a[1] : "start", a.length > 2 ? Integer.parseInt(a[2]) : 0,
+                            a.length > 3 ? Integer.parseInt(a[3]) : 0);
+                }
+                else if (v.startsWith("avrcp-sim:") && SDK >= 21) {
+                    // aviso del Bluetooth del sistema: «avrcp-sim:Título,Artista,estado,posición_s,duración_s»
+                    // (título «-» = solo estado; estado 3 sonando, 2 en pausa, -1 sin estado)
+                    String[] a = v.substring(10).split(",", -1);
+                    String ti = "-".equals(a[0]) ? null : a[0].replace('_', ' ');
+                    sendBroadcast(AvrcpMeta.testIntent(ti, a.length > 1 ? a[1].replace('_', ' ') : null,
+                            a.length > 2 ? Integer.parseInt(a[2]) : 3, a.length > 3 ? Long.parseLong(a[3]) * 1000 : 0,
+                            a.length > 4 ? Long.parseLong(a[4]) * 1000 : 0));
+                }
+                else if ("diag-reproductor".equals(v)) showPlayerDiag();
                 else if (v.startsWith("aa-notif:")) {
                     // notificación de Open Headunit con el tiempo: «aa-notif:Título,posición_s,duración_s»
                     String[] a = v.substring(9).split(",");
@@ -717,7 +775,7 @@ public class Main extends Activity {
                 }
                 else if ("tema:claro".equals(v) || "tema:oscuro".equals(v) || "tema:sistema".equals(v)) {
                     prefs.edit().putString("theme", "tema:claro".equals(v) ? "light" : "tema:sistema".equals(v) ? "system" : "dark").apply();
-                    applyTheme(); applyAccent(); rebuild();
+                    applyThemeNow(); applyAccent(); rebuild();
                 }
                 else if ("nav-buscar".equals(v)) openNavSearch();
                 else if ("nav-salir".equals(v)) stopInternalNav();
@@ -739,6 +797,11 @@ public class Main extends Activity {
                     // tema-premium:aurora lo aplica; «tema-premium:» lo quita
                     applyPremium(v.length() > 13 ? v.substring(13) : null);
                 }
+                else if (v.startsWith("lic-prueba:")) prefs.edit().putBoolean("lic_test", v.endsWith("1")).apply();
+                else if (v.startsWith("desbloquear:")) unlockDialog(v.substring(12));
+                else if (v.startsWith("paquete:")) Prem.forceBundle = v.endsWith("1");
+                else if (v.startsWith("lic-codigo:")) checkCode(Faro.ID, v.substring(11));
+                else if ("lic-usb".equals(v)) importLicense(Faro.ID);
                 else if ("solo-mapa-anim".equals(v)) toggleMapOnly();
                 else if (v.startsWith("foto-demo:")) {
                     // foto-demo:recorte (fondo transparente), foto-demo:normal (con fondo), «foto-demo:» la quita
@@ -775,6 +838,15 @@ public class Main extends Activity {
                     stylePreviewFor = vertical;
                     showSettings(C_STYLE);
                 }
+                else if (v.startsWith("fyt-demo:")) {
+                    // fyt-demo:139,1170 = 13,9 V y 17 °C, como si llegaran de com.syu.ms (con «Datos del carro» activado)
+                    String[] a = v.substring(9).split(",");
+                    if (fyt != null) {
+                        fyt.voltDeci = Integer.parseInt(a[0].trim());
+                        if (a.length > 1) fyt.tempDeci = Integer.parseInt(a[1].trim()) - 1000;
+                        updateCarData();
+                    }
+                }
                 else if ("reposo".equals(v)) h.postDelayed(new Runnable() { public void run() { showIdle(); } }, 1500);
                 else if (v.startsWith("pref:") && v.indexOf('=') > 5) {
                     // pref:clave=valor (true/false, número o texto); «pref:clave=» la borra
@@ -785,7 +857,8 @@ public class Main extends Activity {
                     else if (val.matches("-?\\d{1,9}")) e.putInt(k, Integer.parseInt(val));
                     else e.putString(k, val);
                     e.apply();
-                    applyTheme(); applyAccent(); rebuild();
+                    if (k.startsWith("fyt_data") || "hw".equals(k)) { stopFyt(); startFyt(); }
+                    applyThemeNow(); applyAccent(); rebuild();
                 }
                 else if (v.startsWith("diseno:")) {
                     // diseno:izq|der|sinauto|conauto|normal|compacta|lateral|base  (base = como viene)
@@ -831,6 +904,7 @@ public class Main extends Activity {
                 else if ("fijar-inicio".equals(v)) makeDefaultHome();
                 else if (v.startsWith("sim:")) { prefs.edit().putInt("sim_screen", Integer.parseInt(v.substring(4))).apply(); rebuild(); }
                 else if ("diag-mapa".equals(v)) showMapDiag();
+                else if (v.startsWith("bt-probar:")) { prefs.edit().putString("btaudio", v.substring(10)).apply(); openBtAudioApp(true); }
                 else if ("clima".equals(v)) showWeatherDetail();
                 else if (v.startsWith("vel:")) { float kv = Float.parseFloat(v.substring(4)); setGps(true, kv); }
                 else if (v.startsWith("pack:")) { prefs.edit().putString("icon_pack", v.substring(5)).putString("dock_style", "apps").apply(); rebuild(); }
@@ -993,7 +1067,11 @@ public class Main extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (settingsView != null) { closeSettings(); return; }
+        if (vpanel != null && vpanel.isOpen()) { vpanel.close(); return; }
+        if (settingsView != null) {
+            if (settingsSub != null && settingsCat == C_VEHICLE) { settingsBack(); return; }
+            closeSettings(); return;
+        }
         closeDrawer(); // es la pantalla de inicio: atrás no la cierra
     }
 
@@ -1113,6 +1191,13 @@ public class Main extends Activity {
             else if (lastFix == 0) setGps(false, 0);
             if (++usbTick % 5 == 0) guardUsb();
             if (bt != null && bt.isConnected() && (++btPoll % 3 == 0 || curTitle == null)) bt.refresh();
+            // Android 5+: suena música sin canción y sin permiso → el reproductor lo dice (y se quita solo)
+            if (trackTv != null && curTitle == null && curArtist == null && wantsNotifAccess() != notifHint) renderTrack();
+            // permiso dado pero el sistema no conectó el lector (algunas pantallas): pedirlo otra vez cada minuto
+            if (SDK >= 24 && usbTick % 30 == 0 && !MediaListener.connected && Modern.notificationAccess(Main.this)) {
+                Modern.rebindListener(Main.this);
+                if (mediaWatcher != null) mediaWatcher.start();
+            }
             updatePlayIcon();
             updateStatusIcons();
             if (++themeTick % 30 == 0) {
@@ -1139,6 +1224,11 @@ public class Main extends Activity {
     // ───────────────────────── construcción de la UI ─────────────────────────
 
     private void build(int W, int H) {
+        build0(W, H);
+        attachVehicle();
+    }
+
+    private void build0(int W, int H) {
         root.removeAllViews();
         idleView = null; idleClock = idleDate = idleSpeedTv = null; idleGauge = null;
         // versión de prueba: simular otra pantalla (p. ej. una ancha de 1920x720 en una tablet)
@@ -1183,7 +1273,12 @@ public class Main extends Activity {
         // 2.24: tema premium «Aurora»: su propia distribución (la barra lateral y la compacta no aplican)
         premium = premiumActive();
         Prem.style = premium ? prefs.getString("premium_theme", Aurora.ID) : Aurora.ID;
-        mapOnly = premium && !Prem.cob() && prefs.getBoolean("prem_map_only", false);   // Cobalto es fijo: sin «Solo mapa»
+        mapOnly = premium && Prem.mapOnlyOk() && prefs.getBoolean("prem_map_only", false);   // Cobalto y Faro son fijos: sin «Solo mapa»
+        // Faro (2.25): qué tan visible es el mapa sobre el fondo. Auto (por defecto): suave en pantallas de alta
+        // resolución y más fuerte en las pantallas sencillas de los radios (lado corto ≤ 720 px y densidad baja)
+        int fml = prefs.getInt("faro_mapa", -1);
+        if (fml < 0) fml = simpleScreen() ? 1 : 0;
+        Faro.mapLevel = Math.max(0, Math.min(2, fml));
         if (premium) { sideDock = false; compactDock = false; }
         // Lienzo virtual: 1024x600. Con la barra lateral los botones salen de abajo y el lienzo queda más bajo
         // (1128x460): en pantallas bajas y anchas como 1280x480 todo se ve ~30 % más grande.
@@ -1475,6 +1570,7 @@ public class Main extends Activity {
         // Íconos de Wi-Fi y Bluetooth (2.17, Reinaldo y Daniel): ver si están activos sin abrir los ajustes
         wifiIc = null;
         btIc = null;
+        addCarData(right);
         if (prefs.getBoolean("status_icons", true)) {
             LinearLayout st = new LinearLayout(this);
             st.setGravity(Gravity.CENTER_VERTICAL);
@@ -1889,6 +1985,7 @@ public class Main extends Activity {
 
     private void updateOilBadge() {
         startOdo();
+        renderFaroMaint();
         // 2.20: con mantenimientos propios, el recuadro y la barra de arriba muestran el más próximo
         int ni = nearestMaint();
         badgeTask = ni;
@@ -2651,16 +2748,17 @@ public class Main extends Activity {
             mapClipView = clip;
         } else place(board, card, mapX, mapY, mapW, mapH);
         mapCardView = card;
-        // fondo decorativo mientras no hay GPS; encima, el mapa en vivo
-        card.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
+        // fondo decorativo mientras no hay GPS; encima, el mapa en vivo (Faro: sin dibujo de relleno, el área queda limpia)
+        if (!(premium && Prem.faro())) card.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
         if (!prefs.getBoolean("map_live", true)) { liveMap = null; seedLastLocation(); buildAaCardRest(card); return; }
         liveMap = new LiveMapView(this, s, 20 * s);
         card.addView(liveMap, new FrameLayout.LayoutParams(-1, -1));
         // Aurora: esquinas redondas de verdad sobre el fondo y el mapa un poco translúcido
         if (premium && premBg != null) liveMap.setBackdrop(premBg, premBgHolder, Prem.mapAlpha(LIGHT));
+        if (premium && Prem.faro()) { liveMap.setAttribution(14 * s, 70 * s); liveMap.setTone(Faro.mapTone(LIGHT)); }
         // Cobalto: el mapa se difumina hasta donde empieza el reproductor (abajo, hacia las tarjetas, en vertical)
         if (premium && Prem.cob() && !mapOnly && premBg != null) liveMap.setFade(vertical ? 2 : 1, (vertical ? 150 : Math.max(260, mapW * 0.5f)) * s);
-        liveMap.setVisibility(View.INVISIBLE);
+        liveMap.setVisibility(premium && Prem.faro() ? View.VISIBLE : View.INVISIBLE);
         liveMap.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { liveMap.cycleZoom(); }
         });
@@ -2676,6 +2774,9 @@ public class Main extends Activity {
     }
 
     private void buildAaCardRest(FrameLayout card) {
+        final boolean faroT = premium && Prem.faro();
+        if (faroT) buildFaroMapTop(card);
+        else {
         LinearLayout topRow = new LinearLayout(this);
         topRow.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout tag = new LinearLayout(this);
@@ -2711,6 +2812,7 @@ public class Main extends Activity {
         navSearchBtn = goBtn;
         mapTagBox = topRow;
         placeWrap(card, topRow, 16, 16);
+        }
 
         LinearLayout hud = new LinearLayout(this);
         hud.setOrientation(LinearLayout.HORIZONTAL);
@@ -2770,7 +2872,7 @@ public class Main extends Activity {
         boolean hasPanel = nBtn > 0 || wx;
         final float panelY = hasPanel ? mapH - 96 : mapH, panelW = mapW - 24 - insL - insR;
         final FrameLayout panel = new FrameLayout(this);
-        panel.setBackground(round((CARD & 0x00FFFFFF) | 0xEB000000, 16));
+        panel.setBackground(round(faroT ? Faro.glass(LIGHT) : (CARD & 0x00FFFFFF) | 0xEB000000, 16));
         place(card, panel, 12 + insL, panelY, panelW, 84);
         if (!hasPanel) panel.setVisibility(View.GONE);
 
@@ -2781,7 +2883,7 @@ public class Main extends Activity {
         boolean nbLeft = "left".equals(nbSide) || ("auto".equals(nbSide) && playerLeft);
         final View navBtn = circleIcon("map", nb, nb / 2, (CARD & 0x00FFFFFF) | 0xEB000000);
         place(card, navBtn, nbLeft ? 12 + insL : mapW - 12 - nb - insR, panelY - 12 - nb, nb, nb);
-        if (nbSize == 3) navBtn.setVisibility(View.GONE);
+        if (nbSize == 3 || faroT) navBtn.setVisibility(View.GONE);   // Faro: el buscador de arriba abre la navegación
         // 2.20 (Daniel): mini velocímetro sobre el mapa cuando la tarjeta del vehículo está oculta
         mapGauge = null;
         boolean gaugeTopLeft = false;
@@ -2834,6 +2936,7 @@ public class Main extends Activity {
         speedSignTv.setVisibility(View.GONE);
         float sdx = gaugeTopLeft ? mapW - 58 : 12;
         place(card, speedSignTv, sdx, 92, 46, 46);
+        if (faroT) speedSignTv = null;   // Faro: el límite va en el velocímetro
 
         camBadgeTv = tv("", 11, Color.WHITE, true);
         camBadgeTv.setBackground(round(0xFFD92B2B, 10));
@@ -2854,14 +2957,16 @@ public class Main extends Activity {
         aaBtnTv = null; aaSubTv = null; cpSubTv = null;
         float x = 10;
         if (showAa) {
-            aa = projButton("navigation", "Android Auto", RED, true);
+            aa = projButton("navigation", "Android Auto", faroT ? Faro.tile(LIGHT) : RED, !faroT);
+            if (faroT) faroProj(aa, true);
             aaBtnTv = (TextView) aa.getTag();
             float w = nBtn == 2 || wx ? slotW : fullW;
             place(panel, aa, x, 10, w, 64);
             x += w + 8;
         }
         if (showCp) {
-            cp = projButton("phone_iphone", "CarPlay", BTN, false);
+            cp = projButton("phone_iphone", "CarPlay", faroT ? Faro.tile(LIGHT) : BTN, false);
+            if (faroT) faroProj(cp, false);
             cpSubTv = (TextView) cp.getTag();
             float w = nBtn == 2 || wx ? slotW : fullW;
             place(panel, cp, x, 10, w, 64);
@@ -2874,7 +2979,7 @@ public class Main extends Activity {
         // Android Auto / CarPlay plegables: una flechita los esconde para ver todo el mapa (Druids07, idea de Andrés).
         // Tocar o deslizar la flechita hacia arriba los muestra; hacia abajo (o deslizar los botones) los esconde.
         final FrameLayout handle = new FrameLayout(this);
-        handle.setBackground(round((CARD & 0x00FFFFFF) | 0xEB000000, 11));
+        handle.setBackground(round(faroT ? Faro.glass(LIGHT) : (CARD & 0x00FFFFFF) | 0xEB000000, 11));
         final ImageView chev = icon("chevron_right", 18);
         FrameLayout.LayoutParams clp = new FrameLayout.LayoutParams((int) (18 * s), (int) (18 * s));
         clp.gravity = Gravity.CENTER;
@@ -2991,6 +3096,7 @@ public class Main extends Activity {
     }
 
     private void showPanelWeather() {
+        renderFaroWx();
         if (panelWx == null) return;
         Weather.Now n = weatherNow;
         if (n == null) {
@@ -3304,6 +3410,7 @@ public class Main extends Activity {
         else if (liveMap.usingFile()) mapTagTv.setText(I18n.t(live ? "Mapa sin conexión" : "Sin señal GPS · mapa sin conexión"));
         else if (liveMap.offline()) mapTagTv.setText(I18n.t(live ? "En vivo · sin internet" : "Sin señal GPS ni internet"));
         else mapTagTv.setText(I18n.t(live ? "Mapa en vivo" : "Sin señal GPS · última posición"));
+        updateFaroPill();
     }
 
     private void updateNavHud() {
@@ -3554,6 +3661,7 @@ public class Main extends Activity {
         {"music", "Música", "music_note"}, {"nav", "Navegación", "map"}, {"aa", "Android Auto", "navigation"},
         {"carplay", "CarPlay", "phone_iphone"}, {"web", "Navegador web", "public"}, {"files", "Archivos", "folder"},
         {"nav_home", "Ir a Casa", "location_on"}, {"nav_work", "Ir a Trabajo", "directions_car"},
+        {"obd", "Vehículo (OBD-II)", "car_repair"},
         {"settings", "Ajustes", "settings"}, {"apps", "Apps", "apps"},
     };
 
@@ -3874,7 +3982,7 @@ public class Main extends Activity {
     }
 
     private void toggleMapOnly() {
-        if (Prem.cob()) return;   // Cobalto no tiene «Solo mapa»
+        if (!Prem.mapOnlyOk()) return;   // Cobalto y Faro no tienen «Solo mapa»
         if (!mapOnly) { enterMapOnly(); return; }
         Bitmap snap = null;
         FrameLayout.LayoutParams olp = null;
@@ -3938,7 +4046,12 @@ public class Main extends Activity {
     /** Aurora y Cobalto son gratis para todos desde la 2.24. Los temas siguientes: en StradaOS Prueba sin código
      *  y, en la versión normal, con el código atado al ID de la pantalla (Fase 3). */
     private boolean premiumUnlocked(String id) {
-        return Prem.known(id) && (Prem.free(id) || getPackageName().endsWith(".debug"));
+        return Prem.known(id) && (Prem.free(id) || debugUnlock() || Lic.has(this, id));
+    }
+
+    /** StradaOS Prueba aplica los temas sin código, salvo que se quiera probar el desbloqueo como en la versión normal. */
+    private boolean debugUnlock() {
+        return getPackageName().endsWith(".debug") && !prefs.getBoolean("lic_test", false);
     }
 
     /** Tarjeta translúcida con un borde fino de luz. */
@@ -3961,6 +4074,7 @@ public class Main extends Activity {
         premPillH = noDock ? 0 : vertical ? 68 : 64;
         dockTop = noDock ? boardH : boardH - 16 - premPillH;
         premHeadY = 60;
+        if (Prem.faro()) { faroMetrics(); return; }
         if (Prem.cob()) { cobaltoMetrics(); return; }
         if (mapOnly) premHeadH = 0;
         else if (vertical) premHeadH = 92 + 8 + (shortVertical ? 150 : 172);
@@ -3981,7 +4095,9 @@ public class Main extends Activity {
     }
 
     private void buildPremium() {
-        carCard = null; mapGauge = null; mapGaugeBox = null; carGauge = null; chipTv = null;
+        carCard = null; mapGauge = null; mapGaugeBox = null; carGauge = null; chipTv = null; carDataTv = null;
+        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null;
+        if (Prem.faro()) { buildFaro(); setGps(false, 0); return; }
         buildPremiumTop();
         buildAaCard();
         if (mapOnly) premiumDetached();
@@ -4262,6 +4378,611 @@ public class Main extends Activity {
         }});
     }
 
+    // ───────────────────────── tema premium «Faro» (2.25, Bloque 16) ─────────────────────────
+    // Horizontal: columna izquierda con el velocímetro arriba y el carro visto desde arriba (sin tarjeta, sobre el
+    // fondo); la barra de estado arriba a la derecha; el mapa en trazo en el centro; clima y mantenimientos a la
+    // derecha; el reproductor horizontal debajo del mapa y los mantenimientos; la barra de apps compacta abajo.
+    // Vertical: el mapa arriba; debajo, la columna (velocímetro + carro) junto al clima y los mantenimientos; el
+    // reproductor y la barra. Sin «Solo mapa» (tema fijo, como Cobalto).
+
+    private float faroColX, faroColY, faroColW, faroColH, faroRX, faroRW, faroWxY, faroWxH, faroMtY, faroMtH,
+        faroPlX, faroPlY, faroPlW, faroPlH, faroTopX;
+    private FaroGauge faroGauge;
+    private Faro.Timeline faroBar;
+    private Faro.Icon faroWxIc;
+    private TextView faroCityTv, faroTempTv, faroHiLoTv, faroDescTv, faroRainTv, faroHumTv, faroPillTv;
+    private LinearLayout faroHours, faroRainBox, faroHumBox;
+    private FrameLayout faroMaintBox;
+    private float faroMaintW, faroMaintH, faroHoursW;
+    private Faro.Icon faroPillIc;
+    /** Modo del último inicio armado con Faro (null = ninguno todavía): para encender o apagar los faros. */
+    private static Boolean faroLastLight;
+
+    private void faroMetrics() {
+        float W0 = premW();
+        premHeadH = 0;
+        premWide = false;
+        premPillH = noDock ? 0 : vertical ? 60 : 56;
+        dockTop = noDock ? boardH : boardH - 10 - premPillH;
+        float bottom = dockTop - (noDock ? 12 : 10), top = 8, topH = 34;
+        faroPlH = showPlayer ? (vertical ? 80 : 74) : 0;
+        faroPlY = bottom - faroPlH;
+        float above = faroPlY - (showPlayer ? 10 : 0);   // donde terminan el mapa y las tarjetas
+        boolean wx = prefs.getBoolean("weather_on", true);
+        if (vertical) {
+            float rh = shortVertical ? 300 : Math.max(300, Math.min(470, boardH * 0.36f));
+            float ry = above - rh;
+            faroTopX = 12;
+            mapX = 12; mapY = top + topH + 4; mapW = W0 - 24;
+            mapH = Math.max(120, ry - 10 - mapY);
+            faroColX = 12; faroColY = ry; faroColW = 290; faroColH = rh;
+            faroRX = faroColX + faroColW + 12; faroRW = W0 - 12 - faroRX;
+            faroWxY = ry; faroWxH = wx ? Math.round(rh * 0.54f) : 0;
+            faroPlX = 12; faroPlW = W0 - 24;
+        } else {
+            // la columna llega hasta el borde de abajo: la barra de apps va solo debajo del reproductor
+            faroColX = 12; faroColY = top; faroColW = 292 + Math.min(64, ex / 6f); faroColH = boardH - top;
+            float rx0 = faroColX + faroColW + 12;
+            faroRW = 324 + Math.min(48, ex / 8f);
+            faroRX = W0 - 12 - faroRW;
+            faroTopX = rx0;
+            mapX = rx0; mapY = top + topH + 4; mapW = faroRX - 12 - rx0;
+            mapH = Math.max(120, above - mapY);
+            faroWxY = mapY; faroWxH = wx ? Math.round(mapH * 0.54f) : 0;
+            faroPlX = rx0; faroPlW = W0 - 12 - rx0;
+        }
+        faroMtY = wx ? faroWxY + faroWxH + 10 : faroWxY;
+        faroMtH = (vertical ? faroColY + faroColH : mapY + mapH) - faroMtY;
+        cardH = mapH; rowY = mapY; insL = insR = 0;
+        carX = audX = 16; audW = 248;
+    }
+
+    private void buildFaro() {
+        premHeadViews.clear();
+        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; faroPillIc = null;
+        buildFaroTop();
+        // en claro, el área del mapa con la misma sombra que las tarjetas (el mapa la tapa por dentro)
+        if (LIGHT) {
+            View sh = new View(this);
+            sh.setBackground(new Faro.Card(true, 20 * s, 8 * s, s));
+            place(board, sh, mapX - 8, mapY - 8, mapW + 16, mapH + 16);
+        }
+        buildAaCard();
+        buildFaroColumn();
+        if (faroWxH > 0) buildFaroWeather(faroRX, faroWxY, faroRW, faroWxH);
+        else { faroWxIc = null; panelWx = null; }
+        buildFaroMaint(faroRX, faroMtY, faroRW, faroMtH);
+        if (showPlayer) buildFaroPlayer(faroPlX, faroPlY, faroPlW, faroPlH);
+        else { trackTv = null; artistTv = null; sourceTv = null; timePosTv = null; playerArt = null; playIc = null; }
+        if (!noDock) buildFaroDock();
+        updateOilBadge();
+    }
+
+    /** Tarjeta translúcida de Faro. Devuelve el marco interior (w×hh) donde van las vistas. */
+    private FrameLayout faroCard(float x, float y, float w, float hh) {
+        float m = 8;
+        FrameLayout outer = new FrameLayout(this);
+        outer.setBackground(new Faro.Card(LIGHT, 18 * s, m * s, s));
+        place(board, outer, x - m, y - m, w + 2 * m, hh + 2 * m);
+        FrameLayout inner = new FrameLayout(this);
+        place(outer, inner, m, m, w, hh);
+        return inner;
+    }
+
+    /** Botón con un ícono de trazo centrado (área de toque más grande que el ícono). */
+    private FrameLayout faroIconBtn(int type, float box, float ic, int bg) {
+        FrameLayout f = new FrameLayout(this);
+        if (bg != 0) {
+            GradientDrawable d = round(bg, box * 0.3f);
+            if (LIGHT) d.setStroke(Math.max(1, (int) s), 0x14000000);
+            f.setBackground(d);
+        }
+        Faro.Icon i = new Faro.Icon(this, type, TEXT);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (ic * s), (int) (ic * s));
+        lp.gravity = Gravity.CENTER;
+        f.addView(i, lp);
+        f.setTag(i);
+        return f;
+    }
+
+    /** Barra de estado: hora y fecha a la izquierda; Wi-Fi, Bluetooth (y Apps sin barra) y Ajustes a la derecha. */
+    private void buildFaroTop() {
+        float W0 = premW(), x = faroTopX, w = W0 - 12 - x;
+        LinearLayout row = new LinearLayout(this);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        greetTv = tv("", 13, MUTED, false);   // no se muestra (el reloj lo actualiza)
+        timeTv = tv("", 17, TEXT, true);
+        dateTv = tv("", 13, MUTED, false);
+        dateTv.setPadding((int) (10 * s), 0, 0, 0);
+        row.addView(timeTv);
+        row.addView(dateTv);
+        place(board, row, x + 4, 8, w * 0.6f, 34);
+        premTopRow = row;
+        topSpeedTv = null; topOilTv = null; topIconName = null; weatherBox = null;
+        topNavPill = null; topNavIc = null; topNavDistTv = null;
+
+        LinearLayout right = new LinearLayout(this);
+        right.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        wifiIc = null;
+        btIc = null;
+        addCarData(right);
+        if (prefs.getBoolean("status_icons", true)) {
+            LinearLayout st = new LinearLayout(this);
+            st.setGravity(Gravity.CENTER_VERTICAL);
+            wifiIc = statusIcon(st, "wifi", new Runnable() { public void run() { toggleWifi(); } },
+                new Runnable() { public void run() { openSettingsPage(Settings.ACTION_WIFI_SETTINGS, new Runnable() { public void run() { openSystemSettings(); } }); } });
+            btIc = statusIcon(st, "bluetooth", new Runnable() { public void run() { toggleBt(); } },
+                new Runnable() { public void run() {
+                    if (clwBt) openSlot(1);
+                    else openSettingsPage(Settings.ACTION_BLUETOOTH_SETTINGS, new Runnable() { public void run() { openSlot(1); } });
+                } });
+            right.addView(st);
+        }
+        if (noDock) {
+            FrameLayout apps = faroIconBtn(Faro.I_APPS, 32, 16, Faro.tile(LIGHT));
+            LinearLayout.LayoutParams alp = new LinearLayout.LayoutParams((int) (32 * s), (int) (32 * s));
+            alp.leftMargin = (int) (8 * s);
+            right.addView(apps, alp);
+            apps.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { openDrawer(); } });
+        }
+        FrameLayout gear = circleIcon("settings", 32, 18, 0);
+        GradientDrawable gd = round(Faro.tile(LIGHT), 16);
+        if (LIGHT) gd.setStroke(Math.max(1, (int) s), 0x14000000);
+        gear.setBackground(gd);
+        LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams((int) (32 * s), (int) (32 * s));
+        glp.leftMargin = (int) (8 * s);
+        right.addView(gear, glp);
+        gear.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { openSettings(); } });
+        place(board, right, x + w * 0.4f, 9, w * 0.6f, 32);
+    }
+
+    /** Columna izquierda: velocímetro arriba, nombre del vehículo con el GPS y el carro visto desde arriba. */
+    private void buildFaroColumn() {
+        float x = faroColX, y = faroColY, w = faroColW, hh = faroColH;
+        float D = carSpeed ? Math.min(w - 36, vertical ? hh * 0.36f : (boardH - 16) * 0.33f) : 0;
+        float gx = x + (w - D) / 2, gy = y + 6;
+        float labelH = 20, carMax = Math.min(hh * 0.70f, 380);
+        float labelY = carSpeed ? gy + D + 2 : y + Math.max(4, (hh - carMax - labelH - 4) * 0.40f);
+        // el carro (y su sombra) llega hasta abajo: en horizontal, hasta el borde de la pantalla
+        float carY = labelY + labelH + 2, carH = Math.max(60, carSpeed ? y + hh - carY : Math.min(carMax, y + hh - carY));
+        String col = Faro.car(prefs.getString("faro_car", "silver"));
+        Faro.Car car = new Faro.Car(this, col, LIGHT);
+        place(board, car, x, carY, w, carH);
+        car.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_VEHICLE); } });
+        car.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { chooseFaroCar(); return true; } });
+        // faros: encendidos en oscuro; al pasar de claro a oscuro se encienden y de oscuro a claro se apagan
+        android.graphics.RectF cr = Faro.carRect(w * s, carH * s);
+        float lampY = carY + (cr.top + cr.height() * Faro.LAMP_Y) / s;
+        float lxL = (cr.left + cr.width() * Faro.LAMP_X) / s, lxR = (cr.left + cr.width() * (1 - Faro.LAMP_X)) / s;
+        float bTop = carSpeed ? y : Math.max(y, lampY - 160), bH = lampY + 16 - bTop;
+        Boolean prev = faroLastLight;
+        faroLastLight = LIGHT;
+        boolean fadeOut = LIGHT && prev != null && !prev;
+        if ((!LIGHT || fadeOut) && bH > 40) {
+            float poolY = carSpeed ? gy + D * 0.80f - bTop : (lampY - bTop) * 0.25f;
+            final Faro.Beams beams = new Faro.Beams(this, s, new float[]{lxL * s, (lampY - bTop) * s, lxR * s, (lampY - bTop) * s},
+                (carSpeed ? gy + D * 0.5f - bTop : 0) * s, w / 2 * s, poolY * s, w * 0.42f * s);
+            place(board, beams, x, bTop, w, bH);
+            if (fadeOut) {
+                beams.setAlpha(1f);
+                afterFirstFrame(new Runnable() { public void run() {
+                    beams.animate().alpha(0f).setStartDelay(dur(150)).setDuration(dur(700)).withLayer().withEndAction(new Runnable() { public void run() {
+                        if (beams.getParent() instanceof ViewGroup) ((ViewGroup) beams.getParent()).removeView(beams);
+                    }});
+                }});
+            } else if (prev == null || prev) {
+                beams.setAlpha(0f);
+                afterFirstFrame(new Runnable() { public void run() {
+                    beams.animate().alpha(1f).setStartDelay(dur(150)).setDuration(dur(900))
+                        .setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator()).withLayer();
+                }});
+            }
+        }
+        // velocímetro (mixto por defecto en Faro si nunca se eligió uno)
+        speedTv = tv("0", 12, TEXT, true);   // no se muestra: el número va en el velocímetro
+        carGauge = null; mapGauge = null;
+        if (carSpeed) {
+            faroGauge = new FaroGauge(this, s);
+            faroGauge.setTheme(LIGHT, TEXT, MUTED);
+            faroGauge.setUnit(useMph());
+            faroGauge.setMode(prefs.contains("speedo") ? prefs.getInt("speedo", 2) : 2);
+            place(board, faroGauge, gx, gy, D, D);
+        }
+        // nombre del vehículo y el GPS (donde la referencia dice «Comfort»)
+        LinearLayout lab = new LinearLayout(this);
+        lab.setGravity(Gravity.CENTER);
+        carTv = tv(prefs.getString("car_name", "Mi vehículo"), 13, MUTED, true);
+        carTv.setMaxWidth((int) ((w - 90) * s));
+        lab.addView(carTv);
+        gpsDot = new View(this);
+        gpsDot.setBackground(round(MUTED, 4));
+        LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams((int) (7 * s), (int) (7 * s));
+        dlp.leftMargin = (int) (10 * s);
+        lab.addView(gpsDot, dlp);
+        gpsTv = tv("GPS", 11, MUTED, false);
+        gpsTv.setPadding((int) (5 * s), 0, 0, 0);
+        lab.addView(gpsTv);
+        place(board, lab, x, labelY, w, labelH);
+        chipTv = null;
+        oilValTv = null; oilBar = null; oilBarBg = null; oilLblTv = null; oilIc = null;
+    }
+
+    /**
+     * Pantalla sencilla (la típica de los radios: 1024×600, 1280×720…): lado corto ≤ 720 px y densidad ≤ 240. En
+     * esas pantallas el mapa de Faro va más fuerte por defecto; en celulares y tabletas de alta resolución, suave.
+     */
+    private boolean simpleScreen() {
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        return Math.min(dm.widthPixels, dm.heightPixels) <= 720 && dm.densityDpi <= 240;
+    }
+
+    /** Elegir el color del carro (presión larga sobre el carro o Ajustes → Pantalla de inicio). */
+    private void chooseFaroCar() {
+        final String[] cols = Faro.CAR_COLORS;
+        String[] names = new String[cols.length];
+        for (int i = 0; i < cols.length; i++) names[i] = I18n.t(Faro.CAR_NAMES[i]);
+        int sel = Math.max(0, java.util.Arrays.asList(cols).indexOf(Faro.car(prefs.getString("faro_car", "silver"))));
+        new TB(this, dlg()).raw()
+            .setTitle(I18n.t("Color del carro"))
+            .setSingleChoiceItems(names, sel, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int which) {
+                d.dismiss();
+                prefs.edit().putString("faro_car", cols[which]).apply();
+                rebuild();
+                if (settingsView != null) showSettings(settingsCat);
+            }})
+            .show();
+    }
+
+    /** Clima: ciudad, temperatura grande, máxima/mínima, estado, lluvia y humedad, y las próximas horas abajo. */
+    private void buildFaroWeather(float x, float y, float w, float hh) {
+        FrameLayout card = faroCard(x, y, w, hh);
+        float m = 16;
+        faroCityTv = tv("Clima", 13, MUTED, true);
+        place(card, faroCityTv, m, 14, w * 0.56f - m, 18);
+        faroTempTv = tv("--°", 46, TEXT, false);
+        faroTempTv.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+        place(card, faroTempTv, m - 2, 34, w * 0.52f, 54);
+        faroHiLoTv = tv("", 12, MUTED, false);
+        place(card, faroHiLoTv, m, 92, w * 0.5f, 16);
+        float is = 40;
+        faroWxIc = new Faro.Icon(this, Faro.I_CLOUD, TEXT);
+        faroWxIc.setStroke(1.35f);
+        place(card, faroWxIc, w - m - is, 12, is, is);
+        faroDescTv = tv("", 14, TEXT, false);
+        faroDescTv.setGravity(Gravity.RIGHT);
+        place(card, faroDescTv, w * 0.36f, 58, w * 0.64f - m, 19);
+        LinearLayout meta = new LinearLayout(this);
+        meta.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+        faroRainBox = new LinearLayout(this);
+        faroRainBox.setGravity(Gravity.CENTER_VERTICAL);
+        Faro.Icon ui = new Faro.Icon(this, Faro.I_UMBRELLA, MUTED);
+        faroRainBox.addView(ui, new LinearLayout.LayoutParams((int) (13 * s), (int) (13 * s)));
+        faroRainTv = tv("", 12, MUTED, false);
+        faroRainTv.setPadding((int) (4 * s), 0, 0, 0);
+        faroRainBox.addView(faroRainTv);
+        meta.addView(faroRainBox);
+        faroHumBox = new LinearLayout(this);
+        faroHumBox.setGravity(Gravity.CENTER_VERTICAL);
+        Faro.Icon di = new Faro.Icon(this, Faro.I_DROP, MUTED);
+        faroHumBox.addView(di, new LinearLayout.LayoutParams((int) (13 * s), (int) (13 * s)));
+        faroHumTv = tv("", 12, MUTED, false);
+        faroHumTv.setPadding((int) (4 * s), 0, 0, 0);
+        faroHumBox.addView(faroHumTv);
+        LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(-2, -2);
+        hlp.leftMargin = (int) (12 * s);
+        meta.addView(faroHumBox, hlp);
+        place(card, meta, w * 0.3f, 82, w * 0.7f - m, 18);
+        // próximas horas
+        float hy = Math.max(116, hh * 0.52f);
+        faroHours = new LinearLayout(this);
+        faroHours.setOrientation(LinearLayout.HORIZONTAL);
+        faroHoursW = w - 2 * m + 8;
+        place(card, faroHours, m - 4, hy, faroHoursW, Math.max(40, hh - hy - 10));
+        card.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showWeatherDetail(); } });
+        renderFaroWx();
+    }
+
+    private void renderFaroWx() {
+        if (faroWxIc == null) return;
+        Weather.Now n = weatherNow;
+        faroHours.removeAllViews();
+        if (n == null) {
+            faroCityTv.setText(I18n.t("Clima"));
+            faroTempTv.setText("--°");
+            faroHiLoTv.setText(I18n.t(Double.isNaN(wLat) ? "Esperando la ubicación…" : "Cargando…"));
+            faroDescTv.setText("");
+            faroRainBox.setVisibility(View.GONE);
+            faroHumBox.setVisibility(View.GONE);
+            faroWxIc.set(Faro.I_CLOUD);
+            return;
+        }
+        faroCityTv.setText(n.city != null && n.city.length() > 0 ? n.city : I18n.t("Clima"));
+        faroTempTv.setText(deg(n.temp));
+        Weather.Day d = n.today();
+        faroHiLoTv.setText(d != null ? deg(d.hi) + " / " + deg(d.lo) : "");
+        faroDescTv.setText(I18n.t(Weather.describe(n.code)));
+        faroWxIc.set(Faro.weatherIcon(n.code, n.day));
+        int rain = !n.hours.isEmpty() && n.hours.get(0).rain >= 0 ? n.hours.get(0).rain : d != null ? d.rain : -1;
+        faroRainBox.setVisibility(rain >= 0 ? View.VISIBLE : View.GONE);
+        if (rain >= 0) faroRainTv.setText(I18n.integer(rain) + "%");
+        faroHumBox.setVisibility(n.humidity >= 0 ? View.VISIBLE : View.GONE);
+        if (n.humidity >= 0) faroHumTv.setText(I18n.integer(n.humidity) + "%");
+        int cols = Math.max(3, Math.min(6, (int) (faroHoursW / 48)));
+        for (int i = 0; i < n.hours.size() && i < cols; i++) {
+            Weather.Hour hr = n.hours.get(i);
+            LinearLayout c = new LinearLayout(this);
+            c.setOrientation(LinearLayout.VERTICAL);
+            c.setGravity(Gravity.CENTER);
+            TextView ht = tv(hourLabel(hr.hour), 11, MUTED, false);
+            ht.setGravity(Gravity.CENTER);
+            c.addView(ht, new LinearLayout.LayoutParams(-1, -2));
+            Faro.Icon ic = new Faro.Icon(this, Faro.weatherIcon(hr.code, hr.day), TEXT);
+            LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams((int) (22 * s), (int) (22 * s));
+            ilp.topMargin = (int) (8 * s);
+            ilp.bottomMargin = (int) (8 * s);
+            c.addView(ic, ilp);
+            TextView tt = tv(deg(hr.temp), 13, TEXT, true);
+            tt.setGravity(Gravity.CENTER);
+            c.addView(tt, new LinearLayout.LayoutParams(-1, -2));
+            faroHours.addView(c, new LinearLayout.LayoutParams(0, -1, 1f));
+        }
+    }
+
+    /** Próximos mantenimientos (los de Ajustes → Mantenimientos), del más urgente al más lejano. */
+    private void buildFaroMaint(float x, float y, float w, float hh) {
+        FrameLayout card = faroCard(x, y, w, hh);
+        place(card, tv("Mantenimientos", 13, TEXT, true), 16, 12, w - 32, 18);
+        faroMaintBox = new FrameLayout(this);
+        faroMaintW = w - 24;
+        faroMaintH = Math.max(32, hh - 38 - 6);
+        place(card, faroMaintBox, 12, 38, faroMaintW, faroMaintH);
+        card.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_MAINT); } });
+        renderFaroMaint();
+    }
+
+    private void renderFaroMaint() {
+        if (faroMaintBox == null) return;
+        faroMaintBox.removeAllViews();
+        final List<org.json.JSONObject> l = maint();
+        List<double[]> items = new ArrayList<double[]>();   // {lo que falta, índice} (índice -1 = aceite)
+        if (oilOn()) items.add(new double[]{(oilNextKm() - odoKm()) / Math.max(1, prefs.getFloat("oil_interval_km", 5000)), -1});
+        for (int i = 0; i < l.size(); i++) items.add(new double[]{taskFrac(l.get(i)), i});
+        java.util.Collections.sort(items, new java.util.Comparator<double[]>() {
+            public int compare(double[] a, double[] b) { return Double.compare(a[0], b[0]); }
+        });
+        if (items.isEmpty()) {
+            LinearLayout e = new LinearLayout(this);
+            e.setOrientation(LinearLayout.VERTICAL);
+            e.setGravity(Gravity.CENTER);
+            TextView t1 = tv("Sin mantenimientos programados", 13, MUTED, false);
+            t1.setGravity(Gravity.CENTER);
+            e.addView(t1, new LinearLayout.LayoutParams(-1, -2));
+            TextView t2 = tv("Toca para agregar uno", 12, RED, true);
+            t2.setGravity(Gravity.CENTER);
+            t2.setPadding(0, (int) (6 * s), 0, 0);
+            e.addView(t2, new LinearLayout.LayoutParams(-1, -2));
+            place(faroMaintBox, e, 0, 0, faroMaintW, faroMaintH);
+            return;
+        }
+        int fit = Math.max(1, (int) (faroMaintH / 31));
+        float rowH = faroMaintH / fit, lw = Math.min(124, faroMaintW * 0.36f);
+        for (int k = 0; k < items.size() && k < fit; k++) {
+            double f = items.get(k)[0];
+            final int idx = (int) items.get(k)[1];
+            String name, left, ic;
+            if (idx < 0) {
+                float lk = oilNextKm() - odoKm();
+                name = I18n.t("Cambio de aceite");
+                left = Math.round(toUnit(lk)) <= 0 ? I18n.t("¡Ya toca!") : fmtDist(lk);
+                ic = "water_drop";
+            } else {
+                org.json.JSONObject o = l.get(idx);
+                name = taskName(o);
+                left = f <= 0 ? I18n.t("¡Ya toca!") : taskLeftText(o);
+                ic = taskIcon(o);
+            }
+            int uc = Faro.urgency(f, LIGHT);
+            FrameLayout row = new FrameLayout(this);
+            View bar = new View(this);
+            bar.setBackground(round(uc, 2));
+            place(row, bar, 4, rowH * 0.16f, 4, rowH * 0.68f);
+            ImageView iv = icon(ic, 16);
+            iv.setAlpha(0.85f);
+            place(row, iv, 16, (rowH - 16) / 2, 16, 16);
+            TextView nt = tv(name, 14, TEXT, false);
+            nt.setTypeface(Typeface.DEFAULT);
+            place(row, nt, 40, (rowH - 18) / 2, faroMaintW - 40 - lw - 8, 18);
+            TextView lt = tv(left, 13, f < 0.15 ? uc : MUTED, f < 0.15);
+            lt.setGravity(Gravity.RIGHT);
+            place(row, lt, faroMaintW - lw - 4, (rowH - 17) / 2, lw, 17);
+            place(faroMaintBox, row, 0, k * rowH, faroMaintW, rowH);
+            row.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
+                if (idx < 0) oilMenu(); else taskMenu(idx);
+            }});
+        }
+    }
+
+    /** Reproductor horizontal: anterior, reproducir y siguiente; carátula; canción y artista; la línea de tiempo. */
+    private void buildFaroPlayer(float x, float y, float w, float hh) {
+        final FrameLayout card = faroCard(x, y, w, hh);
+        float cy = hh / 2, x0 = 14;
+        FrameLayout prev = faroIconBtn(Faro.I_PREV, 44, 22, 0), next = faroIconBtn(Faro.I_NEXT, 44, 22, 0);
+        FrameLayout play = new FrameLayout(this);
+        playIc = new ImageView(this);
+        playIc.setImageBitmap(asset("ic/play_arrow.png"));
+        playIc.setColorFilter(TEXT);
+        FrameLayout.LayoutParams plp = new FrameLayout.LayoutParams((int) (34 * s), (int) (34 * s));
+        plp.gravity = Gravity.CENTER;
+        play.addView(playIc, plp);
+        place(card, prev, x0, cy - 22, 44, 44);
+        place(card, play, x0 + 48, cy - 24, 48, 48);
+        place(card, next, x0 + 100, cy - 22, 44, 44);
+        float ax = x0 + 100 + 44 + 16, as = hh - 20;
+        playerArt = new PlayerArt(this, s, asset("ic/music_note.png"));
+        playerArt.setTile(LIGHT ? 0x14000000 : 0x1FFFFFFF);
+        place(card, playerArt, ax, (hh - as) / 2, as, as);
+        float tlW = Math.max(150, Math.min(460, w * 0.36f)), tlX = w - 18 - tlW;
+        float tx = ax + as + 14, tw = Math.max(60, tlX - 20 - tx);
+        trackTv = tv("Nada sonando", 16, TEXT, true);
+        place(card, trackTv, tx, cy - 20, tw, 20);
+        artistTv = tv("Radio, Bluetooth o USB", 13, MUTED, false);
+        place(card, artistTv, tx, cy + 3, tw, 17);
+        sourceTv = tv("", 10, MUTED, true);
+        place(card, sourceTv, tlX, cy - 18, tlW * 0.5f, 14);
+        timePosTv = tv("", 12, MUTED, false);
+        timePosTv.setGravity(Gravity.RIGHT);
+        place(card, timePosTv, tlX + tlW * 0.4f, cy - 19, tlW * 0.6f, 16);
+        faroBar = new Faro.Timeline(this, s, Faro.track(LIGHT), TEXT);
+        place(card, faroBar, tlX - 5, cy + 3, tlW + 10, 18);
+        final View.OnClickListener goPrev = mediaClick(KeyEvent.KEYCODE_MEDIA_PREVIOUS), goNext = mediaClick(KeyEvent.KEYCODE_MEDIA_NEXT);
+        prev.setOnClickListener(goPrev);
+        play.setOnClickListener(mediaClick(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
+        next.setOnClickListener(goNext);
+        card.setOnTouchListener(new View.OnTouchListener() {
+            float x0t, y0t;
+            public boolean onTouch(View v, MotionEvent e) {
+                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) { x0t = e.getX(); y0t = e.getY(); return false; }
+                if (e.getActionMasked() != MotionEvent.ACTION_UP) return false;
+                float dx = e.getX() - x0t, dy = e.getY() - y0t;
+                if (Math.abs(dx) < 50 * s || Math.abs(dx) < 2 * Math.abs(dy)) return false;
+                MotionEvent c = MotionEvent.obtain(e);
+                c.setAction(MotionEvent.ACTION_CANCEL);
+                v.onTouchEvent(c);
+                c.recycle();
+                (dx < 0 ? goNext : goPrev).onClick(v);
+                return true;
+            }
+        });
+        card.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { showPlayerDiag(); return true; } });
+        card.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { openMusicApp(); } });
+        renderTrack();
+    }
+
+    /** Barra de apps compacta y centrada: cada función en un recuadro redondeado; las apps con su propio ícono. */
+    private void buildFaroDock() {
+        final int n = dockCount;
+        int isz = prefs.getInt("dock_icon_size", 1);
+        float ik = isz == 0 ? 0.86f : isz == 2 ? 1.12f : 1f;
+        float pillH = premPillH;
+        // centrada en el reproductor y sin pasarse de sus bordes: crece desde el centro hacia los lados
+        float areaX = faroPlX, areaW = faroPlW;
+        float itemW = Math.min(vertical ? 66 : 62, (areaW - 16) / n), pillW = itemW * n + 16;
+        float px = areaX + (areaW - pillW) / 2, py = dockTop;
+        View bg = new View(this);
+        bg.setBackground(new Faro.Card(LIGHT, Math.min(20, pillH * 0.36f) * s, 8 * s, s));
+        place(board, bg, px - 8, py - 8, pillW + 16, pillH + 16);
+        float tsz = Math.min(Math.min(itemW - 14, pillH - 12) * ik, pillH - 6);
+        final boolean appStyle = "apps".equals(prefs.getString("dock_style", "circle"));
+        for (int i = 0; i < n; i++) {
+            final int idx = i;
+            String t = dockTarget(i);
+            Drawable appIc = t.startsWith("app:") ? appIcon(t.substring(4)) : appStyle ? fnAppIcon(t.substring(3)) : null;
+            FrameLayout b = new FrameLayout(this);
+            View inner;
+            if (appIc != null) {
+                ImageView iv = new ImageView(this);
+                iv.setImageDrawable(appIc);
+                iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                inner = iv;
+            } else {
+                String id = t.startsWith("fn:") ? t.substring(3) : dockDefault(i);
+                FrameLayout tile = new FrameLayout(this);
+                GradientDrawable d = round(Faro.tile(LIGHT), tsz * 0.26f);
+                if (LIGHT) d.setStroke(Math.max(1, (int) s), 0x14000000);
+                tile.setBackground(d);
+                View g;
+                float gs;
+                if ("apps".equals(id)) { g = new Faro.Icon(this, Faro.I_APPS, Faro.pillIcon(LIGHT)); gs = tsz * 0.52f; }
+                else {
+                    ImageView iv = icon(dockFn(id)[2], tsz * 0.5f);
+                    iv.setColorFilter(Faro.pillIcon(LIGHT));
+                    g = iv;
+                    gs = tsz * 0.5f;
+                }
+                FrameLayout.LayoutParams glp = new FrameLayout.LayoutParams((int) (gs * s), (int) (gs * s));
+                glp.gravity = Gravity.CENTER;
+                tile.addView(g, glp);
+                inner = tile;
+            }
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (tsz * s), (int) (tsz * s));
+            lp.gravity = Gravity.CENTER;
+            b.addView(inner, lp);
+            place(board, b, px + 8 + itemW * i, py, itemW, pillH);
+            b.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { runDock(idx); } });
+            b.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { dockMenu(idx, null); return true; } });
+        }
+    }
+
+    /**
+     * Arriba del mapa: buscador discreto a la izquierda (con la navegación integrada abre «Ir a…»; si no, la app de
+     * navegación) y, a la derecha, centrar (zoom automático) y acercar/alejar. Sin GPS el buscador muestra el estado.
+     */
+    private void buildFaroMapTop(FrameLayout card) {
+        FrameLayout box = new FrameLayout(this);
+        place(card, box, 0, 0, mapW, mapH);
+        LinearLayout pill = new LinearLayout(this);
+        pill.setGravity(Gravity.CENTER_VERTICAL);
+        GradientDrawable pd = round(LIGHT ? 0xF2FFFFFF : 0xEB1C1E23, 12);
+        if (LIGHT) pd.setStroke(Math.max(1, (int) s), 0x14000000);
+        pill.setBackground(pd);
+        pill.setPadding((int) (12 * s), 0, (int) (12 * s), 0);
+        faroPillIc = new Faro.Icon(this, Faro.I_SEARCH, TEXT);
+        pill.addView(faroPillIc, new LinearLayout.LayoutParams((int) (18 * s), (int) (18 * s)));
+        faroPillTv = tv("", 14, TEXT, false);
+        faroPillTv.setPadding((int) (10 * s), 0, 0, 0);
+        pill.addView(faroPillTv, new LinearLayout.LayoutParams(0, -2, 1f));
+        float pw = Math.min(250, Math.max(140, mapW - 12 - 12 - 40 - 12));
+        place(box, pill, 12, 12, pw, 40);
+        pill.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
+            if (liveMap == null || !liveMap.hasFix()) { fixGps(); return; }
+            if ("internal".equals(prefs.getString("nav_app", null))) openNavSearch(); else openNavApp();
+        }});
+        pill.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { pickFor("nav_app", "Navegación"); return true; } });
+        // centrar + acercar / alejar
+        FrameLayout loc = faroIconBtn(Faro.I_LOCATE, 40, 19, LIGHT ? 0xF2FFFFFF : 0xEB1C1E23);
+        place(box, loc, mapW - 12 - 40, 12, 40, 40);
+        loc.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { if (liveMap != null) liveMap.autoZoom(); } });
+        LinearLayout zc = new LinearLayout(this);
+        zc.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable zd = round(LIGHT ? 0xF2FFFFFF : 0xEB1C1E23, 12);
+        if (LIGHT) zd.setStroke(Math.max(1, (int) s), 0x14000000);
+        zc.setBackground(zd);
+        FrameLayout zin = faroIconBtn(Faro.I_PLUS, 40, 18, 0), zout = faroIconBtn(Faro.I_MINUS, 40, 18, 0);
+        zc.addView(zin, new LinearLayout.LayoutParams((int) (40 * s), (int) (42 * s)));
+        zc.addView(zout, new LinearLayout.LayoutParams((int) (40 * s), (int) (42 * s)));
+        place(box, zc, mapW - 12 - 40, 60, 40, 84);
+        zin.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { if (liveMap != null) liveMap.zoomBy(1); } });
+        zout.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { if (liveMap != null) liveMap.zoomBy(-1); } });
+        if (mapH < 200) zc.setVisibility(View.GONE);
+        mapTagTv = tv("", 13, TEXT, true);   // no se muestra: el estado del GPS va en el buscador
+        navSearchBtn = null;
+        mapTagBox = box;
+    }
+
+    /** Faro: botón de Android Auto / CarPlay en un recuadro neutro con borde fino; el acento solo en el ícono. */
+    private void faroProj(View b, boolean accentIcon) {
+        if (LIGHT && b.getBackground() instanceof GradientDrawable) ((GradientDrawable) b.getBackground()).setStroke(Math.max(1, (int) s), 0x14000000);
+        if (b instanceof LinearLayout && ((LinearLayout) b).getChildAt(0) instanceof ImageView) {
+            ImageView ic = (ImageView) ((LinearLayout) b).getChildAt(0);
+            if (accentIcon) ic.setColorFilter(RED); else ic.setColorFilter(TEXT);
+        }
+    }
+
+    /** El texto del buscador: el estado del GPS mientras no hay ubicación; luego «Ir a…» o «Navegar». */
+    private void updateFaroPill() {
+        if (faroPillTv == null) return;
+        boolean fix = liveMap != null && liveMap.hasFix();
+        if (!fix) {
+            faroPillTv.setText(mapTagTv != null ? mapTagTv.getText() : "");
+            faroPillTv.setTextColor(MUTED);
+            faroPillIc.set(Faro.I_LOCATE);
+        } else {
+            faroPillTv.setText(I18n.t("internal".equals(prefs.getString("nav_app", null)) ? "Ir a…" : "Navegar"));
+            faroPillTv.setTextColor(TEXT);
+            faroPillIc.set(Faro.I_SEARCH);
+        }
+    }
+
     /** Barra de arriba: saludo (o la hora con «Solo mapa»), íconos, «Solo mapa» y Ajustes. */
     private void buildPremiumTop() {
         float W0 = premW();
@@ -4322,6 +5043,7 @@ public class Main extends Activity {
         right.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
         wifiIc = null;
         btIc = null;
+        addCarData(right);
         if (prefs.getBoolean("status_icons", true)) {
             LinearLayout st = new LinearLayout(this);
             st.setGravity(Gravity.CENTER_VERTICAL);
@@ -4713,6 +5435,7 @@ public class Main extends Activity {
             View th;
             boolean sel = inUse && (i == 1) == LIGHT;
             if (Cobalto.ID.equals(id)) { Cobalto.Thumb t = new Cobalto.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
+            else if (Faro.ID.equals(id)) { Faro.Thumb t = new Faro.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
             else { Aurora.Thumb t = new Aurora.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
             col.addView(th, new LinearLayout.LayoutParams(-1, -2));
             TextView cap = tv(i == 0 ? "Oscuro" : "Claro", 11, MUTED, false);
@@ -4766,16 +5489,167 @@ public class Main extends Activity {
             info.addView(btn, blp);
             btn.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { applyPremium(inUse ? null : id); } });
             if (!inUse) cell.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { applyPremium(id); } });
-            TextView test = tv(free ? "Gratis para todos. Los próximos temas premium se desbloquearán con una donación." : "Versión de prueba: se puede aplicar sin código.", 11, MUTED, false);
+            TextView test = tv(free ? "Gratis para todos. Los próximos temas premium se desbloquearán con una donación."
+                : debugUnlock() ? "Versión de prueba: se puede aplicar sin código." : "Desbloqueado en esta pantalla. ¡Gracias por tu donación!", 11, MUTED, false);
             multiLine(test);
             test.setPadding(0, (int) (8 * s), 0, 0);
             info.addView(test);
         } else {
-            TextView soon = tv("Disponible pronto con una donación. Todas las funciones siguen siendo gratis.", 12, SOFT, true);
+            TextView btn = tv("Desbloquear", 14, 0xFFFFFFFF, true);
+            btn.setText(btn.getText() + " ");
+            btn.setEllipsize(null);
+            btn.setGravity(Gravity.CENTER);
+            btn.setBackground(round(RED, 18));
+            btn.setPadding((int) (18 * s), (int) (9 * s), (int) (18 * s), (int) (9 * s));
+            LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(-2, -2);
+            blp.topMargin = (int) (10 * s);
+            info.addView(btn, blp);
+            View.OnClickListener open = new View.OnClickListener() { public void onClick(View v) { unlockDialog(id); } };
+            btn.setOnClickListener(open);
+            cell.setOnClickListener(open);
+            TextView soon = tv(Prem.bundle() ? "Se desbloquea con una donación de 5 USD, o 8 USD por dos temas. Todas las funciones de StradaOS siguen siendo gratis."
+                : "Se desbloquea con una donación. Todas las funciones de StradaOS siguen siendo gratis.", 11, MUTED, false);
             multiLine(soon);
             soon.setPadding(0, (int) (8 * s), 0, 0);
             info.addView(soon);
         }
+        if (getPackageName().endsWith(".debug") && !free) {
+            // solo en StradaOS Prueba: probar el desbloqueo de verdad (con el ID y el código de esta pantalla)
+            final boolean t = prefs.getBoolean("lic_test", false);
+            TextView tt = tv(t ? "Prueba: volver a aplicar sin código" : "Prueba: desbloquear como en la versión normal", 11, RED, true);
+            multiLine(tt);
+            tt.setPadding(0, (int) (10 * s), 0, 0);
+            info.addView(tt);
+            tt.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
+                prefs.edit().putBoolean("lic_test", !t).apply();
+                showSettings(C_STYLE); }});
+        }
+    }
+
+    // ── Desbloqueo con donación (Fase 3, 2.27): ID de la pantalla → donación en Ko-fi → código STRD-XXXX-XXXX ──
+
+    private void unlockDialog(final String id) {
+        String du = Updates.donateUrl(this);
+        final String url = du.startsWith("https://ko-fi.com/") ? du : "https://ko-fi.com/stradaos";
+        LinearLayout box = new LinearLayout(this);
+        box.setGravity(Gravity.CENTER_VERTICAL);
+        int pad = (int) (20 * s);
+        box.setPadding(pad, pad, pad, (int) (6 * s));
+        android.util.DisplayMetrics dm = getResources().getDisplayMetrics();
+        boolean narrow = dm.widthPixels < dm.heightPixels;
+        box.setOrientation(narrow ? LinearLayout.VERTICAL : LinearLayout.HORIZONTAL);
+        ImageView qr = new ImageView(this);
+        qr.setImageBitmap(qrBitmap(url, (int) (170 * s)));
+        box.addView(qr, new LinearLayout.LayoutParams((int) (170 * s), (int) (170 * s)));
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setPadding(narrow ? 0 : (int) (20 * s), narrow ? (int) (14 * s) : 0, 0, 0);
+        final boolean pack = Prem.bundle();   // con dos o más temas de pago: 8 USD por dos
+        TextView m1 = tv(I18n.t(pack ? "1. Dona en Ko-fi 5 USD por un tema o 8 USD por dos: escanea el código con tu celular o entra a {}."
+            : "1. Dona 5 USD en Ko-fi: escanea el código con tu celular o entra a {}.").replace("{}", url.replace("https://", "")), 13, SOFT, false);
+        multiLine(m1);
+        col.addView(m1);
+        TextView m2 = tv(pack ? "2. En el mensaje de la donación escribe el ID de esta pantalla y qué temas quieres:"
+            : "2. En el mensaje de la donación escribe el ID de esta pantalla:", 13, SOFT, false);
+        multiLine(m2);
+        m2.setPadding(0, (int) (10 * s), 0, (int) (4 * s));
+        col.addView(m2);
+        TextView idv = tv("", 24, RED, true);
+        idv.setText(Lic.shown(this));
+        idv.setPadding(0, 0, 0, (int) (4 * s));
+        col.addView(idv);
+        TextView m3 = tv("3. Te enviamos un código STRD-XXXX-XXXX, casi siempre el mismo día. Escríbelo en «Tengo un código».", 13, SOFT, false);
+        multiLine(m3);
+        m3.setPadding(0, (int) (6 * s), 0, 0);
+        col.addView(m3);
+        TextView m4 = tv("El tema queda en esta pantalla. Si cambias de radio o la restableces, escríbenos con el ID nuevo y te enviamos otro código sin costo.", 11, MUTED, false);
+        multiLine(m4);
+        m4.setPadding(0, (int) (10 * s), 0, 0);
+        col.addView(m4);
+        box.addView(col, narrow ? new LinearLayout.LayoutParams(-1, -2) : new LinearLayout.LayoutParams(0, -2, 1f));
+        android.widget.ScrollView sv = new android.widget.ScrollView(this);
+        sv.addView(box);
+        new TB(this, dlg()).wide()
+            .setTitle(I18n.t("Desbloquear {}").replace("{}", Prem.name(id)))
+            .setView(sv)
+            .setPositiveButton("Tengo un código", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { codeDialog(id); } })
+            .setNeutralButton("Archivo por USB", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { importLicense(id); } })
+            .setNegativeButton("Cerrar", null)
+            .show();
+    }
+
+    private void codeDialog(final String id) {
+        final android.widget.EditText et = field();
+        et.setSingleLine(true);
+        et.setHint("STRD-XXXX-XXXX");
+        et.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS
+            | android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (20 * s);
+        box.setPadding(pad, (int) (10 * s), pad, 0);
+        box.addView(et, new LinearLayout.LayoutParams(-1, -2));
+        TextView hint = tv(I18n.t("ID de esta pantalla: {}. Necesitas internet solo esta vez.").replace("{}", Lic.shown(this)), 12, MUTED, false);
+        multiLine(hint);
+        hint.setPadding(0, (int) (8 * s), 0, 0);
+        box.addView(hint);
+        new TB(this, dlg())
+            .setTitle("Escribe tu código")
+            .setView(box)
+            .setPositiveButton("Desbloquear", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { checkCode(id, et.getText().toString()); } })
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void checkCode(final String id, String typed) {
+        final String code = Lic.normCode(typed);
+        if (code == null) { toast("El código tiene 8 letras o números después de STRD, por ejemplo STRD-7KQ2-M9XA."); return; }
+        toast("Comprobando el código…");
+        new Thread(new Runnable() { public void run() {
+            final int r = Lic.fetch(Main.this, code);
+            h.post(new Runnable() { public void run() { codeResult(id, r, Lic.lastThemes); } });
+        }}).start();
+    }
+
+    private void codeResult(final String id, int r, java.util.List<String> themes) {
+        if (r == Lic.OK) { unlocked(id, themes); return; }
+        String msg = r == Lic.NO_NET
+            ? "No hay internet. Conéctate un momento (por ejemplo, con el celular como módem) y vuelve a intentarlo, o pide el archivo de licencia y pásalo por USB."
+            : I18n.t("No encontramos ese código para esta pantalla. Revisa que esté bien escrito y que el ID que enviaste sea {}.").replace("{}", Lic.shown(this));
+        new TB(this, dlg()).setTitle("No se pudo desbloquear").setMessage(msg)
+            .setPositiveButton("Intentar de nuevo", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { codeDialog(id); } })
+            .setNegativeButton("Cerrar", null).show();
+    }
+
+    private void importLicense(final String id) {
+        toast("Buscando la licencia en la pantalla y en las USB…");
+        new Thread(new Runnable() { public void run() {
+            final java.util.List<String> got = Lic.importUsb(Main.this);
+            h.post(new Runnable() { public void run() {
+                if (!got.isEmpty()) { unlocked(id, got); return; }
+                new TB(Main.this, dlg()).setTitle("No encontramos la licencia")
+                    .setMessage(I18n.t("Copia el archivo que te enviamos (stradaos-licencia.txt) en la raíz de una USB, conéctala y vuelve a intentarlo. Tiene que ser para el ID {}.").replace("{}", Lic.shown(Main.this)))
+                    .setPositiveButton("Intentar de nuevo", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface d, int w) { importLicense(id); } })
+                    .setNegativeButton("Cerrar", null).show();
+            }});
+        }}).start();
+    }
+
+    private void unlocked(final String id, java.util.List<String> themes) {
+        final String th = themes != null && themes.contains(id) ? id : themes != null && !themes.isEmpty() ? themes.get(0) : id;
+        if (settingsView != null && settingsCat == C_STYLE) showSettings(C_STYLE);
+        new TB(this, dlg())
+            .setTitle("¡Listo!")
+            .setMessage(I18n.t("{} quedó desbloqueado en esta pantalla. Gracias por apoyar StradaOS.").replace("{}", Prem.known(th) ? Prem.name(th) : th))
+            .setPositiveButton("Aplicar ahora", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface d, int w) { if (Prem.known(th)) applyPremium(th); } })
+            .setNegativeButton("Después", null)
+            .show();
     }
 
     private void runDock(int i) {
@@ -4808,6 +5682,7 @@ public class Main extends Activity {
         else if ("carplay".equals(id)) openCarPlay();
         else if ("nav_home".equals(id)) navigateSavedSlot("nav_home", "Casa");
         else if ("nav_work".equals(id)) navigateSavedSlot("nav_work", "Trabajo");
+        else if ("obd".equals(id)) openVehiclePanel();
         else openDrawer();
     }
 
@@ -4957,7 +5832,48 @@ public class Main extends Activity {
     }
 
     /** Toca el reproductor: la app de música elegida; si no hay, la de la fuente que suena. */
+    private boolean notifHint;
+
+    /** Android 5+: suena música pero StradaOS no tiene «Acceso a notificaciones», así que no puede ver la canción. */
+    private boolean wantsNotifAccess() {
+        if (SDK < 21 || curTitle != null || curArtist != null || prefs.getBoolean("notif_hint_off", false)) return false;
+        try {
+            if (Modern.notificationAccess(this)) return false;
+            return ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
+        } catch (Throwable e) { return false; }
+    }
+
+    /** Explica el permiso y abre el ajuste; si la pantalla no lo tiene, da el comando de ADB. */
+    private void askNotifAccess() {
+        new TB(this, dlg())
+            .setTitle("Ver la canción de tus apps")
+            .setMessage("Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.")
+            .setPositiveButton("Activar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                try { startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
+                catch (Throwable e) { notifAccessAdb(); }
+            }})
+            .setNeutralButton("No volver a mostrar", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                prefs.edit().putBoolean("notif_hint_off", true).apply();
+                renderTrack();
+            }})
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    /** Pantallas sin el ajuste de «Acceso a notificaciones»: se activa desde una computadora con ADB. */
+    private void notifAccessAdb() {
+        String cn = getPackageName() + "/" + MediaListener.class.getName();
+        String cmd = SDK >= 27 ? "adb shell cmd notification allow_listener " + cn
+            : "adb shell settings put secure enabled_notification_listeners " + cn;
+        new TB(this, dlg()).raw()
+            .setTitle(I18n.t("Ver la canción de tus apps"))
+            .setMessage(I18n.t("Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:") + "\n\n" + cmd)
+            .setPositiveButton("OK", null)
+            .show();
+    }
+
     private void openMusicApp() {
+        if (notifHint && wantsNotifAccess()) { askNotifAccess(); return; }
         if (launchSaved("music_app")) return;
         if ("Android Auto".equals(curSource) && launchPkg(PKG_HUR)) return;
         if ("Bluetooth".equals(curSource)) { ComponentName cn = btMusicApp(); if (cn != null && launchComponent(cn)) return; }
@@ -5792,20 +6708,53 @@ public class Main extends Activity {
     private void setGps(boolean ok, float kmh) {
         lastKmh = kmh;
         lastOk = ok;
+        if (!ok && speedTv != null) lastFix = 0;
+        showSpeed();
+    }
+
+    /**
+     * 2.29: con el escáner OBD-II conectado, el velocímetro del inicio usa la velocidad del carro (más exacta y sin el
+     * retraso del GPS, también en túneles). Sin datos frescos del escáner (menos de 3 s) vuelve solo al GPS.
+     * El auto simulado no cuenta, para no mostrar una velocidad falsa (salvo en StradaOS Prueba con «obd-vel-demo:1»).
+     * Devuelve km/h o NaN.
+     */
+    private float obdKmh() {
+        if (!obdOn() || !prefs.getBoolean("obd_speed", true) || Obd.status != Obd.LIVE || !Obd.SPEED.has()) return Float.NaN;
+        if (SystemClock.elapsedRealtime() - Obd.SPEED.at > 3000) return Float.NaN;
+        if ("demo".equals(prefs.getString("obd_addr", "demo")) && !obdSpeedDemo
+            && !(getPackageName().endsWith(".debug") && prefs.getBoolean("obd_speed_demo", false))) return Float.NaN;
+        return Obd.SPEED.value;
+    }
+    private boolean obdSpeedDemo;
+    private boolean speedFromObd;
+
+    private void showSpeed() {
+        float ob = obdKmh();
+        boolean fromObd = !Float.isNaN(ob);
+        speedFromObd = fromObd;
+        boolean ok = fromObd || lastOk;
+        float kmh = fromObd ? ob : lastKmh;
+        float conv = useMph() ? kmh * 0.621371f : kmh;
+        if (!fromObd) conv = speedFix(conv);      // la corrección del velocímetro es para el GPS
         if (idleView != null) {
-            float iv = speedFix(useMph() ? kmh * 0.621371f : kmh);
+            float iv = conv;
             if (idleSpeedTv != null) idleSpeedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : iv)) : "--");
             if (idleGauge != null) idleGauge.setSpeed(kmh < 2 ? 0 : iv, ok);
         }
         if (speedTv == null) return;
-        if (!ok) lastFix = 0;
-        float v = speedFix(useMph() ? kmh * 0.621371f : kmh);
+        float v = conv;
         speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
         if (carGauge != null) carGauge.setSpeed(kmh < 2 ? 0 : v, ok);
         if (mapGauge != null) mapGauge.setSpeed(kmh < 2 ? 0 : v, ok);
+        if (faroGauge != null) {
+            faroGauge.setSpeed(kmh < 2 ? 0 : v, ok);
+            int lim = Nav.active != null && Nav.curSpeedLimitKmh > 0
+                ? (useMph() ? Math.max(5, (int) (Math.round((Nav.curSpeedLimitKmh / 1.60934) / 5.0) * 5)) : Nav.curSpeedLimitKmh) : 0;
+            faroGauge.setLimit(lim);
+        }
         if (topSpeedTv != null) topSpeedTv.setText((ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--") + " " + (useMph() ? "mph" : "km/h"));
         int gs = ok ? 0 : gpsState();
-        gpsTv.setText(ok ? "GPS" : I18n.t(gs == 1 ? "Sin permiso" : gs == 2 ? "GPS apagado" : "Buscando GPS"));
+        gpsTv.setText(fromObd ? "OBD" : ok ? "GPS" : I18n.t(gs == 1 ? "Sin permiso" : gs == 2 ? "GPS apagado" : "Buscando GPS"));
         gpsDot.setBackground(round(ok ? 0xFF3DDC84 : MUTED, 4));
         updateMapTag();
     }
@@ -5836,6 +6785,9 @@ public class Main extends Activity {
         if (mediaWatcher != null && mediaWatcher.hasSession()) return false;
         final AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (am.isMusicActive()) return false;
+        // 2.30 (#50): con Android Auto o CarPlay conectado la música viene del celular; arrancar la app de la pantalla
+        // hacía sonar dos canciones a la vez. ▶ queda como tecla multimedia normal.
+        if (projectionActive()) { BtBridge.log("▶ no abre la app de música: Android Auto / CarPlay conectado"); return false; }
         String saved = prefs.getString("music_app", null);
         ComponentName cn = saved != null ? ComponentName.unflattenFromString(saved) : null;
         final String pkg = cn != null ? cn.getPackageName() : firstInstalled(MUSIC_PKGS);
@@ -5852,6 +6804,20 @@ public class Main extends Activity {
             if (!launchSaved("music_app")) launchPkg(pkg);
         }}, 2500);
         return true;
+    }
+
+    /**
+     * Android Auto o CarPlay sonando: Open Headunit vivo, celular por USB en modo Android Auto, o una app de proyección
+     * (ZLink, AutoKit…) con notificación multimedia. Una app de proyección solo abierta, esperando el celular, no cuenta.
+     */
+    private boolean projectionActive() {
+        try {
+            if (aaRunning()) return true;
+            if (aaUsbState() == 1) return true;
+            return !Projection.media.isEmpty();
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     /** Si suena Bluetooth, controla directamente la app Bluetooth de fábrica (com.clw.btmusic). */
@@ -5904,6 +6870,9 @@ public class Main extends Activity {
     private void showTrack(NowPlaying.Track t) {
         long now = SystemClock.elapsedRealtime();
         if ("bt".equals(t.origin) && t.positionMs >= 0) { btPosMs = t.positionMs; btPosAt = now; }
+        // Pantalla HCN con una canción local sonando (issue #5): el celular conectado por Bluetooth manda su canción
+        // aunque esté en pausa; no reemplaza la del equipo. Al cambiar de fuente, el equipo borra el archivo y entra.
+        if ("bt".equals(t.origin) && "hcn".equals(curOrigin) && Hcn.blocksBt()) return;
         boolean hasContent = t.title != null || t.artist != null;
         // Un aviso sin pista de otra fuente (p. ej. el sistema cuando entra la cámara de reversa)
         // no debe borrar ni pausar lo que muestra la fuente actual.
@@ -6195,6 +7164,17 @@ public class Main extends Activity {
                 + "\nOpen Headunit corriendo: " + (processRunning(PKG_HUR) ? "sí" : "no")
                 + " · celular por USB en modo Android Auto: " + (aaUsbState() == 1 ? "sí" : aaUsbState() == 0 ? "no" : "no se sabe")
                 + "\nAndroid Auto conectado (para StradaOS): " + (aaRunning() ? "sí" : "no")
+                + "\nApps de Android Auto / CarPlay con notificación: " + Projection.describe(Projection.any)
+                + " · multimedia: " + Projection.describe(Projection.media)
+                + "\n▶ sin nada sonando abre tu app de música: " + (projectionActive() ? "no (Android Auto / CarPlay conectado)" : "sí")
+                + "\n\nMúsica de cualquier app (Android 5+): " + (SDK < 21 ? "no aplica en este Android"
+                    : "acceso a notificaciones " + (Modern.notificationAccess(this) ? "SÍ" : "NO") + " · lector conectado " + (MediaListener.connected ? "sí" : "no")
+                    + "\nSonido de música en el sistema: " + (((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive() ? "sí" : "no")
+                    + "\nSesiones multimedia: " + MediaWatcher.report())
+                + "\n\n" + Hcn.report()
+                + "\nBluetooth del sistema (AVRCP): " + (NowPlaying.avrcpAt == 0 ? "ningún aviso"
+                    : NowPlaying.avrcpCount + " avisos, el último hace " + ((SystemClock.elapsedRealtime() - NowPlaying.avrcpAt) / 1000)
+                    + " s: " + NowPlaying.avrcpLast)
                 + "\nApp Bluetooth conectada: " + (bt != null && bt.isConnected() ? "sí" : "no")
                 + "\nAudio Bluetooth automático: " + (clwBt ? (btAutoOn() ? "activado" : "desactivado") : "no aplica (otra marca)")
                 + (clwBt ? "" : "\nApp de música Bluetooth: " + (btMusicApp() != null ? btMusicApp().getPackageName() : "no encontrada")
@@ -6236,12 +7216,14 @@ public class Main extends Activity {
     private void renderTrack() {
         if (trackTv == null) return;
         if (curTitle == null && curArtist == null) {
-            trackTv.setText(I18n.t("Nada sonando"));
-            artistTv.setText(I18n.t("Radio, Bluetooth o USB"));
+            notifHint = wantsNotifAccess();
+            trackTv.setText(I18n.t(notifHint ? "Música sonando" : "Nada sonando"));
+            artistTv.setText(I18n.t(notifHint ? "Toca para ver la canción" : "Radio, Bluetooth o USB"));
             sourceTv.setText("");
             timePosTv.setText("");
             playerArt.setArt(null);
             playerArt.setProgress(-1);
+            if (faroBar != null) faroBar.set(-1);
         } else {
             boolean aaOff = curSource != null && curSource.toLowerCase(ES).contains("headunit")
                     && ("Conectado".equalsIgnoreCase(curArtist) || "Connected".equalsIgnoreCase(curArtist));
@@ -6264,12 +7246,15 @@ public class Main extends Activity {
             long p = currentPos();
             playerArt.setProgress(p / (float) durMs);
             timePosTv.setText(fmt(p) + "  /  " + fmt(durMs));
+            if (faroBar != null) faroBar.set(p / (float) durMs);
         } else if (durMs > 0) {
             playerArt.setProgress(-1);
             timePosTv.setText(fmt(durMs));
+            if (faroBar != null) faroBar.set(-1);
         } else {
             playerArt.setProgress(-1);
             timePosTv.setText("");
+            if (faroBar != null) faroBar.set(-1);
         }
     }
 
@@ -6438,7 +7423,7 @@ public class Main extends Activity {
     private void wizard() {
         int sel = Math.max(0, java.util.Arrays.asList(I18n.CODES).indexOf(I18n.lang));
         wizardDlg = new TB(this, dlg()).raw()
-            .setTitle("Idioma · Language · Langue · Lingua · Sprache · Bahasa · Dil · اللغة")
+            .setTitle("Idioma · Language · Langue · Lingua · Sprache · Bahasa · Dil · Nyelv · اللغة")
             .setSingleChoiceItems(I18n.NAMES, sel, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface d, int w) {
                     d.dismiss();
@@ -6867,9 +7852,7 @@ public class Main extends Activity {
 
     private void applyTheme() {
         String mode = prefs.getString("theme", "dark");
-        LIGHT = "light".equals(mode)
-                || ("auto".equals(mode) && !darkHours())
-                || ("system".equals(mode) && !systemNight());
+        LIGHT = !themeDark(mode);
         if (LIGHT) {
             BG = 0xFFE9ECF1; CARD = 0xFFFFFFFF; INNER = 0xFFF1F3F7; BTN = 0xFFE2E6EC; DOCK = 0xFFDDE1E8;
             TEXT = 0xFF14161B; MUTED = 0xFF6B7280; SOFT = 0xFF3A404C; CIRCLE = 0xFFFFFFFF; ICON = 0xFF2B303A;
@@ -6877,6 +7860,150 @@ public class Main extends Activity {
             BG = 0xFF15171C; CARD = 0xFF1E2128; INNER = 0xFF262A33; BTN = 0xFF2A2E37; DOCK = 0xFF0D0E11;
             TEXT = 0xFFF2F3F5; MUTED = 0xFF8B9099; SOFT = 0xFFC5C8CE; CIRCLE = 0xFF23262E; ICON = 0xFFFFFFFF;
         }
+    }
+
+    // ── Espera antes de cambiar de tema (Auto, Sistema y Luces) ──
+    // Caso típico: de noche, al apagar el carro se apagan las luces y la pantalla pasaba a claro de golpe.
+    // Cada sentido tiene su espera (por defecto 0 = como siempre). El tema que se ve se guarda en theme_last_dark,
+    // así que al encender de nuevo la pantalla arranca con el último tema y la espera también se respeta.
+    static final int[] THEME_DELAYS = {0, 1, 2, 3, 4, 5};
+    static final String[] THEME_DELAY_LBL = {"Sin espera", "1 s", "2 s", "3 s", "4 s", "5 s"};
+    private Boolean themeShown, themeWant;
+    private long themeWantAt;
+    private boolean themeForce;
+
+    /** Lo que pide el modo elegido, sin espera: true = oscuro. */
+    private boolean themeWanted(String mode) {
+        if ("dark".equals(mode)) return true;
+        if ("light".equals(mode)) return false;
+        if ("system".equals(mode)) return systemNight();
+        return darkHours();   // auto
+    }
+
+    /** Espera activada (Apariencia → Tema → «Espera para cambiar de tema»); apagada por defecto. */
+    private boolean themeDelayOn() { return prefs.getBoolean("theme_delay_on", false); }
+
+    /** ¿Oscuro? Aplica la espera elegida para cada sentido; los modos Oscuro y Claro cambian al instante. */
+    private boolean themeDark(String mode) {
+        boolean want = themeWanted(mode);
+        boolean manual = "dark".equals(mode) || "light".equals(mode);
+        int dDark = Math.min(5, prefs.getInt("theme_delay_dark", 0)), dLight = Math.min(5, prefs.getInt("theme_delay_light", 0));
+        if (manual || themeForce || !themeDelayOn() || (dDark <= 0 && dLight <= 0)) { themeForce = false; return themeSettle(want); }
+        if (themeShown == null) themeShown = prefs.getBoolean("theme_last_dark", want);   // al arrancar: el último tema
+        if (want == themeShown) {
+            themeWant = null;
+            h.removeCallbacks(themeRecheck);
+            return want;
+        }
+        long now = SystemClock.elapsedRealtime();
+        if (themeWant == null || themeWant != want) { themeWant = want; themeWantAt = now; }
+        long left = themeWantAt + (want ? dDark : dLight) * 1000L - now;
+        if (left <= 0) return themeSettle(want);
+        h.removeCallbacks(themeRecheck);
+        h.postDelayed(themeRecheck, left + 100);
+        return themeShown;
+    }
+
+    private boolean themeSettle(boolean dark) {
+        themeShown = dark;
+        themeWant = null;
+        h.removeCallbacks(themeRecheck);
+        if (prefs.getBoolean("theme_last_dark", !dark) != dark) prefs.edit().putBoolean("theme_last_dark", dark).apply();
+        return dark;
+    }
+
+    /** Cambio pedido por el usuario (modo, horario…): se aplica ya, sin espera. */
+    private void applyThemeNow() {
+        themeForce = true;
+        applyTheme();
+    }
+
+    private final Runnable themeRecheck = new Runnable() { public void run() {
+        try {
+            if (root == null) return;
+            boolean was = LIGHT;
+            applyTheme();
+            if (was != LIGHT) { applyAccent(); rebuild(); }
+        } catch (Throwable e) { Guard.log("Tema con espera: " + e); }
+    }};
+
+    // ── Modo «Sistema» en pantallas FYT: sigue las luces (Settings.System car_mode = 1 con las luces encendidas) ──
+    // En estas pantallas el modo oscuro de Android está bloqueado (mNightModeLocked), así que uiMode nunca cambia.
+
+    /** Luces del carro si la pantalla es FYT y las informa: 1 encendidas, 0 apagadas; -1 si no (se usa uiMode). */
+    private int fytLights() { return fytOn() ? Fyt.lights(this) : -1; }
+
+    /** Encendieron o apagaron las luces: en el modo «Sistema» de una FYT se revisa el tema (con la espera elegida). */
+    private final android.database.ContentObserver lightsObs = new android.database.ContentObserver(new Handler(android.os.Looper.getMainLooper())) {
+        @Override public void onChange(boolean selfChange) {
+            try {
+                if (prefs == null || root == null || !"system".equals(prefs.getString("theme", "dark")) || !fytOn()) return;
+                h.removeCallbacks(brightApply);
+                h.postDelayed(brightApply, 300);
+            } catch (Throwable ignored) { }
+        }
+    };
+
+    // ── Equipo: marca de la pantalla (Ajustes → Tu vehículo → Equipo) ──
+
+    /**
+     * Pantalla FYT: elegida a mano o detectada (pref hw = auto | generic | fyt).
+     * Por defecto «generic»: nada cambia hasta que el usuario elige FYT o Automático.
+     */
+    private boolean fytOn() {
+        String hw = prefs.getString("hw", "generic");
+        return "fyt".equals(hw) || ("auto".equals(hw) && Fyt.detect(this));
+    }
+
+    private Fyt fyt;
+    private TextView carDataTv;
+
+    /** Datos del carro de la FYT (batería y temperatura exterior): solo con la opción activada. */
+    private void startFyt() {
+        if (fyt != null || !fytOn() || !prefs.getBoolean("fyt_data", false)) return;
+        try {
+            fyt = new Fyt(this, new Fyt.Listener() { public void onCarData() { updateCarData(); } });
+            fyt.start();
+        } catch (Throwable e) { Guard.log("FYT: " + e); fyt = null; }
+    }
+
+    private void stopFyt() {
+        if (fyt != null) try { fyt.stop(); } catch (Throwable ignored) { }
+        fyt = null;
+        updateCarData();
+    }
+
+    /** Datos del carro en la barra de arriba, a la izquierda de los íconos de Wi-Fi y Bluetooth. */
+    private void addCarData(LinearLayout bar) {
+        carDataTv = tv("", 15, TEXT, true);
+        carDataTv.setPadding(0, 0, (int) (12 * s), 0);
+        bar.addView(carDataTv);
+        updateCarData();
+    }
+
+    /** «13,9 V · 17 °C»: lo que esté activado y haya llegado, o "" sin datos. */
+    private String carDataText() { return carDataText(false); }
+
+    /** all = true: todo lo que llegó, aunque no se muestre en el inicio (para Ajustes). */
+    private String carDataText(boolean all) {
+        if (fyt == null) return "";
+        StringBuilder b = new StringBuilder();
+        if (fyt.hasVolt() && (all || prefs.getBoolean("fyt_volt", false)))
+            b.append(String.format(java.util.Locale.getDefault(), "%.1f V", fyt.voltDeci / 10f));
+        if (fyt.hasTemp() && (all || prefs.getBoolean("fyt_temp", false))) {
+            if (b.length() > 0) b.append("  ·  ");
+            float c = fyt.tempDeci / 10f;
+            boolean f = "F".equals(prefs.getString("temp_unit", "C"));
+            b.append(Math.round(f ? c * 9f / 5f + 32 : c)).append(f ? " °F" : " °C");
+        }
+        return b.toString();
+    }
+
+    private void updateCarData() {
+        if (carDataTv == null) return;
+        String t = carDataText();
+        carDataTv.setText(t);
+        carDataTv.setVisibility(t.length() == 0 ? View.GONE : View.VISIBLE);
     }
 
     /** Guarda la ubicación para el amanecer/atardecer solo si cambió bastante (~25 km): no escribe a cada lectura. */
@@ -6967,6 +8094,8 @@ public class Main extends Activity {
 
     /** Modo «Sistema»: sigue el modo oscuro de la pantalla (algunas lo activan al encender las luces del carro). */
     private boolean systemNight() {
+        int l = fytLights();   // FYT: las luces del carro (car_mode); las demás pantallas, el modo oscuro de Android
+        if (l >= 0) return l == 1;
         try {
             return (getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
                     == android.content.res.Configuration.UI_MODE_NIGHT_YES;
@@ -6990,7 +8119,7 @@ public class Main extends Activity {
         pickTime(title, cur, h24, new IntCb() { public void on(int minutes) {
             prefs.edit().putInt(key, minutes).apply();
             boolean was = LIGHT;
-            applyTheme();
+            applyThemeNow();   // horario elegido a mano: sin espera
             if (was != LIGHT) { applyAccent(); rebuild(); }
             showSettings(settingsCat);
         }});
@@ -7112,7 +8241,9 @@ public class Main extends Activity {
         Weather.fetch(this, wLat, wLon, new Weather.Listener() {
             public void onWeather(final Weather.Now n, String err) {
                 h.post(new Runnable() { public void run() {
-                    if (n != null) weatherNow = n; else weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L; // reintenta en 5 min
+                    if (n != null) weatherNow = n;
+                    // sin datos, o con el pronóstico guardado (#46): reintenta en 5 min para traer el de internet
+                    if (n == null || n.cachedAt > 0) weatherAt = SystemClock.elapsedRealtime() - 25 * 60 * 1000L;
                     showWeather();
                 }});
             }
@@ -7146,10 +8277,13 @@ public class Main extends Activity {
 
     private android.widget.ScrollView settingsScroll;
     private int settingsScrollCat = -1;
+    private String settingsScrollSub = "";
     private int settingsPendingY = -1;   // posición por restaurar en una página que aún no se ha acomodado
 
     private void closeSettings() {
         settingsCat = -1;
+        settingsSub = null;
+        Obd.removeListener(obdSettingsL);
         settingsScroll = null; settingsScrollCat = -1; settingsPendingY = -1;
         if (settingsView != null) { root.removeView(settingsView); settingsView = null; }
     }
@@ -7162,10 +8296,14 @@ public class Main extends Activity {
 
     private void showSettings0(int cat) {
         if (cat == 0) { closeSettings(); return; }
+        if (cat != C_VEHICLE) settingsSub = null;
+        Obd.removeListener(obdSettingsL);
+        obdLive.clear();
         // al cambiar un ajuste se redibuja la página: que se quede donde estaba, no que vuelva arriba
         // (algunos ajustes redibujan dos veces seguidas: la segunda vez la página anterior aún no se acomodó y su
         // posición sigue pendiente; se usa esa y no un 0)
-        final int keepY = settingsScroll == null || settingsScrollCat != cat ? 0
+        String subKey = settingsSub == null ? "" : settingsSub;
+        final int keepY = settingsScroll == null || settingsScrollCat != cat || !subKey.equals(settingsScrollSub) ? 0
                 : settingsPendingY >= 0 ? settingsPendingY : settingsScroll.getScrollY();
         settingsPendingY = keepY > 0 ? keepY : -1;
         settingsCat = cat;
@@ -7228,7 +8366,7 @@ public class Main extends Activity {
                 side.addView(d, dl);
             }
             it.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { showSettings(idx); }
+                public void onClick(View v) { settingsSub = null; showSettings(idx); }
             });
         }
         }
@@ -7250,17 +8388,20 @@ public class Main extends Activity {
         sc.setVerticalScrollBarEnabled(false);
         if (vertical) place(panel, sc, 16, 84, 688, boardH - 96);
         else place(panel, sc, 272, 16, 736, 568);
-        settingsScroll = sc; settingsScrollCat = cat;
+        settingsScroll = sc; settingsScrollCat = cat; settingsScrollSub = subKey;
         LinearLayout body = new LinearLayout(this);
         body.setOrientation(LinearLayout.VERTICAL);
         body.setPadding((int) (8 * s), (int) (6 * s), (int) (8 * s), (int) (24 * s));
         sc.addView(body, new FrameLayout.LayoutParams(-1, -2));
+        if (cat == C_VEHICLE && settingsSub != null) obdHeader(body);
+        else {
         TextView title = tv(CAT_NAMES[cat], 24, TEXT, true);
         title.setPadding((int) (4 * s), 0, 0, (int) (14 * s));
         body.addView(title);
+        }
 
         switch (cat) {
-            case C_VEHICLE: catVehicle(body); break;
+            case C_VEHICLE: if (settingsSub != null) obdPage(body, settingsSub); else catVehicle(body); break;
             case C_MAINT: catMaint(body); break;
             case C_HOME: catHome(body); break;
             case C_DOCK: catDock(body); break;
@@ -7301,7 +8442,7 @@ public class Main extends Activity {
             tabs.addView(it, ilp);
             if (sel) chosen[0] = it;
             it.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) { showSettings(idx); }
+                public void onClick(View v) { settingsSub = null; showSettings(idx); }
             });
         }
         // la categoría elegida se deja a la vista durante el acomodo, antes de dibujar (sin salto)
@@ -7646,6 +8787,55 @@ public class Main extends Activity {
             offLbl, Math.max(0, java.util.Arrays.asList(SPEED_OFFSETS).indexOf(prefs.getString("speed_offset", "0"))), new IntCb() { public void on(int i) {
                 prefs.edit().putString("speed_offset", SPEED_OFFSETS[i]).apply(); rebuild(); showSettings(settingsCat);
             }});
+        // Equipo: marca de la pantalla. Automático detecta FYT (com.syu.ms); con FYT se ofrecen las luces y los datos del carro
+        LinearLayout eq = section(body, "Equipo");
+        final String[] hws = {"auto", "generic", "fyt"};
+        boolean det = Fyt.detect(this);
+        String detTxt = det ? I18n.t("Detectada:") + " FYT" + (Fyt.platform().length() > 0 ? " · " + Fyt.platform() : "")
+                : I18n.t("No se detectó una marca con funciones propias");
+        segmented(eq, "Marca de la pantalla", detTxt, new String[]{"Auto", "Genérica", "FYT"},
+            Math.max(0, java.util.Arrays.asList(hws).indexOf(prefs.getString("hw", "generic"))), new IntCb() { public void on(int i) {
+                prefs.edit().putString("hw", hws[i]).apply();
+                stopFyt(); startFyt();
+                applyThemeNow(); applyAccent(); rebuild(); showSettings(settingsCat);   // «Sistema» pasa a seguir (o no) las luces
+            }});
+        if (fytOn()) {
+            toggle(eq, "Datos del carro", "Elige qué datos del carro se ven arriba, junto al Wi-Fi",
+                prefs.getBoolean("fyt_data", false), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("fyt_data", i == 1).apply();
+                    if (i == 1) startFyt(); else stopFyt();
+                    rebuild(); showSettings(settingsCat);
+                }});
+            if (prefs.getBoolean("fyt_data", false)) {
+                toggle(eq, "Tensión de la batería", "Medida por la pantalla; no necesita la caja CAN",
+                    prefs.getBoolean("fyt_volt", false), new IntCb() { public void on(int i) {
+                        prefs.edit().putBoolean("fyt_volt", i == 1).apply(); updateCarData(); showSettings(settingsCat);
+                    }});
+                toggle(eq, "Temperatura exterior", "Del sensor del carro; necesita la caja CAN",
+                    prefs.getBoolean("fyt_temp", false), new IntCb() { public void on(int i) {
+                        prefs.edit().putBoolean("fyt_temp", i == 1).apply(); updateCarData(); showSettings(settingsCat);
+                    }});
+            }
+            if (fyt != null) {
+                String now = carDataText(true);
+                row(eq, "Lectura actual", I18n.t("Servicio com.syu.ms:") + " " + I18n.t(fyt.state)
+                        + (fyt.canType > 0 ? " · CAN " + fyt.canType : fyt.canType == 0 ? " · " + I18n.t("sin caja CAN") : ""),
+                    now.length() > 0 ? now : I18n.t("Esperando datos"), new Runnable() { public void run() { showSettings(settingsCat); } });
+            }
+            int l = Fyt.lights(this);
+            row(eq, "Luces del carro", "Para seguirlas, elige Apariencia → Tema → Modo → Sistema",
+                l < 0 ? I18n.t("Sin datos") : I18n.t(l == 1 ? "Encendidas" : "Apagadas"), new Runnable() { public void run() { showSettings(C_LOOK); } });
+        }
+        // 2.26: escáner OBD-II (motor del PR #42 de Jaacern). Apagado por defecto: sin él, nada cambia en el inicio
+        LinearLayout ob = section(body, "Escáner OBD-II");
+        row(ob, "Guía del escáner", "Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet", null, obdGo("obd_guide"));
+        toggle(ob, "Monitor del motor", "Con un escáner ELM327 por Wi-Fi o Bluetooth: temperatura, batería, alertas por voz y códigos de falla",
+            obdOn(), new IntCb() { public void on(int i) { if (i == 1) obdDialogs().turnOn(); else obdDialogs().turnOff(); }});
+        if (obdOn()) {
+            row(ob, "Escáner OBD-II", ObdDialogs.deviceName(this) + " · " + obdStateText(), null, obdGo("obd"));
+            row(ob, "Abrir el panel del vehículo", "También con la pestaña del borde o con un botón de la barra", null,
+                new Runnable() { public void run() { openVehiclePanel(); } });
+        }
         LinearLayout mt = section(body, "Mantenimientos");
         row(mt, "Aceite, filtros, SOAT y más", "Ahora están en su propia sección", null, new Runnable() { public void run() { showSettings(C_MAINT); } });
     }
@@ -7712,11 +8902,13 @@ public class Main extends Activity {
         LinearLayout c = section(body, "Tema");
         String t = prefs.getString("theme", "dark");
         final String[] themes = {"dark", "light", "auto", "system"};
-        segmented(c, "Modo", "Auto: por horario. Sistema: sigue el modo oscuro de la pantalla (algunas lo cambian al encender las luces)",
+        final boolean fy = fytOn();
+        segmented(c, "Modo", fy ? "Auto: por horario. Sistema: sigue las luces del carro (pantalla FYT)"
+                : "Auto: por horario. Sistema: sigue el modo oscuro de la pantalla (algunas lo cambian al encender las luces)",
             new String[]{"Oscuro", "Claro", "Auto", "Sistema"},
             Math.max(0, java.util.Arrays.asList(themes).indexOf(t)), new IntCb() { public void on(int i) {
                 prefs.edit().putString("theme", themes[i]).apply();
-                applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
+                applyThemeNow(); applyAccent(); rebuild(); showSettings(settingsCat);
             }});
         if ("auto".equals(t)) {
             final boolean sunOn = prefs.getBoolean("auto_sun", false);
@@ -7726,7 +8918,7 @@ public class Main extends Activity {
                 brOn ? 2 : sunOn ? 1 : 0, new IntCb() { public void on(int i) {
                     prefs.edit().putBoolean("auto_sun", i == 1).putBoolean("auto_bright", i == 2).apply();
                     brightDark = null;
-                    applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
+                    applyThemeNow(); applyAccent(); rebuild(); showSettings(settingsCat);
                 }});
             int[] sun = sunToday();
             final int bright = brOn ? brightnessPct() : -1;
@@ -7739,7 +8931,7 @@ public class Main extends Activity {
                 choice(c, "Oscuro con brillo menor a", "Elige un nivel entre el brillo de día y el de noche", lo, sel, new IntCb() { public void on(int i) {
                     prefs.edit().putInt("bright_dark", lv[i]).apply();
                     brightDark = null;
-                    applyTheme(); applyAccent(); rebuild(); showSettings(settingsCat);
+                    applyThemeNow(); applyAccent(); rebuild(); showSettings(settingsCat);
                 }});
             } else if (!brOn && sunOn && sun != null) {
                 row(c, "Hoy", I18n.t("Amanecer") + " " + fmtMinutes(sun[0]) + " · " + I18n.t("Atardecer") + " " + fmtMinutes(sun[1])
@@ -7754,6 +8946,35 @@ public class Main extends Activity {
                     askDarkTime("dark_end", 6 * 60, "Claro desde");
                 }});
             }
+        }
+        // Espera antes de cambiar de tema, en cada sentido (por defecto sin espera, como siempre)
+        // primero solo el interruptor; las dos esperas aparecen al activarlo (menos cosas para quien no lo usa)
+        if ("auto".equals(t) || "system".equals(t)) {
+            final boolean dOn = themeDelayOn();
+            toggle(c, "Espera para cambiar de tema", "Evita cambios de golpe, p. ej. al apagar el carro de noche",
+                dOn, new IntCb() { public void on(int i) {
+                    SharedPreferences.Editor e = prefs.edit().putBoolean("theme_delay_on", i == 1);
+                    // al activarla por primera vez: 5 s para volver a claro, el caso típico
+                    if (i == 1 && prefs.getInt("theme_delay_dark", 0) <= 0 && prefs.getInt("theme_delay_light", 0) <= 0)
+                        e.putInt("theme_delay_light", 5);
+                    e.apply();
+                    applyThemeNow(); applyAccent(); rebuild(); showSettings(settingsCat);
+                }});
+        }
+        if (("auto".equals(t) || "system".equals(t)) && themeDelayOn()) {
+            final int dd = prefs.getInt("theme_delay_dark", 0), dl = prefs.getInt("theme_delay_light", 0);
+            int sd = 0, sl = 0;
+            for (int i = 0; i < THEME_DELAYS.length; i++) { if (THEME_DELAYS[i] == dd) sd = i; if (THEME_DELAYS[i] == dl) sl = i; }
+            choice(c, "Espera para pasar a oscuro", "Cuánto debe durar el cambio (luces encendidas, poco brillo…) antes de oscurecer",
+                THEME_DELAY_LBL, sd, new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("theme_delay_dark", THEME_DELAYS[i]).apply();
+                    showSettings(settingsCat);
+                }});
+            choice(c, "Espera para pasar a claro", "Útil si al apagar el carro de noche se apagan las luces y la pantalla pasa a claro de golpe",
+                THEME_DELAY_LBL, sl, new IntCb() { public void on(int i) {
+                    prefs.edit().putInt("theme_delay_light", THEME_DELAYS[i]).apply();
+                    showSettings(settingsCat);
+                }});
         }
         LinearLayout a = section(body, "Color de acento");
         LinearLayout r = rowBase(a, "Color", "Botones, anillo del reproductor, ruta y etiquetas");
@@ -7822,6 +9043,18 @@ public class Main extends Activity {
             String pid = prefs.getString("premium_theme", Aurora.ID);
             LinearLayout r = rowBase(pn, I18n.t(Prem.name(pid)) + " · " + I18n.t("En uso"), "El tema arma la pantalla de inicio. Las tarjetas, la barra y el velocímetro de aquí se usan otra vez al quitarlo en Personalización.");
             r.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_STYLE); } });
+            if (Faro.ID.equals(pid)) {
+                final String[] cols = Faro.CAR_COLORS;
+                int ci = Math.max(0, java.util.Arrays.asList(cols).indexOf(Faro.car(prefs.getString("faro_car", "silver"))));
+                choice(pn, "Color del carro", "El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.", Faro.CAR_NAMES, ci, new IntCb() { public void on(int i) {
+                    prefs.edit().putString("faro_car", cols[i]).apply(); rebuild(); showSettings(C_HOME);
+                }});
+                segmented(pn, "Intensidad del mapa", "Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.",
+                    new String[]{"Auto", "Baja", "Media", "Alta"}, Math.max(-1, Math.min(2, prefs.getInt("faro_mapa", -1))) + 1, new IntCb() { public void on(int i) {
+                        if (i == 0) prefs.edit().remove("faro_mapa").apply(); else prefs.edit().putInt("faro_mapa", i - 1).apply();
+                        rebuild(); showSettings(C_HOME);
+                    }});
+            }
         }
         if (boxW > 0 && canVertical(boxW, boxH)) {
             // Solo en pantallas casi cuadradas o verticales (en las horizontales no tiene sentido).
@@ -7834,9 +9067,10 @@ public class Main extends Activity {
                 }});
         }
         LinearLayout lay = section(body, "Tarjetas");
-        segmented(lay, "Reproductor de música", "Ponlo del lado del conductor para tenerlo a la mano", new String[]{"Derecha", "Izquierda"},
-            playerLeft ? 1 : 0, new IntCb() { public void on(int i) {
-                prefs.edit().putString("player_side", i == 1 ? "left" : "right").apply(); rebuild();
+        segmented(lay, "Reproductor de música", "Ponlo del lado del conductor para tenerlo a la mano", new String[]{"Izquierda", "Derecha"},
+            playerLeft ? 0 : 1, new IntCb() { public void on(int i) {
+                // botones en el orden de la pantalla: izquierda, derecha
+                prefs.edit().putString("player_side", i == 0 ? "left" : "right").apply(); rebuild();
             }});
         toggle(lay, "Tarjeta del reproductor", "Si la ocultas, el mapa gana espacio", showPlayer, new IntCb() { public void on(int i) {
             prefs.edit().putBoolean("show_player", i == 1).apply(); rebuild();
@@ -8369,10 +9603,11 @@ public class Main extends Activity {
         LinearLayout c = section(body, "Pista en reproducción");
         row(c, "Carátula de Android Auto", "Lee la notificación de Open Headunit (accesibilidad)", NotifArt.running ? "Activada" : "Desactivada",
             new Runnable() { public void run() { openAccessibility(); } });
-        if (SDK >= 18) row(c, "Música de cualquier app", "Android 5+: acceso a notificaciones", MediaListener.connected ? "Activado" : "Desactivado",
+        if (SDK >= 18) row(c, "Música de cualquier app", "Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)",
+            Modern.notificationAccess(this) ? "Activado" : "Desactivado",
             new Runnable() { public void run() {
                 try { startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
-                catch (Throwable e) { toast("No se pudo abrir el ajuste"); }
+                catch (Throwable e) { notifAccessAdb(); }
             }});
         row(c, "Diagnóstico del reproductor", "Fuente activa, lector de notificaciones y Bluetooth", null, new Runnable() { public void run() { showPlayerDiag(); } });
         LinearLayout b = section(body, "Audio Bluetooth");
@@ -8666,7 +9901,7 @@ public class Main extends Activity {
     private void reloadAll() {
         I18n.init(this, prefs);
         LiveMapView.headingUp = prefs.getBoolean("map_heading", false);
-        applyTheme();
+        applyThemeNow();
         applyAccent();
         try { lm.removeUpdates(odoListener); } catch (Throwable ignored) { }
         odoRunning = false;
@@ -8756,6 +9991,10 @@ public class Main extends Activity {
         compatLine(b, "Pista y carátula por Bluetooth", "Android 4.1+", true, clwBt ? "app Bluetooth de fábrica detectada" : "depende de la marca");
         compatLine(b, "Botón ▶ del inicio pasa el sonido a Bluetooth", "Pantallas Clinkway / Autochips", clwBt, clwBt ? "funciona aunque vengas de la radio" : "en otras marcas: «Abrir la app de música Bluetooth al conectar»");
         compatLine(b, "Pasar a Bluetooth al dar play en el celular (en prueba)", "Pantallas Clinkway / Autochips", clwBt, clwBt ? (btAutoOn() ? "activado" : "desactivado; en algunas pantallas no detecta el play del celular") : null);
+        boolean fy = fytOn();
+        compatLine(b, "Tema según las luces, batería y temperatura exterior", "Pantallas FYT (com.syu.ms)", fy,
+            fy ? (Fyt.lights(this) >= 0 ? "luces detectadas" : "esta pantalla no informa las luces")
+               : Fyt.detect(this) ? "pantalla FYT detectada: elígela en Tu vehículo → Equipo" : null);
         compatLine(b, "Carátula de Android Auto (Open Headunit)", "Android 4.1+ · accesibilidad", true, NotifArt.running ? "activada" : "falta activar la accesibilidad");
         compatLine(b, "Música de cualquier app (Spotify, YouTube…)", "Android 5+", SDK >= 21, SDK >= 21 ? (MediaListener.connected ? "activada" : "falta dar acceso a notificaciones") : "no disponible en " + androidName(SDK));
         compatLine(b, "Android Auto con Open Headunit", "Android 4.1+ · cable USB", true, installed(PKG_HUR) ? "Open Headunit instalado" : "falta instalar Open Headunit");
@@ -10041,5 +11280,438 @@ public class Main extends Activity {
             root.removeView(drawer);
             drawer = null;
         }
+    }
+
+    // ───────────────────────── Escáner OBD-II (2.26) ─────────────────────────
+    // Motor del PR #42 (Jaacern). Nada cambia en las pantallas de inicio: el vehículo se ve en un panel que se despliega
+    // encima de cualquier tema (VehiclePanel) y se configura en Ajustes → Tu vehículo → Escáner OBD-II.
+
+    private VehiclePanel vpanel;
+    private VehiclePanel.Handle vhandle;
+    private ObdDialogs obdDlg;
+    /** Subpágina de «Tu vehículo» (null = la categoría): obd, obd_conn, obd_alerts, obd_codes, obd_live, obd_ai, obd_adv. */
+    private String settingsSub;
+    private final java.util.HashMap<String, TextView> obdLive = new java.util.HashMap<String, TextView>();
+    private String obdPageKey = "";
+    private final java.util.HashSet<String> critShown = new java.util.HashSet<String>();
+
+    static final String[][] OBD_PAGES = {
+        {"obd", "Escáner OBD-II"}, {"obd_conn", "Conexión"}, {"obd_alerts", "Alertas"}, {"obd_codes", "Códigos de falla"},
+        {"obd_live", "Datos en vivo"}, {"obd_ai", "Inteligencia artificial"}, {"obd_adv", "Avanzado"},
+    };
+
+    private boolean obdOn() { return prefs.getBoolean("obd_on", false); }
+
+    private ObdDialogs obdDialogs() {
+        if (obdDlg == null) obdDlg = new ObdDialogs(this, new Runnable() { public void run() { obdChanged(); } });
+        return obdDlg;
+    }
+
+    /** Después de un cambio hecho en una ventana del escáner: redibuja Ajustes y el panel o la pestaña. */
+    private void obdChanged() {
+        if (settingsView != null && settingsCat == C_VEHICLE) showSettings(C_VEHICLE);
+        attachVehicle();
+    }
+
+    private boolean vehicleLeft() {
+        String side = prefs.getString("obd_panel_side", "auto");
+        return "left".equals(side) || ("auto".equals(side) && playerLeft);
+    }
+
+    private final VehiclePanel.Host vhost = new VehiclePanel.Host() {
+        public void openSettings(String sub) { settingsSub = sub; showSettings(C_VEHICLE); }
+        public void openChart(String key) { openObdChart(key); }
+        public ObdDialogs dialogs() { return obdDialogs(); }
+        public View backdrop() { return root; }
+        public void onClosed() { }
+    };
+
+    /** Pone (o quita) el panel y la pestaña del borde según el ajuste; van encima del tema y debajo de Ajustes. */
+    private void attachVehicle() {
+        if (root == null) return;
+        boolean wasOpen = vpanel != null && vpanel.isOpen();
+        if (vhandle != null) { root.removeView(vhandle); vhandle = null; }
+        if (vpanel != null) { vpanel.closeNow(); root.removeView(vpanel); vpanel = null; }
+        if (!obdOn() || root.getWidth() <= 0 || s <= 0) return;
+        boolean left = vehicleLeft();
+        vpanel = new VehiclePanel(this, s, root.getWidth() / s, root.getHeight() / s, left, vhost);
+        int at = settingsView != null && settingsView.getParent() == root ? root.indexOfChild(settingsView) : -1;
+        if (at >= 0) root.addView(vpanel, at, new FrameLayout.LayoutParams(-1, -1));
+        else root.addView(vpanel, new FrameLayout.LayoutParams(-1, -1));
+        if (prefs.getBoolean("obd_handle", true)) {
+            vhandle = new VehiclePanel.Handle(this, s, left, new Runnable() { public void run() { openVehiclePanel(); } });
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (26 * s), (int) (120 * s));
+            lp.gravity = (left ? Gravity.LEFT : Gravity.RIGHT) | Gravity.CENTER_VERTICAL;
+            at = settingsView != null && settingsView.getParent() == root ? root.indexOfChild(settingsView) : -1;
+            if (at >= 0) root.addView(vhandle, at, lp);
+            else root.addView(vhandle, lp);
+        }
+        if (wasOpen) vpanel.open();
+    }
+
+    /** Abre el panel del vehículo; con el monitor apagado lleva a sus ajustes. */
+    private void openVehiclePanel() {
+        if (!obdOn()) { settingsSub = null; showSettings(C_VEHICLE); toast(I18n.t("Enciende el monitor del motor en «Escáner OBD-II»")); return; }
+        if (settingsView != null) closeSettings();
+        closeDrawer();
+        if (vpanel == null) attachVehicle();
+        if (vpanel != null) vpanel.open();
+    }
+
+    private void openObdChart(String key) {
+        try { startActivity(new Intent(this, ObdActivity.class).putExtra("chart", key)); } catch (Throwable e) { toast("No se pudo abrir la app"); }
+    }
+
+    private String obdStateText() {
+        if (!Obd.running()) return I18n.t(prefs.contains("obd_addr") ? "Apagado" : "Elige tu escáner");
+        if (Obd.status == Obd.LIVE) return I18n.t("En vivo") + (Obd.vin != null ? " · VIN " + Obd.vin : "");
+        if (Obd.statusMsg.length() > 0) return I18n.t(Obd.statusMsg);
+        return I18n.t("Conectando…");
+    }
+
+    /** Alertas graves: abren el panel aunque se esté en otra cosa (una vez por alerta); también avisa a las ventanas. */
+    private final Obd.Listener obdWatch = new Obd.Listener() { public void onObd() {
+        if (obdDlg != null) obdDlg.onObd();
+        if (speedFromObd || !Float.isNaN(obdKmh())) showSpeed();   // velocímetro del inicio con la velocidad del escáner
+        java.util.HashSet<String> now = new java.util.HashSet<String>();
+        boolean fresh = false;
+        synchronized (Obd.alerts) {
+            for (Obd.Alert a : Obd.alerts) if (a.level == Obd.CRIT) { now.add(a.key); if (!critShown.contains(a.key)) fresh = true; }
+        }
+        critShown.retainAll(now);
+        if (!fresh || vpanel == null) return;
+        // Se da por vista solo cuando el usuario la ve: con el panel abierto o en las páginas del escáner. Si llega
+        // mientras está en otros ajustes, el panel se abre al volver al inicio (antes se perdía y nunca se abría).
+        boolean seen = vpanel.isOpen() || (settingsView != null && settingsSub != null && settingsSub.startsWith("obd")
+            && !settingsSub.startsWith("obd_guide"));
+        if (!seen && obdOn() && prefs.getBoolean("obd_panel_auto", true) && settingsView == null && !isFinishing()) {
+            vpanel.open();
+            seen = true;
+        }
+        if (seen || !prefs.getBoolean("obd_panel_auto", true)) critShown.addAll(now);
+    }};
+
+    /** Mientras se ve una página del escáner en Ajustes: los valores cambian en su sitio; si cambia lo que hay, se redibuja. */
+    private final Obd.Listener obdSettingsL = new Obd.Listener() { public void onObd() {
+        if (settingsView == null || settingsCat != C_VEHICLE) return;
+        String k = obdStructure();
+        if (!k.equals(obdPageKey)) { showSettings(C_VEHICLE); return; }
+        for (java.util.Map.Entry<String, TextView> e : obdLive.entrySet()) {
+            String v = obdLiveValue(e.getKey());
+            if (v != null && !v.contentEquals(e.getValue().getText())) e.getValue().setText(v);
+        }
+    }};
+
+    private String obdStructure() {
+        StringBuilder b = new StringBuilder(settingsSub == null ? "" : settingsSub).append(Obd.running()).append(Obd.status == Obd.LIVE);
+        if ("obd_codes".equals(settingsSub) || "obd".equals(settingsSub)) b.append(Obd.dtcs).append(Obd.pending).append(Obd.lastDtcCheck > 0);
+        if ("obd_alerts".equals(settingsSub) || "obd".equals(settingsSub)) synchronized (Obd.alerts) { for (Obd.Alert a : Obd.alerts) b.append(a.key).append(a.level); }
+        if ("obd_live".equals(settingsSub)) for (Obd.Sensor x : Obd.ALL) if (x.has()) b.append(x.key);
+        return b.toString();
+    }
+
+    private String obdLiveValue(String key) {
+        if ("status".equals(key)) return obdStateText();
+        Obd.Sensor x = ObdDialogs.sensorOf(key);
+        return x == null ? null : x.has() ? x.text() + " " + x.unit : "—";
+    }
+
+    /** Fila cuyo valor se actualiza solo (estado o un dato del motor). */
+    private void liveRow(LinearLayout card, String title, String sub, String key, Runnable onClick) {
+        row(card, title, sub, obdLiveValue(key), onClick);
+        LinearLayout r = (LinearLayout) card.getChildAt(card.getChildCount() - 1);
+        if (r.getChildCount() > 1 && r.getChildAt(1) instanceof TextView) obdLive.put(key, (TextView) r.getChildAt(1));
+    }
+
+    private Runnable obdGo(final String sub) {
+        return new Runnable() { public void run() { settingsSub = sub; showSettings(C_VEHICLE); } };
+    }
+
+    private void settingsBack() {
+        if (settingsSub != null && settingsSub.startsWith("obd_guide:")) settingsSub = "obd_guide";
+        else if ("obd_guide".equals(settingsSub)) settingsSub = obdOn() ? "obd" : null;
+        else settingsSub = "obd".equals(settingsSub) ? null : "obd";
+        showSettings(C_VEHICLE);
+    }
+
+    /** Encabezado de una subpágina: volver y el título. */
+    private void obdHeader(LinearLayout body) {
+        String title = "", back = "Tu vehículo";
+        for (String[] pg : OBD_PAGES) if (pg[0].equals(settingsSub)) title = pg[1];
+        if (!"obd".equals(settingsSub)) back = "Escáner OBD-II";
+        boolean raw = false;
+        if ("obd_guide".equals(settingsSub)) { title = "Guía del escáner"; back = obdOn() ? "Escáner OBD-II" : "Tu vehículo"; }
+        else if (settingsSub != null && settingsSub.startsWith("obd_guide:")) {
+            ObdGuide.Section g = ObdGuide.get(this, settingsSub.substring(10));
+            title = g != null ? g.title : "";
+            raw = true;                                    // el título de la guía ya viene en el idioma elegido
+            back = "Guía del escáner";
+        }
+        TextView b = tv("‹  " + I18n.t(back), 14, RED, true);
+        b.setPadding((int) (4 * s), (int) (2 * s), (int) (12 * s), (int) (6 * s));
+        b.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { settingsBack(); } });
+        body.addView(b, new LinearLayout.LayoutParams(-2, -2));
+        TextView t = tv(raw ? "" : title, 24, TEXT, true);
+        if (raw) { t.setText(title); t.setSingleLine(false); }
+        t.setPadding((int) (4 * s), 0, 0, (int) (14 * s));
+        body.addView(t);
+    }
+
+    private void obdPage(LinearLayout body, String sub) {
+        final ObdDialogs d = obdDialogs();
+        if (sub.startsWith("obd_guide")) { guidePage(body, sub); return; }   // se lee también con el monitor apagado
+        obdPageKey = obdStructure();
+        Obd.addListener(obdSettingsL);
+        if (!obdOn() && !"obd_ai".equals(sub) && !"obd_adv".equals(sub)) {
+            LinearLayout c = section(body, "Monitor del motor");
+            toggle(c, "Monitor del motor", "Está apagado: enciéndelo para conectar el escáner", false,
+                new IntCb() { public void on(int i) { d.turnOn(); }});
+            return;
+        }
+        if ("obd".equals(sub)) {
+            LinearLayout gu = section(body, "Guía");
+            row(gu, "Guía del escáner", "Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet", null, obdGo("obd_guide"));
+            LinearLayout st = section(body, "Estado");
+            row(st, "Escáner", null, ObdDialogs.deviceName(this), obdGo("obd_conn"));
+            liveRow(st, "Conexión", null, "status", obdGo("obd_conn"));
+            row(st, "Abrir el panel del vehículo", "Medidores, alertas y códigos encima del tema que tengas", null,
+                new Runnable() { public void run() { openVehiclePanel(); } });
+            List<Obd.Alert> al;
+            synchronized (Obd.alerts) { al = new ArrayList<Obd.Alert>(Obd.alerts); }
+            int nc = Obd.dtcs.size();
+            for (String x : Obd.pending) if (!Obd.dtcs.contains(x)) nc++;
+            LinearLayout dg = section(body, "Diagnóstico");
+            row(dg, "Alertas", "Qué vigila StradaOS y cuándo avisa por voz",
+                al.isEmpty() ? I18n.t("Todo normal") : I18n.t(al.size() == 1 ? "1 activa" : al.size() + " activas"), obdGo("obd_alerts"));
+            row(dg, "Códigos de falla", "Qué significan y qué hacer; borrarlos con el motor apagado",
+                nc == 0 ? I18n.t(Obd.lastDtcCheck > 0 ? "Ninguno" : "—") : String.valueOf(nc), obdGo("obd_codes"));
+            row(dg, "Datos en vivo", "Cada dato que entrega tu auto, con gráficos", null, obdGo("obd_live"));
+            LinearLayout mo = section(body, "Más");
+            row(mo, "Inteligencia artificial", "Opcional: explica los códigos para tu auto en particular",
+                I18n.t(DtcInfo.aiReady(this) ? "Configurada" : "Sin configurar"), obdGo("obd_ai"));
+            row(mo, "Avanzado", "Motor, protocolo, panel y escaneo completo", null, obdGo("obd_adv"));
+        } else if ("obd_conn".equals(sub)) {
+            LinearLayout c = section(body, "Escáner");
+            row(c, "Escáner", "Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar", ObdDialogs.deviceName(this),
+                new Runnable() { public void run() { d.pickAdapter(); } });
+            row(c, "Buscar escáneres Bluetooth cercanos", "Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)", null,
+                new Runnable() { public void run() { d.discover(); } });
+            liveRow(c, "Conexión", null, "status", new Runnable() { public void run() { d.reconnect(); } });
+            row(c, "Reconectar", null, null, new Runnable() { public void run() { d.reconnect(); } });
+            LinearLayout o = section(body, "Al encender");
+            toggle(o, "Conectar al iniciar StradaOS", "Las alertas funcionan aunque estés en otra app (con una notificación fija)",
+                prefs.getBoolean("obd_autostart", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_autostart", i == 1).apply(); showSettings(C_VEHICLE); }});
+            LinearLayout h2 = section(body, "Ayuda");
+            row(h2, "Cómo conectar el escáner", null, null, new Runnable() { public void run() {
+                new TB(Main.this, dlg()).setTitle("Cómo conectar el escáner")
+                    .setMessage("1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».")
+                    .setNegativeButton("Cerrar", null).show(); }});
+            row(h2, "Registro de la conexión", "Lo que respondió el escáner (para reportar un problema)", null,
+                new Runnable() { public void run() { d.showLog(); } });
+        } else if ("obd_alerts".equals(sub)) {
+            LinearLayout now = section(body, "Ahora");
+            List<Obd.Alert> al;
+            synchronized (Obd.alerts) { al = new ArrayList<Obd.Alert>(Obd.alerts); }
+            if (al.isEmpty()) row(now, "Todo normal por ahora", null, null, null);
+            for (final Obd.Alert a : al) row(now, a.title(), a.advice(), I18n.t(a.level == Obd.CRIT ? "Alerta" : "Aviso"),
+                new Runnable() { public void run() { d.showAlert(a); } });
+            LinearLayout av = section(body, "Avisos");
+            toggle(av, "Avisos por voz", "Habla aunque estés en Waze o con música", prefs.getBoolean("obd_voice", true), new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("obd_voice", i == 1).apply(); Obd.reloadPrefs(Main.this); showSettings(C_VEHICLE); }});
+            toggle(av, "Abrir el panel con una alerta grave", "Por ejemplo, el motor muy caliente o la batería que no carga",
+                prefs.getBoolean("obd_panel_auto", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_panel_auto", i == 1).apply(); showSettings(C_VEHICLE); }});
+            toggle(av, "Subida rápida del refrigerante", "Más de 4 °C por minuto con el motor caliente",
+                prefs.getBoolean("obd_alert_coolant_rise", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_alert_coolant_rise", i == 1).apply(); Obd.reloadPrefs(Main.this); showSettings(C_VEHICLE); }});
+            toggle(av, "Códigos de falla nuevos (aviso por voz)", null,
+                prefs.getBoolean("obd_alert_dtc", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_alert_dtc", i == 1).apply(); Obd.reloadPrefs(Main.this); showSettings(C_VEHICLE); }});
+            LinearLayout th = section(body, "Cuándo avisa cada dato");
+            for (final Obd.Sensor x : ObdDialogs.alertSensors(prefs)) row(th, I18n.t(x.label), null, ObdDialogs.limits(x),
+                new Runnable() { public void run() { d.editAlert(x); } });
+        } else if ("obd_codes".equals(sub)) {
+            List<String> codes = new ArrayList<String>(Obd.dtcs);
+            for (String x : Obd.pending) if (!codes.contains(x)) codes.add(x);
+            LinearLayout c = section(body, "Códigos guardados en el auto");
+            if (codes.isEmpty()) row(c, Obd.lastDtcCheck > 0 ? "El auto no tiene códigos guardados" : "Se revisan al conectar y cada 30 segundos", null, null, null);
+            for (final String code : codes) {
+                DtcInfo.Entry e = DtcInfo.get(this, code);
+                boolean pend = !Obd.dtcs.contains(code);
+                String what = e.es != null ? e.es : e.en != null ? e.en : DtcInfo.system(code);
+                row(c, code, what, I18n.t(pend ? "Pendiente" : e.severity >= 3 ? "Grave" : e.severity == 1 ? "Leve" : "Revisar"),
+                    new Runnable() { public void run() { d.showCode(code); } });
+            }
+            if (Obd.mil) row(c, "Luz del motor encendida", "El computador del motor confirmó una falla", null, null);
+            if (!Obd.dtcs.isEmpty()) {
+                LinearLayout b = section(body, "Borrar");
+                row(b, "Borrar códigos", "Con el motor apagado y el contacto puesto. Anota los códigos antes: no se puede deshacer", null,
+                    new Runnable() { public void run() { d.confirmClear(); } });
+            }
+            String rd = Scan.readiness(Obd.status01);
+            if (rd != null) {
+                LinearLayout m = section(body, "Monitores de emisiones");
+                row(m, rd, "✓ listo · ✗ aún no termina su prueba (normal después de borrar códigos o desconectar la batería).", null, null);
+            }
+        } else if ("obd_live".equals(sub)) {
+            LinearLayout c = section(body, "Datos del motor");
+            int n = 0;
+            for (final Obd.Sensor x : Obd.ALL) {
+                if (!x.has()) continue;
+                n++;
+                liveRow(c, I18n.t(x.label) + (x.pid == -2 ? " (" + I18n.t("calculado") + ")" : ""), null, x.key,
+                    new Runnable() { public void run() { openObdChart(x.key); } });
+            }
+            if (n == 0) row(c, Obd.status == Obd.LIVE ? "Esperando datos" : "Conecta el escáner para ver los datos", null, null, null);
+            LinearLayout g = section(body, "Gráficos");
+            row(g, "Gráficos en vivo", "Hasta 3 datos a la vez, de 1 a 30 minutos", null, new Runnable() { public void run() { openObdChart("coolant"); } });
+        } else if ("obd_ai".equals(sub)) {
+            final String[] pr = DtcInfo.preset(this);
+            LinearLayout c = section(body, "Proveedor");
+            row(c, "Proveedor", null, I18n.t(pr[1]), new Runnable() { public void run() { d.pickProvider(); } });
+            row(c, "API key", "La tuya: cada consulta la cobra tu proveedor", ObdDialogs.mask(prefs.getString("ai_key", "")),
+                new Runnable() { public void run() { d.askKey(); } });
+            row(c, "Modelo", null, DtcInfo.model(this).length() > 0 ? DtcInfo.model(this) : I18n.t("elegir…"),
+                new Runnable() { public void run() { d.pickModel(); } });
+            if ("custom".equals(pr[0])) row(c, "Dirección de la API", null, DtcInfo.baseUrl(this).length() > 0 ? DtcInfo.baseUrl(this) : "—",
+                new Runnable() { public void run() { d.askUrl(); } });
+            LinearLayout pv = section(body, "Privacidad");
+            row(pv, "Qué se envía", "Solo el código, el vehículo que escribas y los datos del motor de ese momento; nunca tu ubicación. Las respuestas se guardan en la pantalla", null, null);
+            row(pv, "Tu vehículo (para la IA)", "Marca, modelo, año, motor y caja", prefs.getString("obd_vehicle", "").length() > 0 ? prefs.getString("obd_vehicle", "") : "—",
+                new Runnable() { public void run() { d.askVehicle(); } });
+            toggle(pv, "Enviar el VIN a la IA", "Identifica tu auto de forma única. Apagado por defecto", prefs.getBoolean("obd_ai_vin", false), new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("obd_ai_vin", i == 1).apply(); showSettings(C_VEHICLE); }});
+            LinearLayout t = section(body, "Probar");
+            row(t, "Probar la IA", "Pregunta por un código de ejemplo", null, new Runnable() { public void run() { d.testAi(); } });
+            if (prefs.getString("ai_key", "").length() > 0) row(t, "Borrar la API key", null, null, new Runnable() { public void run() {
+                prefs.edit().remove("ai_key").apply(); showSettings(C_VEHICLE); }});
+        } else if ("obd_adv".equals(sub)) {
+            LinearLayout m = section(body, "Motor");
+            row(m, "Cilindrada del motor", "Para calcular el consumo en motores sin sensor MAF",
+                String.format(java.util.Locale.US, "%.1f L", prefs.getFloat("obd_displacement", 2.4f)), new Runnable() { public void run() { d.askDisplacement(); } });
+            row(m, "Protocolo", "Automático casi siempre; fuerza uno si el escáner no lo detecta", ObdDialogs.protocolName(prefs.getString("obd_protocol", "auto")),
+                new Runnable() { public void run() { d.pickProtocol(); } });
+            LinearLayout ve = section(body, "Velocímetro");
+            toggle(ve, "Usar la velocidad del escáner", "Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso",
+                prefs.getBoolean("obd_speed", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_speed", i == 1).apply(); showSpeed(); showSettings(C_VEHICLE); }});
+            // Solo en StradaOS Prueba: ver el velocímetro con el auto simulado, para probar sin escáner
+            if (getPackageName().endsWith(".debug"))
+                toggle(ve, "Prueba: usar también el auto simulado", "Solo en StradaOS Prueba. Elige «Auto simulado» en Conexión y mira el inicio",
+                    prefs.getBoolean("obd_speed_demo", false), new IntCb() { public void on(int i) {
+                        prefs.edit().putBoolean("obd_speed_demo", i == 1).apply(); showSpeed(); showSettings(C_VEHICLE); }});
+            LinearLayout pn = section(body, "Panel del vehículo");
+            final String[] sides = {"auto", "left", "right"};
+            segmented(pn, "Lado del panel", "Automático: del lado del reproductor (el del conductor)", new String[]{"Automático", "Izquierda", "Derecha"},
+                Math.max(0, java.util.Arrays.asList(sides).indexOf(prefs.getString("obd_panel_side", "auto"))), new IntCb() { public void on(int i) {
+                    prefs.edit().putString("obd_panel_side", sides[i]).apply(); attachVehicle(); showSettings(C_VEHICLE); }});
+            toggle(pn, "Pestaña en el borde", "Toca o desliza la pestaña para abrir el panel. Sin ella, ábrelo con un botón de la barra",
+                prefs.getBoolean("obd_handle", true), new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_handle", i == 1).apply(); attachVehicle(); showSettings(C_VEHICLE); }});
+            LinearLayout sc = section(body, "Diagnóstico");
+            row(sc, "Escanear todo lo que entrega el auto", "Informe de cada dato estándar y los propios de la marca. Solo lee", null,
+                new Runnable() { public void run() { d.scanAll(); } });
+            if (Obd.report != null) row(sc, "Ver el último informe", null, null, new Runnable() { public void run() { d.showReport(); } });
+        }
+    }
+
+    // ── Guía del escáner (2.26): textos ya traducidos en assets/guide (ObdGuide), sin internet ──
+
+    /** Fila con textos que ya vienen en el idioma elegido (no pasan por I18n.t). */
+    private void rowRaw(LinearLayout card, String title, String sub, final Runnable onClick) {
+        LinearLayout r = rowBase(card, "", null);
+        LinearLayout col = (LinearLayout) r.getChildAt(0);
+        ((TextView) col.getChildAt(0)).setText(title);
+        if (sub != null && sub.length() > 0) {
+            TextView st = tv("", 12, MUTED, false);
+            st.setText(sub);
+            st.setSingleLine(false);
+            st.setPadding(0, (int) (3 * s), 0, 0);
+            col.addView(st);
+        }
+        if (onClick != null) {
+            ImageView ch = icon("chevron_right", 20);
+            ch.setAlpha(0.6f);
+            r.addView(ch, new LinearLayout.LayoutParams((int) (20 * s), (int) (20 * s)));
+            r.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { onClick.run(); } });
+        }
+    }
+
+    private TextView guideText(String text, float size, int color, boolean medium) {
+        TextView v = tv("", size, color, medium);
+        // en árabe cada párrafo va de derecha a izquierda aunque empiece con una palabra latina (Groq, Claude…)
+        v.setText("ar".equals(I18n.lang) ? "\u200F" + text : text);
+        v.setSingleLine(false);
+        v.setEllipsize(null);
+        v.setLineSpacing(4 * s, 1f);
+        return v;
+    }
+
+    private void guidePage(LinearLayout body, String sub) {
+        if ("obd_guide".equals(sub)) {
+            LinearLayout c = section(body, "Guía");
+            for (final ObdGuide.Section g : ObdGuide.load(this))
+                rowRaw(c, g.title, g.sub, obdGo("obd_guide:" + g.id));
+            return;
+        }
+        String id = sub.substring(10);
+        ObdGuide.Section g = ObdGuide.get(this, id);
+        if (g == null) { settingsSub = "obd_guide"; showSettings(C_VEHICLE); return; }
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackground(round(CARD, 16));
+        card.setPadding((int) (20 * s), (int) (16 * s), (int) (20 * s), (int) (8 * s));
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(-1, -2);
+        clp.bottomMargin = (int) (10 * s);
+        body.addView(card, clp);
+        List<ObdGuide.Item> acts = new ArrayList<ObdGuide.Item>();
+        for (ObdGuide.Item it : g.items) {
+            if (it.type == ObdGuide.ACTION) { acts.add(it); continue; }
+            if (it.type == ObdGuide.SUBHEAD) {
+                TextView h = guideText(it.text, 15, TEXT, true);
+                h.setPadding(0, (int) ((card.getChildCount() > 0 ? 10 : 0) * s), 0, (int) (8 * s));
+                card.addView(h);
+            } else if (it.type == ObdGuide.BULLET) {
+                LinearLayout r = new LinearLayout(this);
+                boolean rtl = "ar".equals(I18n.lang);
+                TextView dot = guideText("•", 14, RED, true);
+                dot.setPadding(rtl ? (int) (10 * s) : 0, 0, rtl ? 0 : (int) (10 * s), 0);
+                TextView bt = guideText(it.text, 14, SOFT, false);
+                if (rtl) bt.setGravity(Gravity.RIGHT);
+                if (!rtl) r.addView(dot);
+                r.addView(bt, new LinearLayout.LayoutParams(0, -2, 1f));
+                if (rtl) r.addView(dot);                       // la viñeta, a la derecha
+                r.setPadding(rtl ? 0 : (int) (4 * s), 0, rtl ? (int) (4 * s) : 0, (int) (8 * s));
+                card.addView(r);
+            } else {
+                TextView pt = guideText(it.text, 14, SOFT, false);
+                pt.setPadding(0, 0, 0, (int) (10 * s));
+                card.addView(pt);
+            }
+        }
+        if (!acts.isEmpty()) {
+            int h = body.getChildCount();
+            LinearLayout a = section(body, "");
+            body.removeViewAt(h);                              // sin encabezado: los botones van justo debajo del texto
+            for (final ObdGuide.Item it : acts) rowRaw(a, it.text, null, guideAction(it.action));
+        }
+        final ObdGuide.Section nx = ObdGuide.next(this, id);
+        if (nx != null) {
+            LinearLayout n = section(body, "Siguiente");
+            rowRaw(n, nx.title, nx.sub, obdGo("obd_guide:" + nx.id));
+        }
+    }
+
+    private Runnable guideAction(final String action) {
+        if ("demo".equals(action)) return new Runnable() { public void run() {
+            String cur = prefs.getString("obd_addr", "");
+            // con un escáner real ya elegido no se cambia sin preguntar: se lleva a Conexión, donde se elige a propósito
+            if (cur.length() > 0 && !"demo".equals(cur)) { settingsSub = "obd_conn"; showSettings(C_VEHICLE); return; }
+            obdDialogs().choose("demo", I18n.t("Auto simulado"));
+            settingsSub = "obd"; showSettings(C_VEHICLE); }};
+        if ("panel".equals(action)) return new Runnable() { public void run() { openVehiclePanel(); } };
+        if (action.startsWith("obd")) return obdGo(action);
+        return null;
     }
 }

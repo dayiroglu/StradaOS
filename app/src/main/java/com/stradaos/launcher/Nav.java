@@ -806,6 +806,8 @@ public class Nav {
         if ("fr".equals(lang)) return "fr-FR";
         if ("de".equals(lang)) return "de-DE";
         if ("it".equals(lang)) return "it-IT";
+        if ("hu".equals(lang)) return "hu-HU";
+        if ("pl".equals(lang)) return "pl-PL";
         return "en-US";
     }
 

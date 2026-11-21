@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Idiomas de StradaOS (español, inglés, portugués, italiano, alemán, malayo, árabe, turco, francés, chino). El código se escribe en español y cada texto se traduce al
+ * Idiomas de StradaOS (español, inglés, portugués, italiano, alemán, malayo, árabe, turco, francés, chino, húngaro, polaco). El código se escribe en español y cada texto se traduce al
  * mostrarse (tv(), toast(), ventanas TB, etc.) buscándolo en assets/i18n/LANG.txt.
  *
  * Formato del archivo: una línea por texto, «español<TAB>traducción». «\n» representa un salto de línea.
@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
  * tabla. En la traducción, {1}, {2}… permiten cambiar el orden. Si un texto no está en la tabla queda en español.
  */
 public class I18n {
-    static final String[] CODES = {"es", "en", "pt", "it", "de", "ms", "ar", "tr", "fr", "zh"};
-    static final String[] NAMES = {"Español", "English", "Português", "Italiano", "Deutsch", "Melayu", "العربية", "Türkçe", "Français", "中文"};
+    static final String[] CODES = {"es", "en", "pt", "it", "de", "ms", "ar", "tr", "fr", "zh", "hu", "pl"};
+    static final String[] NAMES = {"Español", "English", "Português", "Italiano", "Deutsch", "Melayu", "العربية", "Türkçe", "Français", "中文", "Magyar", "Polski"};
 
     static String lang = "es";
     static Locale loc = new Locale("es", "CO");
@@ -31,6 +31,10 @@ public class I18n {
     private static final HashMap<String, String> map = new HashMap<String, String>();
     private static final List<Pat> pats = new ArrayList<Pat>();
     private static final HashMap<String, String> cache = new HashMap<String, String>();
+    /** Solo en StradaOS Prueba: anota en el logcat (StradaI18n) cada texto que quedó sin traducir. */
+    private static boolean audit;
+    private static final java.util.HashSet<String> missed = new java.util.HashSet<String>();
+    private static final java.util.regex.Pattern WORD = java.util.regex.Pattern.compile("[a-záéíóúñ]{3,}");
 
     private static class Pat {
         Pattern re;
@@ -38,7 +42,7 @@ public class I18n {
         int lit;   // letras fijas: se prueban primero los patrones más específicos
     }
 
-    /** Idioma guardado («auto», «es», «en», «pt», «it», «de», «ms», «ar», «tr», «fr», «zh»). Instalaciones anteriores a los idiomas siguen en español. */
+    /** Idioma guardado («auto», «es», «en», «pt», «it», «de», «ms», «ar», «tr», «fr», «zh», «hu»). Instalaciones anteriores a los idiomas siguen en español. */
     static String pref(SharedPreferences p) {
         String v = p.getString("lang", null);
         if (v == null) {
@@ -63,11 +67,15 @@ public class I18n {
     static synchronized void set(Context c, String code) {
         if (code == null) code = "es";
         lang = code;
+        audit = c != null && c.getPackageName().endsWith(".debug");
+        missed.clear();
         loc = "en".equals(code) ? Locale.US : "pt".equals(code) ? new Locale("pt", "BR")
             : "it".equals(code) ? Locale.ITALY : "de".equals(code) ? Locale.GERMANY
             : "ms".equals(code) ? new Locale("ms", "MY") : "ar".equals(code) ? new Locale("ar")
             : "tr".equals(code) ? new Locale("tr", "TR") : "fr".equals(code) ? Locale.FRANCE
-            : "zh".equals(code) ? Locale.SIMPLIFIED_CHINESE : new Locale("es", "CO");
+            : "zh".equals(code) ? Locale.SIMPLIFIED_CHINESE : "hu".equals(code) ? new Locale("hu", "HU")
+            : "pl".equals(code) ? new Locale("pl", "PL")
+            : new Locale("es", "CO");
         num = "ar".equals(code) ? Locale.US : loc;
         map.clear();
         pats.clear();
@@ -116,6 +124,12 @@ public class I18n {
         String s = cs.toString();
         if ("es".equals(lang) || s.length() == 0) return s;
         return tr(s, 0);
+    }
+
+    /** ¿Hay traducción exacta de este texto en el idioma de ahora? (en español, siempre) */
+    static synchronized boolean has(String s) {
+        if ("es".equals(lang) || s != null && map.containsKey(s)) return true;
+        return s != null && !tr(s, 0).equals(s);              // con patrón («… del cilindro {}.»)
     }
 
     /** Texto de varias líneas (diagnósticos): se traduce cada línea por separado. */
@@ -180,6 +194,8 @@ public class I18n {
                 break;
             }
         }
+        if (audit && out.equals(s) && missed.size() < 3000 && WORD.matcher(s).find() && missed.add(s))
+            android.util.Log.w("StradaI18n", lang + "\t" + s.replace("\n", "\\n"));
         if (cache.size() > 3000) cache.clear();
         cache.put(s, out);
         return out;
@@ -212,6 +228,8 @@ public class I18n {
         if ("ms".equals(lang) || "tr".equals(lang)) return "EEEE, d MMMM";
         if ("ar".equals(lang)) return "EEEE، d MMMM";
         if ("zh".equals(lang)) return "EEEE, M月d日";
+        if ("hu".equals(lang)) return "MMMM d., EEEE";
+        if ("pl".equals(lang)) return "EEEE, d MMMM";
         return "EEEE, d 'de' MMMM";
     }
 }

@@ -23,6 +23,18 @@ public class Modern {
         return false;
     }
 
+    /** ¿Están dados estos permisos? Antes de Android 6 se dan al instalar: siempre true. */
+    public static boolean hasPermissions(Activity a, String... perms) {
+        if (android.os.Build.VERSION.SDK_INT < 23) return true;
+        for (String p : perms) if (a.checkSelfPermission(p) != PackageManager.PERMISSION_GRANTED) return false;
+        return true;
+    }
+
+    public static void requestPermissions(Activity a, int req, String... perms) {
+        if (android.os.Build.VERSION.SDK_INT < 23) return;
+        a.requestPermissions(perms, req);
+    }
+
     /** Android 8+: permiso por app para instalar APKs. */
     public static boolean canInstall(Activity a) {
         if (android.os.Build.VERSION.SDK_INT < 26) return true;
@@ -32,6 +44,15 @@ public class Modern {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         } catch (Throwable ignored) { }
         return false;
+    }
+
+    /** Android 7+: el permiso está dado pero el sistema no conectó el lector (pasa en algunas pantallas): pedirlo otra vez. */
+    public static void rebindListener(Context c) {
+        if (android.os.Build.VERSION.SDK_INT < 24) return;
+        try {
+            android.service.notification.NotificationListenerService.requestRebind(
+                new android.content.ComponentName(c, MediaListener.class));
+        } catch (Throwable ignored) { }
     }
 
     public static boolean notificationAccess(Context c) {

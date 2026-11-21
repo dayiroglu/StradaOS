@@ -127,6 +127,20 @@ public class LiveMapView extends View {
     private final android.graphics.Matrix backM = new android.graphics.Matrix();
     private final int[] locA = new int[2], locB = new int[2];
 
+    // Tema Faro (2.25): el mapa en el tono del tema. Mismas teselas que Cobalto, con menos color (gris azulado en
+    // oscuro, suave en claro). Es un filtro de color al dibujar (la GPU lo hace gratis); el tráfico conserva sus colores.
+    private final Paint tileTone = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private boolean toned;
+    void setTone(android.graphics.ColorFilter f) {
+        toned = f != null;
+        tileTone.setColorFilter(f);
+        invalidate();
+    }
+
+    // Tema Faro (2.25): dónde va la atribución de OSM (px; alineada a la izquierda), si no se navega.
+    private float attrX = -1, attrY = -1;
+    void setAttribution(float x, float y) { attrX = x; attrY = y; invalidate(); }
+
     // Tema Cobalto: el mapa se difumina hacia un borde (1 = derecha, 2 = abajo) hasta quedar en el fondo.
     private int fadeEdge;
     private float fadeLen;
@@ -381,6 +395,12 @@ public class LiveMapView extends View {
         invalidate();
     }
 
+    /** Faro: acercar (+1) o alejar (-1) con los botones del mapa. */
+    void zoomBy(int d) { userZoom = true; zoom = Math.max(11, Math.min(18, zoom + d)); invalidate(); }
+
+    /** Faro: botón de centrar: vuelve al zoom automático según la velocidad. */
+    void autoZoom() { userZoom = false; zoom = 16; invalidate(); }
+
     /** Pruebas: fija el zoom (14–18). */
     void setZoom(int z) { userZoom = true; zoom = Math.max(10, Math.min(18, z)); invalidate(); }
 
@@ -426,7 +446,9 @@ public class LiveMapView extends View {
                     Bitmap b = get(zoom, wx, ty, fromFile ? L_FILE : L_BASE);
                     if (b != null) {
                         tile.setFilterBitmap(rot || b.getWidth() != dst.width());
-                        c.drawBitmap(b, null, dst, tile);
+                        Paint tp = tile;
+                        if (toned) { tileTone.setAlpha(tile.getAlpha()); tileTone.setFilterBitmap(tile.isFilterBitmap()); tp = tileTone; }
+                        c.drawBitmap(b, null, dst, tp);
                         if (trTpl != null && zoom >= 11) {
                             Bitmap tr = getTraffic(zoom, wx, ty, trPv);
                             if (tr != null) c.drawBitmap(tr, null, dst, tile);
@@ -434,7 +456,7 @@ public class LiveMapView extends View {
                         if (fromFile) anyFile = true;
                         else if (LABELS[provider] != null) {
                             Bitmap l = get(zoom, wx, ty, L_LABELS);
-                            if (l != null) c.drawBitmap(l, null, dst, tile);
+                            if (l != null) c.drawBitmap(l, null, dst, toned ? tileTone : tile);
                         }
                     } else {
                         c.drawLine(dst.left, dst.top, dst.right, dst.top, grid);
@@ -449,6 +471,7 @@ public class LiveMapView extends View {
             String attr = anyFile ? I18n.t("© colaboradores de OpenStreetMap") + " · mapsforge"
                     : provider == 5 ? "© Esri, HERE, Garmin, © OpenStreetMap" : provider == 4 ? "© OpenStreetMap, SRTM · © OpenTopoMap" : I18n.t("© colaboradores de OpenStreetMap");
             float ax = w - text.measureText(attr) - 10 * s, ay = (Nav.active != null ? 96 : 14) * s;
+            if (attrY >= 0 && Nav.active == null) { ax = attrX; ay = attrY; }
             if (bd && fadeEdge == 1 && fadeLen > 0) {
                 // Cobalto: antes del difuminado (si no, queda detrás de la tarjeta del reproductor) y un poco más
                 // arriba para no rozar los botones de la esquina

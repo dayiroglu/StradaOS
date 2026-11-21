@@ -1157,3 +1157,586 @@ Irlanda del Norte	Irlanda do Norte
 Islas Canarias	Ilhas Canárias
 Tiempo en StradaOS: {}	Tempo no StradaOS: {}
 Último tiempo por Bluetooth: {}	Último tempo pelo Bluetooth: {}
+# Bloque 16 (2.25): tema premium Faro
+Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.	Fundo carvão (ou pérola no modo claro) com um feixe de luz diagonal. À esquerda, o velocímetro e um carro visto de cima que acende os faróis à noite; no centro, o mapa integrado ao fundo; à direita, o clima por hora e suas próximas manutenções, com o player e a barra de apps embaixo.
+Color del carro	Cor do carro
+El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.	O carro do tema Faro, visto de cima. Também muda com um toque longo no carro.
+Intensidad del mapa	Intensidade do mapa
+Qué tan visible es el mapa sobre el fondo. Auto lo pone más fuerte en las pantallas sencillas de los radios y suave en las de alta gama. Súbela si al sol no se ve bien.	Quão visível o mapa fica sobre o fundo. O Auto o deixa mais forte nas telas simples das centrais multimídia e mais suave nas telas de alta qualidade. Aumente se não estiver bem visível ao sol.
+Baja	Baixa
+Media	Média
+Alta	Alta
+Negro	Preto
+Sin mantenimientos programados	Nenhuma manutenção programada
+Toca para agregar uno	Toque para adicionar
+Navegar	Navegar
+# 2.25: canción de las apps (acceso a notificaciones)
+Música sonando	Música tocando
+Toca para ver la canción	Toque para ver a música
+Ver la canción de tus apps	Ver a música dos seus apps
+Para mostrar la canción, el artista y la carátula de Spotify, YouTube Music y otras apps, StradaOS necesita «Acceso a notificaciones». Solo lo usa para leer lo que suena: no guarda ni envía nada.	Para mostrar a música, o artista e a capa do Spotify, YouTube Music e outros apps, o StradaOS precisa de «Acesso a notificações». Ele só usa isso para ler o que está tocando: nada é guardado nem enviado.
+No volver a mostrar	Não mostrar de novo
+Esta pantalla no tiene el ajuste de «Acceso a notificaciones». Se puede activar una sola vez desde una computadora con ADB:	Esta tela não tem o ajuste de «Acesso a notificações». Dá para ativar uma única vez por um computador com ADB:
+Spotify, YouTube Music y otras apps de la pantalla (acceso a notificaciones)	Spotify, YouTube Music e outros apps da tela (acesso a notificações)
+# Pantallas FYT: tema según las luces, espera para cambiar de tema y datos del carro
+Encendidas	Acesas
+Apagadas	Apagadas
+Espera para pasar a oscuro	Espera para passar ao escuro
+Cuánto debe durar el cambio (luces encendidas, poco brillo…) antes de oscurecer	Quanto tempo a mudança (luzes acesas, pouco brilho…) deve durar antes de escurecer
+Espera para pasar a claro	Espera para passar ao claro
+Útil si al apagar el carro de noche se apagan las luces y la pantalla pasa a claro de golpe	Útil se, ao desligar o carro à noite, as luzes apagam e a tela passa de repente ao claro
+Sin espera	Sem espera
+Marca de la pantalla	Marca da tela
+Genérica	Genérica
+Detectada:	Detectada:
+No se detectó una marca con funciones propias	Não foi detectada uma marca com funções próprias
+Datos del carro	Dados do carro
+Lectura actual	Leitura atual
+Servicio com.syu.ms:	Serviço com.syu.ms:
+sin caja CAN	sem caixa CAN
+Esperando datos	Aguardando dados
+Luces del carro	Luzes do carro
+Sin datos	Sem dados
+sin conectar	sem conexão
+conectando	conectando
+conectado	conectado
+desconectado	desconectado
+no se encontró com.syu.ms	com.syu.ms não encontrado
+com.syu.ms no respondió	com.syu.ms não respondeu
+com.syu.ms se reinició	com.syu.ms reiniciou
+Tema según las luces, batería y temperatura exterior	Tema pelas luzes, bateria e temperatura exterior
+Pantallas FYT (com.syu.ms)	Telas FYT (com.syu.ms)
+luces detectadas	luzes detectadas
+Auto: por horario. Sistema: sigue las luces del carro (pantalla FYT)	Auto: por horário. Sistema: segue as luzes do carro (tela FYT)
+Espera para cambiar de tema	Espera para mudar de tema
+Evita cambios de golpe, p. ej. al apagar el carro de noche	Evita mudanças de repente, p. ex. ao desligar o carro à noite
+Para seguirlas, elige Apariencia → Tema → Modo → Sistema	Para segui-las, escolha Aparência → Tema → Modo → Sistema
+Elige qué datos del carro se ven arriba, junto al Wi-Fi	Escolha quais dados do carro aparecem em cima, junto ao Wi-Fi
+Tensión de la batería	Tensão da bateria
+Medida por la pantalla; no necesita la caja CAN	Medida pela tela; não precisa da caixa CAN
+Temperatura exterior	Temperatura exterior
+Del sensor del carro; necesita la caja CAN	Do sensor do carro; precisa da caixa CAN
+pantalla FYT detectada: elígela en Tu vehículo → Equipo	tela FYT detectada: escolha-a em Seu veículo → Equipamento
+esta pantalla no informa las luces	esta tela não informa as luzes
+# OBD-II (PR #42, Jaacern)
+Presión del múltiple	Pressão do coletor
+Consumo del motor	Consumo do motor
+Consumo por hora	Consumo por hora
+Panel de datos	Painel de dados
+Datos del panel	Dados do painel
+Datos del motor	Dados do motor
+Cilindrada del motor	Cilindrada do motor
+Cilindrada del motor (litros)	Cilindrada do motor (litros)
+Protocolo	Protocolo
+CAN 11 bits · 500 kbps	CAN 11 bits · 500 kbps
+CAN 29 bits · 500 kbps	CAN 29 bits · 500 kbps
+CAN 11 bits · 250 kbps	CAN 11 bits · 250 kbps
+CAN 29 bits · 250 kbps	CAN 29 bits · 250 kbps
+Escribe un número entre 0,5 y 8	Digite um número entre 0,5 e 8
+Máximo 6 datos	Máximo 6 dados
+Hasta 6 datos del escáner, por ejemplo RPM, velocidad, refrigerante y consumo	Até 6 dados do scanner, por exemplo RPM, velocidade, líquido de arrefecimento e consumo
+Avance del encendido	Avanço da ignição
+Sonda O2 banco 1	Sonda O2 banco 1
+Sonda O2 banco 1 sensor 2	Sonda O2 banco 1 sensor 2
+Tiempo de marcha	Tempo de funcionamento
+Distancia con la luz del motor	Distância com a luz do motor
+EGR comandada	EGR comandada
+Arranques desde borrar códigos	Partidas desde limpar códigos
+Distancia desde borrar códigos	Distância desde limpar códigos
+Presión barométrica	Pressão barométrica
+Catalizador banco 1	Catalisador banco 1
+Catalizador banco 1 sensor 2	Catalisador banco 1 sensor 2
+Carga absoluta	Carga absoluta
+Mezcla comandada	Mistura comandada
+Acelerador relativo	Acelerador relativo
+Acelerador B	Acelerador B
+Pedal D	Pedal D
+Pedal E	Pedal E
+Acelerador comandado	Acelerador comandado
+Tiempo con la luz del motor	Tempo com a luz do motor
+Tiempo desde borrar códigos	Tempo desde limpar códigos
+Mezcla O2 banco 1	Mistura O2 banco 1
+Mezcla O2 banco 1 sensor 2	Mistura O2 banco 1 sensor 2
+ALTITUD	ALTITUDE
+API key	Chave de API
+APPS	APPS
+Accesos directos (apps)	Atalhos (apps)
+Aceite del motor	Óleo do motor
+Acelerador	Acelerador
+Agregar franja de widgets	Adicionar faixa de widgets
+Aire de admisión	Ar de admissão
+Ajustar esta alerta	Ajustar este alerta
+Ajustes del vehículo	Ajustes do veículo
+Alertas	Alertas
+Alertas a vigilar	Alertas a monitorar
+Altitud, pendiente y rumbo	Altitude, inclinação e rumo
+Apagado	Desligado
+Arrastra las manijas para cambiar tamaños · arrastra una tarjeta para moverla · toca un widget para cambiarlo · ✕ oculta una tarjeta	Arraste as alças para mudar tamanhos · arraste um cartão para movê-lo · toque em um widget para alterá-lo · ✕ oculta um cartão
+Auto simulado	Carro simulado
+Auto simulado (para probar)	Carro simulado (para testar)
+Aviso bajo	Aviso baixo
+Aviso sobre	Aviso alto
+Aviso sobre ±	Aviso alto ±
+Avisos por voz	Avisos por voz
+Baja la exigencia y revisa el nivel de aceite cuando puedas parar.	Reduza a exigência e verifique o nível de óleo quando puder parar.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y vigila que el electroventilador encienda.	Reduza a exigência: use uma marcha mais baixa, desligue o ar-condicionado e verifique se o eletroventilador liga.
+Baja la velocidad o usa una marcha más alta. En bajadas, frena con motor sin pasar la zona roja.	Reduza a velocidade ou use uma marcha mais alta. Em descidas, freie com o motor sem passar da zona vermelha.
+Batería	Bateria
+Borrar códigos	Apagar códigos
+Borrar la API key	Apagar a chave de API
+Buscar de nuevo	Buscar de novo
+Buscar escáneres Bluetooth cercanos	Buscar scanners Bluetooth próximos
+Carga combustible en la próxima estación. En la montaña puede no haber más adelante.	Abasteça no próximo posto. Na serra pode não haver outro adiante.
+Carga del motor	Carga do motor
+Combustible	Combustível
+Con el motor en marcha debe estar entre 13,5 y 14,8 V. Con el motor apagado, 12,4 a 12,8 V es normal.	Com o motor em marcha deve ficar entre 13,5 e 14,8 V. Com o motor desligado, 12,4 a 12,8 V é normal.
+Conecta tu escáner OBD-II	Conecte seu scanner OBD-II
+Consumo	Consumo
+Cuánto corrige el computador la mezcla. Positivo = le falta combustible (fuga de aire); negativo = le sobra.	Quanto o computador corrige a mistura. Positivo = falta combustível (vazamento de ar); negativo = sobra.
+Códigos de falla	Códigos de falha
+Códigos de falla nuevos (aviso por voz)	Códigos de falha novos (aviso por voz)
+Dato del vehículo…	Dado do veículo…
+Datos del motor cuando se registró la falla	Dados do motor quando a falha foi registrada
+Datos en vivo	Dados ao vivo
+Desliza el dedo sobre un gráfico para ver el valor de cada momento. Toca los datos de arriba para comparar hasta 3.	Deslize o dedo sobre um gráfico para ver o valor de cada momento. Toque nos dados acima para comparar até 3.
+Dirección de la API	Endereço da API
+El Bluetooth está apagado	O Bluetooth está desligado
+El aire que entra al motor está muy caliente: pierde potencia. Si estás detenido, avanza para que circule aire.	O ar que entra no motor está muito quente: perde potência. Se estiver parado, avance para que o ar circule.
+El auto no tiene códigos guardados.	O carro não tem códigos guardados.
+El escaneo se cortó	A varredura foi interrompida
+El motor va al máximo hace rato. En cuestas largas usa una marcha más baja y deja descansar el motor y la caja.	O motor está no máximo há um tempo. Em subidas longas use uma marcha mais baixa e deixe o motor e o câmbio descansarem.
+Elegir escáner	Escolher scanner
+Elige el modelo de la IA en los ajustes	Escolha o modelo da IA nos ajustes
+Emparejado	Emparelhado
+Emparejando… si pide clave, escribe 1234 o 0000	Emparelhando… se pedir senha, digite 1234 ou 0000
+Emparéjalo en los ajustes de Bluetooth del equipo	Emparelhe-o nos ajustes de Bluetooth do aparelho
+En vivo	Ao vivo
+Encender el monitor al iniciar StradaOS	Ligar o monitor ao iniciar o StradaOS
+Enviar el VIN a la IA	Enviar o VIN para a IA
+Escaneando	Escaneando
+Escanear todo lo que entrega el auto	Escanear tudo o que o carro fornece
+Escaneo terminado.	Varredura concluída.
+Escribe IP:puerto, por ejemplo 192.168.0.10:35000	Digite IP:porta, por exemplo 192.168.0.10:35000
+Escribe la dirección de la API en los ajustes	Digite o endereço da API nos ajustes
+Escribe un número	Digite um número
+Escribir otro…	Digitar outro…
+Escáner	Scanner
+Escáner Wi-Fi (escribir IP y puerto)	Scanner Wi-Fi (digitar IP e porta)
+Escáner conectado. Vigilando el motor.	Scanner conectado. Monitorando o motor.
+Este código no está en la tabla sin conexión: suele ser un código propio de la marca. La IA puede explicarlo.	Este código não está na tabela offline: geralmente é um código próprio da marca. A IA pode explicá-lo.
+Este equipo no tiene Bluetooth	Este aparelho não tem Bluetooth
+Explicación de la IA	Explicação da IA
+Flujo de aire	Fluxo de ar
+Gráficos en vivo	Gráficos ao vivo
+Guardado en	Salvo em
+IP y puerto del escáner Wi-Fi	IP e porta do scanner Wi-Fi
+Inteligencia artificial	Inteligência artificial
+La API key no es válida	A chave de API não é válida
+La IA está ocupada o sin saldo. Intenta más tarde.	A IA está ocupada ou sem saldo. Tente mais tarde.
+La IA no quiso responder	A IA não quis responder
+La IA recibe solo el código, el vehículo que escribiste y los datos del motor; nunca tu ubicación. El VIN solo se envía si lo activas aquí. Cada consulta la cobra tu proveedor con tu API key.	A IA recebe apenas o código, o veículo que você digitou e os dados do motor; nunca sua localização. O VIN só é enviado se você o ativar aqui. Cada consulta é cobrada pelo seu provedor com sua chave de API.
+La IA respondió vacío	A IA respondeu vazio
+Listo	Pronto
+Lo que entrega tu auto	O que o seu carro fornece
+Luz del motor	Luz do motor
+Mantén presionado para reiniciar el viaje o cambiar los widgets	Mantenha pressionado para reiniciar a viagem ou mudar os widgets
+Mezcla corta	Mistura curta
+Mezcla larga	Mistura longa
+Mi vehículo (para la IA)	Meu veículo (para a IA)
+Modelo	Modelo
+Monitor apagado	Monitor desligado
+Monitor apagado · toca para conectar	Monitor desligado · toque para conectar
+Monitor del vehículo	Monitor do veículo
+Monitores de emisiones	Monitores de emissões
+MÚSICA	MÚSICA
+Música (canción y controles)	Música (canção e controles)
+No se pudo consultar la IA	Não foi possível consultar a IA
+No se pudo emparejar. Prueba con la clave 1234 o 0000.	Não foi possível emparelhar. Tente a senha 1234 ou 0000.
+Normal en marcha: 85 a 98 °C. También avisa si sube más de 4 °C por minuto sobre 95 °C.	Normal em marcha: 85 a 98 °C. Também avisa se subir mais de 4 °C por minuto acima de 95 °C.
+Ojo: los códigos de airbag, ABS y carrocería normalmente no se leen con OBD-II genérico; si aparece aquí es porque el auto lo reporta al computador del motor.	Atenção: os códigos de airbag, ABS e carroceria normalmente não são lidos com OBD-II genérico; se aparecer aqui é porque o carro o reporta ao computador do motor.
+Preguntar a la IA	Perguntar à IA
+Primero escribe la API key	Primeiro digite a chave de API
+Probar con un auto simulado	Testar com um carro simulado
+Probar la IA	Testar a IA
+Proveedor	Provedor
+Qué hacer	O que fazer
+RPM	RPM
+Registro de la conexión	Registro da conexão
+Se perdió la conexión con el escáner.	Perdeu-se a conexão com o scanner.
+Se revisan al conectar y cada 30 segundos.	São revisados ao conectar e a cada 30 segundos.
+Sin configurar	Sem configurar
+Sin el permiso de ubicación Android no deja buscar equipos Bluetooth	Sem a permissão de localização o Android não deixa buscar aparelhos Bluetooth
+Sin monitor activo.	Sem monitor ativo.
+Solo informativo: este dato no genera alertas.	Apenas informativo: este dado não gera alertas.
+Subida rápida del refrigerante	Aumento rápido do líquido de arrefecimento
+Toca para ver qué hacer	Toque para ver o que fazer
+Todo normal por ahora.	Tudo normal por enquanto.
+Tu vehículo: marca, modelo, año, motor y caja	Seu veículo: marca, modelo, ano, motor e câmbio
+VIAJE	VIAGEM
+Valores de fábrica	Valores de fábrica
+Vehículo	Veículo
+Viaje (km, tiempo, consumo)	Viagem (km, tempo, consumo)
+Vigilar	Monitorar
+Volver	Voltar
+ahora	agora
+alerta	alerta
+alerta bajo	alerta baixo
+alerta sobre	alerta alto
+alerta sobre ±	alerta alto ±
+ancho	largura
+aviso	aviso
+bajo	baixo
+calculado	calculado
+código propio de la marca	código próprio da marca
+elegir…	escolher…
+emparejado	emparelhado
+hace	há
+límite	limite
+monitor apagado	monitor desligado
+máx	máx
+mín	mín
+normal	normal
+pendiente —	pendente —
+prom	méd
+recomendado	recomendado
+revisa el detalle en la pantalla	veja o detalhe na tela
+se ajusta solo	ajusta-se sozinho
+✓ listo · ✗ aún no termina su prueba (normal después de borrar códigos o desconectar la batería).	✓ pronto · ✗ ainda não terminou seu teste (normal após apagar códigos ou desconectar a bateria).
+# 2.26: escáner OBD-II (panel del vehículo y ajustes)
+Escáner OBD-II	Scanner OBD-II
+Enciende el monitor del motor en «Escáner OBD-II»	Ligue o monitor do motor em «Scanner OBD-II»
+Conectando…	Conectando…
+Monitor del motor	Monitor do motor
+Está apagado: enciéndelo para conectar el escáner	Está desligado: ligue-o para conectar o scanner
+Estado	Estado
+Abrir el panel del vehículo	Abrir o painel do veículo
+Medidores, alertas y códigos encima del tema que tengas	Medidores, alertas e códigos por cima do seu tema
+Diagnóstico	Diagnóstico
+Qué vigila StradaOS y cuándo avisa por voz	O que o StradaOS vigia e quando avisa por voz
+Todo normal	Tudo normal
+Qué significan y qué hacer; borrarlos con el motor apagado	O que significam e o que fazer; apague-os com o motor desligado
+Cada dato que entrega tu auto, con gráficos	Cada dado que o seu carro fornece, com gráficos
+Más	Mais
+Opcional: explica los códigos para tu auto en particular	Opcional: explica os códigos para o seu carro em particular
+Motor, protocolo, panel y escaneo completo	Motor, protocolo, painel e varredura completa
+Bluetooth emparejado, Wi-Fi (IP y puerto) o un auto simulado para probar	Bluetooth pareado, Wi-Fi (IP e porta) ou um carro simulado para testar
+Empareja el escáner sin salir de StradaOS (clave 1234 o 0000)	Pareie o scanner sem sair do StradaOS (senha 1234 ou 0000)
+Reconectar	Reconectar
+Conectar al iniciar StradaOS	Conectar ao iniciar o StradaOS
+Las alertas funcionan aunque estés en otra app (con una notificación fija)	Os alertas funcionam mesmo em outro app (com uma notificação fixa)
+Cómo conectar el escáner	Como conectar o scanner
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000).\n3. Elígelo arriba en «Escáner».	1. Ligue o scanner ELM327 no conector OBD (embaixo do volante) e ligue a ignição.\n2. Bluetooth: pareie com a senha 1234 ou 0000. Wi-Fi: conecte a central à rede do scanner e escreva o IP e a porta (quase sempre 192.168.0.10:35000).\n3. Escolha-o acima em «Scanner».
+Lo que respondió el escáner (para reportar un problema)	O que o scanner respondeu (para relatar um problema)
+Todo normal por ahora	Tudo normal por enquanto
+Alerta	Alerta
+Aviso	Aviso
+Avisos	Avisos
+Habla aunque estés en Waze o con música	Fala mesmo no Waze ou com música
+Abrir el panel con una alerta grave	Abrir o painel com um alerta grave
+Por ejemplo, el motor muy caliente o la batería que no carga	Por exemplo, o motor muito quente ou a bateria que não carrega
+Más de 4 °C por minuto con el motor caliente	Mais de 4 °C por minuto com o motor quente
+Cuándo avisa cada dato	Quando cada dado avisa
+Códigos guardados en el auto	Códigos guardados no carro
+El auto no tiene códigos guardados	O carro não tem códigos guardados
+Se revisan al conectar y cada 30 segundos	Verificados ao conectar e a cada 30 segundos
+Luz del motor encendida	Luz do motor acesa
+El computador del motor confirmó una falla	O computador do motor confirmou uma falha
+Con el motor apagado y el contacto puesto. Anota los códigos antes: no se puede deshacer	Com o motor desligado e a ignição ligada. Anote os códigos antes: não dá para desfazer
+Conecta el escáner para ver los datos	Conecte o scanner para ver os dados
+Gráficos	Gráficos
+Hasta 3 datos a la vez, de 1 a 30 minutos	Até 3 dados por vez, de 1 a 30 minutos
+La tuya: cada consulta la cobra tu proveedor	A sua: cada consulta é cobrada pelo seu provedor
+Privacidad	Privacidade
+Qué se envía	O que é enviado
+Solo el código, el vehículo que escribas y los datos del motor de ese momento; nunca tu ubicación. Las respuestas se guardan en la pantalla	Só o código, o veículo que você escrever e os dados do motor naquele momento; nunca a sua localização. As respostas ficam salvas na central
+Tu vehículo (para la IA)	Seu veículo (para a IA)
+Marca, modelo, año, motor y caja	Marca, modelo, ano, motor e câmbio
+Identifica tu auto de forma única. Apagado por defecto	Identifica o seu carro de forma única. Desligado por padrão
+Probar	Testar
+Pregunta por un código de ejemplo	Pergunta sobre um código de exemplo
+Motor	Motor
+Para calcular el consumo en motores sin sensor MAF	Para calcular o consumo em motores sem sensor MAF
+Automático casi siempre; fuerza uno si el escáner no lo detecta	Automático quase sempre; force um se o scanner não o detectar
+Panel del vehículo	Painel do veículo
+Lado del panel	Lado do painel
+Pestaña en el borde	Aba na borda
+Toca o desliza la pestaña para abrir el panel. Sin ella, ábrelo con un botón de la barra	Toque ou deslize a aba para abrir o painel. Sem ela, abra com um botão da barra
+Informe de cada dato estándar y los propios de la marca. Solo lee	Relatório de cada dado padrão e dos próprios da marca. Só leitura
+Ver el último informe	Ver o último relatório
+Con un escáner ELM327 por Wi-Fi o Bluetooth: temperatura, batería, alertas por voz y códigos de falla	Com um scanner ELM327 por Wi-Fi ou Bluetooth: temperatura, bateria, alertas por voz e códigos de falha
+También con la pestaña del borde o con un botón de la barra	Também com a aba da borda ou com um botão da barra
+Vehículo (OBD-II)	Veículo (OBD-II)
+Sin elegir	Não escolhido
+Apagada	Desligado
+Alerta sobre	Alerta acima de
+Alerta bajo	Alerta abaixo de
+Alerta sobre ±	Alerta acima de ±
+No	Não
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en Ajustes → Tu vehículo → Escáner OBD-II → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	Para que uma IA explique os códigos, coloque a sua API key (Claude, Groq, Gemini ou outra) em Ajustes → Seu veículo → Scanner OBD-II → Inteligência artificial. As explicações ficam salvas no aparelho e depois funcionam sem internet.
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar; también se reinician los monitores de emisiones. No se puede deshacer y, si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	A luz do motor se apaga e os dados que a oficina usa para diagnosticar são apagados; os monitores de emissões também são reiniciados. Não dá para desfazer e, se a falha continuar, o código voltará. Anote os códigos antes.
+Ej.: Kia Picanto 2019 1.2 gasolina mecánico	Ex.: Kia Picanto 2019 1.2 gasolina manual
+Sin poner	Não definida
+Escaneando… el avance se ve en el estado del escáner	Escaneando… o progresso aparece no estado do scanner
+Todavía no hay un informe	Ainda não há relatório
+Sin monitor activo	Sem monitor ativo
+Sin códigos guardados	Sem códigos guardados
+Se revisan al conectar	Verificados ao conectar
+Ver todo	Ver tudo
+1 activa	1 ativo
+{} activas	{} ativos
+
+# 2.26: textos del escáner que faltaban
+Conectando con el escáner…	Conectando ao scanner…
+Conectado	Conectado
+Esperando al auto (¿contacto apagado?)	Aguardando o carro (ignição desligada?)
+Códigos borrados.	Códigos apagados.
+El auto no aceptó borrar los códigos.	O carro não aceitou apagar os códigos.
+El escáner no logra hablar con el auto. ¿Está el contacto puesto?	O scanner não consegue falar com o carro. A ignição está ligada?
+El escáner no responde	O scanner não responde
+El escáner cerró la conexión	O scanner fechou a conexão
+No se pudo conectar	Não foi possível conectar
+Motor sobrecalentado: {}	Motor superaquecido: {}
+Refrigerante alto: {}	Motor esquentando: {}
+El refrigerante sube rápido: {} °C	A temperatura sobe rápido: {} °C
+Voltaje alto: {}	Tensão alta: {}
+Voltaje bajo: {}	Tensão baixa: {}
+RPM muy altas: {}	RPM muito altas: {}
+Motor muy exigido: {}	Motor muito exigido: {}
+Aire de admisión muy caliente: {}	Ar de admissão muito quente: {}
+Poco combustible: {}	Pouco combustível: {}
+Aceite del motor muy caliente: {}	Óleo do motor muito quente: {}
+Código de falla {}	Código de falha {}
+Código pendiente {}	Código pendente {}
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Espera que enfríe y revisa el nivel de refrigerante, el electroventilador y la correa.	Pare em um lugar seguro e desligue o motor. Não abra a tampa do radiador quente. Espere esfriar e verifique o nível do líquido de arrefecimento, a ventoinha e a correia.
+Baja la exigencia: usa una marcha más baja, apaga el aire acondicionado y, si sigue subiendo, pon la calefacción al máximo y busca dónde parar.	Reduza a exigência: use uma marcha mais baixa, desligue o ar-condicionado e, se continuar subindo, ligue o aquecimento no máximo e procure onde parar.
+El alternador está cargando de más y puede dañar la batería. Revísalo pronto.	O alternador está carregando demais e pode danificar a bateria. Verifique logo.
+El alternador no está cargando bien: apaga lo que no necesites (aire, luces extra) y ve a un taller antes de que se descargue la batería. Revisa la correa.	O alternador não está carregando bem: desligue o que não precisar (ar, luzes extras) e vá a uma oficina antes que a bateria descarregue. Verifique a correia.
+El motor recibe menos combustible del que necesita: puede ser una fuga de vacío, el filtro de combustible o el sensor MAF. Puede perder fuerza en subidas.	O motor recebe menos combustível do que precisa: pode ser um vazamento de vácuo, o filtro de combustível ou o sensor MAF. Pode perder força nas subidas.
+El motor recibe más combustible del necesario: revisa el filtro de aire, el sensor MAF o un inyector que gotee.	O motor recebe mais combustível do que o necessário: verifique o filtro de ar, o sensor MAF ou um bico injetor pingando.
+código	código
+códigos	códigos
+Carrocería (airbag, cinturones, luces, cierre…)	Carroceria (airbag, cintos, luzes, travas…)
+Chasis (frenos ABS, dirección, suspensión, 4x4)	Chassi (freios ABS, direção, suspensão, 4x4)
+Comunicación entre computadores del auto	Comunicação entre os computadores do carro
+Motor: mezcla de aire y combustible	Motor: mistura de ar e combustível
+Motor: encendido y fallas de encendido	Motor: ignição e falhas de ignição
+Control de emisiones	Controle de emissões
+Velocidad, ralentí y entradas auxiliares	Velocidade, marcha lenta e entradas auxiliares
+Computador del motor y sus salidas	Computador do motor e suas saídas
+Caja de cambios	Câmbio
+Motor o caja (sistema híbrido u otro)	Motor ou câmbio (sistema híbrido ou outro)
+Conectar	Conectar
+Pendiente	Pendente
+Grave	Grave
+Leve	Leve
+Revisar	Verificar
+Volver a preguntar a la IA	Perguntar de novo à IA
+Explicar con IA	Explicar com IA
+Preguntando a la IA…	Perguntando à IA…
+Apaga el motor y deja solo el contacto puesto para borrar los códigos.	Desligue o motor e deixe só a ignição ligada para apagar os códigos.
+¿Borrar los códigos de falla?	Apagar os códigos de falha?
+Sí	Sim
+No hay escáneres Bluetooth emparejados: emparéjalo en los ajustes del equipo	Não há scanners Bluetooth pareados: pareie-o nas configurações do aparelho
+Elige tu escáner	Escolha seu scanner
+Otra compatible con OpenAI	Outra compatível com OpenAI
+Buscando los modelos del proveedor…	Buscando os modelos do provedor…
+Preguntando por el código de ejemplo P0711…	Perguntando pelo código de exemplo P0711…
+La IA funciona · P0711 de ejemplo	A IA funciona · P0711 de exemplo
+Conecta el escáner con el contacto puesto (mejor con el motor en marcha) y vuelve a intentarlo.	Conecte o scanner com a ignição ligada (melhor com o motor funcionando) e tente de novo.
+Pregunta al auto por cada dato estándar y por los datos propios de la marca del motor y la caja. Tarda hasta 2 minutos y mientras tanto las alertas se pausan: hazlo detenido. Solo lee, no cambia nada en el auto.	Pergunta ao carro por cada dado padrão e pelos dados próprios da marca do motor e do câmbio. Leva até 2 minutos e enquanto isso os alertas ficam pausados: faça com o carro parado. Só lê, não muda nada no carro.
+Escanear	Escanear
+Panel	Painel
+Todos los datos	Todos os dados
+Catalizador	Catalisador
+No se encontraron equipos. ¿Está el escáner enchufado y el contacto puesto?	Nenhum aparelho encontrado. O scanner está conectado e a ignição ligada?
+Buscando… (enchufa el escáner y pon el contacto)	Buscando… (conecte o scanner e ligue a ignição)
+Los escáneres suelen llamarse OBDII, OBD2, V-LINK o Vgate.	Os scanners costumam se chamar OBDII, OBD2, V-LINK ou Vgate.
+Esperando datos…	Aguardando dados…
+
+# 2.26: alertas de mezcla y explicación de los códigos de falla más comunes (assets/obd/dtc_es.tsv)
+Mezcla pobre ({}): {}	Mistura pobre ({}): {}
+Mezcla rica ({}): {}	Mistura rica ({}): {}
+Árbol de levas de admisión adelantado más de lo esperado (variador CVVT).	Comando de admissão mais adiantado que o esperado (variador CVVT).
+Revisa nivel y estado del aceite: el variador funciona con presión de aceite. Si el aceite está bien, revisar la válvula solenoide OCV.	Verifique o nível e o estado do óleo: o variador funciona com a pressão do óleo. Se o óleo estiver bom, verifique a válvula solenoide OCV.
+Árbol de levas de admisión atrasado más de lo esperado (variador CVVT).	Comando de admissão mais atrasado que o esperado (variador CVVT).
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV y la cadena de distribución.	Verifique o nível e o estado do óleo. Se continuar, verifique a válvula OCV e a corrente de distribuição.
+Árbol de levas de escape adelantado más de lo esperado.	Comando de escape mais adiantado que o esperado.
+Revisa nivel y estado del aceite. Si sigue, revisar la válvula OCV de escape.	Verifique o nível e o estado do óleo. Se continuar, verifique a válvula OCV do escape.
+La posición del cigüeñal y del árbol de levas no coinciden.	As posições do virabrequim e do comando de válvulas não coincidem.
+Puede ser la cadena de distribución estirada o saltada. Evita exigir el motor y llévalo al taller pronto.	Pode ser a corrente de distribuição esticada ou que pulou um dente. Evite exigir do motor e leve-o à oficina logo.
+El sensor de flujo de aire (MAF) marca fuera de lo esperado.	O sensor de fluxo de ar (MAF) marca fora do esperado.
+Revisa el filtro de aire y que no haya mangueras sueltas después del sensor. Limpiar el MAF con limpiador especial.	Verifique o filtro de ar e se não há mangueiras soltas depois do sensor. Limpe o MAF com limpador específico.
+Señal baja del sensor de flujo de aire (MAF).	Sinal baixo do sensor de fluxo de ar (MAF).
+Revisa el conector y el cableado del MAF.	Verifique o conector e a fiação do MAF.
+Señal alta del sensor de flujo de aire (MAF).	Sinal alto do sensor de fluxo de ar (MAF).
+El sensor de presión del múltiple (MAP) marca fuera de lo esperado.	O sensor de pressão do coletor (MAP) marca fora do esperado.
+Revisa mangueras de vacío y el conector del sensor MAP.	Verifique as mangueiras de vácuo e o conector do sensor MAP.
+El sensor de temperatura del aire de admisión marca fuera de lo esperado.	O sensor de temperatura do ar de admissão marca fora do esperado.
+Revisa el conector del sensor. No suele dejarte botado.	Verifique o conector do sensor. Raramente deixa você na mão.
+Señal baja del sensor de temperatura del aire de admisión.	Sinal baixo do sensor de temperatura do ar de admissão.
+Revisa el conector y el cableado del sensor.	Verifique o conector e a fiação do sensor.
+Señal alta del sensor de temperatura del aire de admisión.	Sinal alto do sensor de temperatura do ar de admissão.
+El sensor de temperatura del refrigerante marca fuera de lo esperado.	O sensor de temperatura do líquido de arrefecimento marca fora do esperado.
+No confíes en el indicador de temperatura hasta revisarlo. Vigila que el electroventilador encienda.	Não confie no indicador de temperatura até verificá-lo. Observe se a ventoinha liga.
+Señal baja del sensor de temperatura del refrigerante.	Sinal baixo do sensor de temperatura do líquido de arrefecimento.
+Sin este dato el motor puede sobrecalentarse sin avisar. Revisa nivel de refrigerante y el conector del sensor.	Sem esse dado o motor pode superaquecer sem avisar. Verifique o nível do líquido de arrefecimento e o conector do sensor.
+Señal alta del sensor de temperatura del refrigerante.	Sinal alto do sensor de temperatura do líquido de arrefecimento.
+El sensor de posición del acelerador marca fuera de lo esperado.	O sensor de posição do acelerador marca fora do esperado.
+El motor puede entrar en modo de emergencia (poca potencia). Revisa el cuerpo de aceleración y su conector.	O motor pode entrar em modo de emergência (pouca potência). Verifique o corpo de borboleta e seu conector.
+Señal baja del sensor de posición del acelerador.	Sinal baixo do sensor de posição do acelerador.
+Puede entrar en modo de emergencia. Revisa el conector del cuerpo de aceleración.	Pode entrar em modo de emergência. Verifique o conector do corpo de borboleta.
+Señal alta del sensor de posición del acelerador.	Sinal alto do sensor de posição do acelerador.
+El motor tarda mucho en llegar a temperatura para el control de mezcla.	O motor demora muito para chegar à temperatura de controle da mistura.
+Suele ser el termostato abierto o el sensor de temperatura. Revisa en el taller.	Costuma ser a válvula termostática aberta ou o sensor de temperatura. Verifique na oficina.
+El refrigerante no llega a la temperatura del termostato.	O líquido de arrefecimento não chega à temperatura da válvula termostática.
+Casi siempre es el termostato pegado abierto. Gasta más combustible y calienta poco la cabina; cámbialo cuando puedas.	Quase sempre é a válvula termostática travada aberta. Gasta mais combustível e aquece pouco a cabine; troque-a quando puder.
+Falla en el circuito del sensor de oxígeno delantero (banco 1).	Falha no circuito do sensor de oxigênio dianteiro (banco 1).
+Revisa el conector del sensor. Gastarás algo más de combustible.	Verifique o conector do sensor. O consumo de combustível vai aumentar um pouco.
+El sensor de oxígeno delantero responde lento.	O sensor de oxigênio dianteiro responde devagar.
+El sensor está viejo. Cámbialo cuando puedas.	O sensor está velho. Troque-o quando puder.
+Falla en el calentador del sensor de oxígeno delantero.	Falha no aquecedor do sensor de oxigênio dianteiro.
+Revisa el fusible y el conector del sensor. Se puede seguir.	Verifique o fusível e o conector do sensor. Dá para seguir.
+Falla en el calentador del sensor de oxígeno trasero.	Falha no aquecedor do sensor de oxigênio traseiro.
+Mezcla pobre: entra más aire o llega menos combustible de lo que debería.	Mistura pobre: entra mais ar ou chega menos combustível do que deveria.
+Busca fugas de vacío (mangueras, junta de admisión), revisa el MAF, la presión de combustible y el filtro. En subidas largas puede perder fuerza.	Procure vazamentos de vácuo (mangueiras, junta do coletor), verifique o MAF, a pressão de combustível e o filtro. Em subidas longas pode perder força.
+Mezcla rica: llega más combustible del que debería.	Mistura rica: chega mais combustível do que deveria.
+Revisa el filtro de aire, el MAF, inyectores que goteen y el regulador de presión.	Verifique o filtro de ar, o MAF, bicos injetores pingando e o regulador de pressão.
+Temperatura del motor excesiva.	Temperatura do motor excessiva.
+Detente en un lugar seguro y apaga el motor. No abras la tapa del radiador en caliente. Revisa refrigerante, ventilador y correa.	Pare em um lugar seguro e desligue o motor. Não abra a tampa do radiador quente. Verifique o líquido de arrefecimento, a ventoinha e a correia.
+Falla en el circuito del relé de la bomba de combustible.	Falha no circuito do relé da bomba de combustível.
+El motor puede apagarse sin aviso. Revisa relé y fusible de la bomba.	O motor pode desligar sem aviso. Verifique o relé e o fusível da bomba.
+Falla en el inyector del cilindro {}.	Falha no bico injetor do cilindro {}.
+Puede fallar el cilindro {}. Revisa el conector del inyector.	O cilindro {} pode falhar. Verifique o conector do bico injetor.
+Fallas de encendido en varios cilindros.	Falhas de ignição em vários cilindros.
+Si la luz del motor parpadea, baja la velocidad y no exijas el motor: el catalizador se puede dañar. Revisa bujías, bobinas, combustible y fugas de vacío.	Se a luz do motor piscar, reduza a velocidade e não exija do motor: o catalisador pode ser danificado. Verifique velas, bobinas, combustível e vazamentos de vácuo.
+Falla de encendido en el cilindro {}.	Falha de ignição no cilindro {}.
+Si la luz parpadea, no exijas el motor. Intercambia la bobina del cilindro {} con otra para ver si la falla se mueve; revisa la bujía.	Se a luz piscar, não exija do motor. Troque a bobina do cilindro {} com outra para ver se a falha muda de lugar; verifique a vela.
+Falla en el circuito del sensor de detonación.	Falha no circuito do sensor de detonação.
+El motor se protege atrasando el encendido: tendrá menos fuerza. Usa el combustible recomendado y revisa el conector del sensor.	O motor se protege atrasando a ignição: terá menos força. Use o combustível recomendado e verifique o conector do sensor.
+Falla en el sensor de posición del cigüeñal.	Falha no sensor de posição do virabrequim.
+El motor puede apagarse o no volver a arrancar. Evita lugares aislados y revisa el sensor y su conector.	O motor pode desligar ou não voltar a pegar. Evite lugares isolados e verifique o sensor e seu conector.
+El sensor de posición del cigüeñal marca fuera de lo esperado.	O sensor de posição do virabrequim marca fora do esperado.
+El motor puede apagarse o no volver a arrancar. Revisa el sensor y su conector.	O motor pode desligar ou não voltar a pegar. Verifique o sensor e seu conector.
+Falla en el sensor de posición del árbol de levas.	Falha no sensor de posição do comando de válvulas.
+Puede costar arrancar o apagarse. Revisa el sensor y su conector.	Pode custar a pegar ou desligar. Verifique o sensor e seu conector.
+El sensor del árbol de levas marca fuera de lo esperado.	O sensor do comando de válvulas marca fora do esperado.
+Revisa el sensor, su conector y la distribución.	Verifique o sensor, seu conector e a distribuição.
+Falla en el circuito de la bobina del cilindro {}.	Falha no circuito da bobina do cilindro {}.
+Puede fallar el cilindro {}. Revisa la bobina y su conector.	O cilindro {} pode falhar. Verifique a bobina e seu conector.
+El catalizador (banco 1) ya no limpia los gases como debería.	O catalisador (banco 1) já não limpa os gases como deveria.
+Se puede seguir manejando. Antes de cambiarlo, descarta fallas de encendido, fugas de escape y sensores de oxígeno.	Dá para continuar dirigindo. Antes de trocá-lo, descarte falhas de ignição, vazamentos no escape e sensores de oxigênio.
+Flujo incorrecto en el sistema de vapores de combustible (EVAP).	Fluxo incorreto no sistema de vapores de combustível (EVAP).
+No afecta cómo maneja. Revisa la válvula de purga.	Não afeta a dirigibilidade. Verifique a válvula de purga.
+Pequeña fuga en el sistema de vapores de combustible (EVAP).	Pequeno vazamento no sistema de vapores de combustível (EVAP).
+Revisa que la tapa del estanque cierre bien. No afecta cómo maneja.	Verifique se a tampa do tanque fecha bem. Não afeta a dirigibilidade.
+Fuga grande en el sistema de vapores de combustible (EVAP).	Vazamento grande no sistema de vapores de combustível (EVAP).
+Revisa que la tapa del estanque esté puesta y bien cerrada.	Verifique se a tampa do tanque está colocada e bem fechada.
+Fuga muy pequeña en el sistema de vapores de combustible (EVAP).	Vazamento muito pequeno no sistema de vapores de combustível (EVAP).
+Revisa la tapa del estanque. No afecta cómo maneja.	Verifique a tampa do tanque. Não afeta a dirigibilidade.
+Falla en el sensor de velocidad del vehículo.	Falha no sensor de velocidade do veículo.
+La caja automática puede cambiar mal y el velocímetro fallar. Revisa el sensor y su conector.	O câmbio automático pode trocar mal e o velocímetro falhar. Verifique o sensor e seu conector.
+Falla en el control de ralentí.	Falha no controle de marcha lenta.
+El motor puede quedar acelerado o apagarse en ralentí. Limpia el cuerpo de aceleración.	O motor pode ficar acelerado ou desligar em marcha lenta. Limpe o corpo de borboleta.
+Ralentí más bajo de lo esperado.	Marcha lenta mais baixa que o esperado.
+Limpia el cuerpo de aceleración y revisa fugas de vacío.	Limpe o corpo de borboleta e procure vazamentos de vácuo.
+Ralentí más alto de lo esperado.	Marcha lenta mais alta que o esperado.
+Suele ser una fuga de vacío o el cuerpo de aceleración sucio.	Costuma ser um vazamento de vácuo ou o corpo de borboleta sujo.
+Voltaje del sistema bajo.	Tensão do sistema baixa.
+El alternador puede no estar cargando. Revisa la correa, los bornes de la batería y el alternador antes de un viaje largo.	O alternador pode não estar carregando. Verifique a correia, os bornes da bateria e o alternador antes de uma viagem longa.
+Voltaje del sistema alto.	Tensão do sistema alta.
+El regulador del alternador puede estar fallando y dañar la batería. Revísalo pronto.	O regulador do alternador pode estar falhando e danificar a bateria. Verifique logo.
+Falla de comunicación interna del computador del motor.	Falha de comunicação interna do computador do motor.
+Revisa masas (tierras) y conectores del computador.	Verifique os aterramentos e os conectores do computador.
+Falla de memoria del computador del motor.	Falha de memória do computador do motor.
+Llévalo al taller.	Leve-o à oficina.
+La caja automática registró una falla (pide leer el computador de la caja).	O câmbio automático registrou uma falha (leia o computador do câmbio).
+Hay otro código guardado en el computador de la caja. Si la caja queda en un solo cambio (modo de emergencia), maneja suave hasta el taller.	Há outro código guardado no computador do câmbio. Se o câmbio ficar em uma só marcha (modo de emergência), dirija com suavidade até a oficina.
+Falla en el sensor de posición de la palanca de cambios.	Falha no sensor de posição da alavanca de câmbio.
+Puede no arrancar en P o N o mostrar mal el cambio. Revisa el interruptor de rango.	Pode não dar partida em P ou N ou mostrar a marcha errada. Verifique o interruptor de posição.
+Falla en el circuito del sensor de temperatura del aceite de la caja automática.	Falha no circuito do sensor de temperatura do óleo do câmbio automático.
+La caja puede cambiar brusco. Revisa el nivel y el color del aceite de la caja y el conector del sensor. Evita remolcar o subir pendientes largas exigiendo la caja.	O câmbio pode trocar com trancos. Verifique o nível e a cor do óleo do câmbio e o conector do sensor. Evite rebocar ou subir ladeiras longas exigindo do câmbio.
+El sensor de temperatura del aceite de la caja automática marca fuera de lo esperado.	O sensor de temperatura do óleo do câmbio automático marca fora do esperado.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa nivel y color del aceite de la caja (oscuro u olor a quemado es mala señal) y el conector del sensor. En subidas largas usa una marcha baja y descansa la caja.	O câmbio pode trocar com trancos ou entrar em modo de emergência. Verifique o nível e a cor do óleo do câmbio (escuro ou com cheiro de queimado é mau sinal) e o conector do sensor. Em subidas longas use uma marcha baixa e deixe o câmbio descansar.
+Señal baja del sensor de temperatura del aceite de la caja automática.	Sinal baixo do sensor de temperatura do óleo do câmbio automático.
+Revisa el conector y el cableado del sensor. La caja puede cambiar brusco.	Verifique o conector e a fiação do sensor. O câmbio pode trocar com trancos.
+Señal alta del sensor de temperatura del aceite de la caja automática.	Sinal alto do sensor de temperatura do óleo do câmbio automático.
+Falla en el sensor de velocidad de entrada de la caja.	Falha no sensor de velocidade de entrada do câmbio.
+La caja puede cambiar brusco o quedar en modo de emergencia. Revisa el sensor y su conector.	O câmbio pode trocar com trancos ou entrar em modo de emergência. Verifique o sensor e seu conector.
+Falla en el sensor de velocidad de salida de la caja.	Falha no sensor de velocidade de saída do câmbio.
+La caja puede cambiar brusco y el velocímetro fallar. Revisa el sensor y su conector.	O câmbio pode trocar com trancos e o velocímetro falhar. Verifique o sensor e seu conector.
+La relación de cambios no es la correcta (la caja patina).	A relação de marchas não é a correta (o câmbio está patinando).
+Revisa el nivel del aceite de la caja de inmediato. Maneja suave: seguir exigiéndola puede dañarla.	Verifique o nível do óleo do câmbio imediatamente. Dirija com suavidade: continuar exigindo pode danificá-lo.
+Relación incorrecta en 1ª: la caja patina en primera.	Relação incorreta em 1ª: o câmbio patina em primeira.
+Revisa el nivel del aceite de la caja. Maneja suave hasta el taller.	Verifique o nível do óleo do câmbio. Dirija com suavidade até a oficina.
+Relación incorrecta en 2ª: la caja patina en segunda.	Relação incorreta em 2ª: o câmbio patina em segunda.
+Relación incorrecta en 3ª: la caja patina en tercera.	Relação incorreta em 3ª: o câmbio patina em terceira.
+Relación incorrecta en 4ª: la caja patina en cuarta.	Relação incorreta em 4ª: o câmbio patina em quarta.
+Falla en el circuito del embrague del convertidor de torque.	Falha no circuito da embreagem do conversor de torque.
+Gastará más combustible y la caja se calentará más. Revisa el aceite de la caja.	Vai gastar mais combustível e o câmbio vai esquentar mais. Verifique o óleo do câmbio.
+El embrague del convertidor de torque no acopla o patina.	A embreagem do conversor de torque não acopla ou patina.
+La caja se calienta más: evita subidas largas exigentes y revisa el aceite de la caja.	O câmbio esquenta mais: evite subidas longas exigentes e verifique o óleo do câmbio.
+Falla eléctrica en el embrague del convertidor de torque.	Falha elétrica na embreagem do conversor de torque.
+Revisa el conector de la caja. Gastará más combustible.	Verifique o conector do câmbio. Vai gastar mais combustível.
+Falla en el solenoide de cambio {}.	Falha no solenoide de troca {}.
+La caja puede quedar en un solo cambio. Maneja suave hasta el taller.	O câmbio pode ficar em uma só marcha. Dirija com suavidade até a oficina.
+El sensor de oxígeno trasero ve mezcla pobre después del catalizador.	O sensor de oxigênio traseiro vê mistura pobre depois do catalisador.
+Revisa fugas de escape antes del sensor.	Procure vazamentos no escape antes do sensor.
+El sensor de oxígeno trasero ve mezcla rica después del catalizador.	O sensor de oxigênio traseiro vê mistura rica depois do catalisador.
+Revisa sensores de oxígeno y el catalizador.	Verifique os sensores de oxigênio e o catalisador.
+Mezcla pobre en ralentí.	Mistura pobre em marcha lenta.
+Suele ser una fuga de vacío. Revisa mangueras y la válvula PCV.	Costuma ser um vazamento de vácuo. Verifique as mangueiras e a válvula PCV.
+Mezcla rica en ralentí.	Mistura rica em marcha lenta.
+Revisa inyectores y la válvula de purga del EVAP.	Verifique os bicos injetores e a válvula de purga do EVAP.
+
+# 2.26: monitores de emisiones y avance del escaneo
+Fallas de encendido	Falhas de ignição
+Sistema de combustible	Sistema de combustível
+Componentes	Componentes
+Catalizador calefaccionado	Catalisador aquecido
+Vapores de combustible (EVAP)	Vapores de combustível (EVAP)
+Aire secundario	Ar secundário
+Sensores de oxígeno	Sensores de oxigênio
+Calefactor de sensores de oxígeno	Aquecedor dos sensores de oxigênio
+Recirculación de gases (EGR)	Recirculação de gases (EGR)
+Escaneando: {}	Escaneando: {}
+Datos estándar (modo 01)…	Dados padrão (modo 01)…
+Información del vehículo (modo 09)…	Informações do veículo (modo 09)…
+Modo 01 · PID {}	Modo 01 · PID {}
+Sin conexión	Sem conexão
+Interrumpido	Interrompido
+Dirección no válida: {}	Endereço inválido: {}
+Apps	Apps
+Guía del escáner	Guia do scanner
+Guía	Guia
+Qué comprar, cómo conectarlo y qué significa cada cosa · sin internet	O que comprar, como conectar e o que significa cada coisa · sem internet
+Desbloquear	Desbloquear
+Se desbloquea con una donación. Todas las funciones de StradaOS siguen siendo gratis.	Desbloqueia com uma doação. Todas as funções do StradaOS continuam grátis.
+Desbloqueado en esta pantalla. ¡Gracias por tu donación!	Desbloqueado nesta tela. Obrigado pela sua doação!
+Prueba: volver a aplicar sin código	Teste: voltar a aplicar sem código
+Prueba: desbloquear como en la versión normal	Teste: desbloquear como na versão normal
+1. Dona 5 USD en Ko-fi: escanea el código con tu celular o entra a {}.	1. Doe 5 USD no Ko-fi: escaneie o código com o celular ou entre em {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla:	2. Na mensagem da doação, escreva o ID desta tela:
+3. Te enviamos un código STRD-XXXX-XXXX, casi siempre el mismo día. Escríbelo en «Tengo un código».	3. Enviamos um código STRD-XXXX-XXXX, quase sempre no mesmo dia. Digite-o em “Tenho um código”.
+El tema queda en esta pantalla. Si cambias de radio o la restableces, escríbenos con el ID nuevo y te enviamos otro código sin costo.	O tema fica nesta tela. Se trocar de central ou restaurá-la, escreva para nós com o novo ID e enviamos outro código sem custo.
+Desbloquear {}	Desbloquear {}
+Tengo un código	Tenho um código
+Archivo por USB	Arquivo por USB
+ID de esta pantalla: {}. Necesitas internet solo esta vez.	ID desta tela: {}. Você só precisa de internet desta vez.
+Escribe tu código	Digite seu código
+El código tiene 8 letras o números después de STRD, por ejemplo STRD-7KQ2-M9XA.	O código tem 8 letras ou números depois de STRD, por exemplo STRD-7KQ2-M9XA.
+Comprobando el código…	Verificando o código…
+No hay internet. Conéctate un momento (por ejemplo, con el celular como módem) y vuelve a intentarlo, o pide el archivo de licencia y pásalo por USB.	Sem internet. Conecte-se um momento (por exemplo, usando o celular como roteador) e tente de novo, ou peça o arquivo de licença e passe por USB.
+No encontramos ese código para esta pantalla. Revisa que esté bien escrito y que el ID que enviaste sea {}.	Não encontramos esse código para esta tela. Confira se está digitado certo e se o ID que você enviou é {}.
+No se pudo desbloquear	Não foi possível desbloquear
+Intentar de nuevo	Tentar de novo
+Buscando la licencia en la pantalla y en las USB…	Procurando a licença na tela e nos pendrives…
+No encontramos la licencia	Licença não encontrada
+Copia el archivo que te enviamos (stradaos-licencia.txt) en la raíz de una USB, conéctala y vuelve a intentarlo. Tiene que ser para el ID {}.	Copie o arquivo que enviamos (stradaos-licencia.txt) na raiz de um pendrive, conecte-o e tente de novo. Ele precisa ser do ID {}.
+¡Listo!	Pronto!
+{} quedó desbloqueado en esta pantalla. Gracias por apoyar StradaOS.	{} foi desbloqueado nesta tela. Obrigado por apoiar o StradaOS.
+Aplicar ahora	Aplicar agora
+1. Dona en Ko-fi 5 USD por un tema o 8 USD por dos: escanea el código con tu celular o entra a {}.	1. Doe no Ko-fi 5 USD por um tema ou 8 USD por dois: escaneie o código com o celular ou entre em {}.
+2. En el mensaje de la donación escribe el ID de esta pantalla y qué temas quieres:	2. Na mensagem da doação, escreva o ID desta tela e quais temas você quer:
+Se desbloquea con una donación de 5 USD, o 8 USD por dos temas. Todas las funciones de StradaOS siguen siendo gratis.	Desbloqueia com uma doação de 5 USD, ou 8 USD por dois temas. Todas as funções do StradaOS continuam grátis.
+Usar la velocidad del escáner	Usar a velocidade do scanner
+Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso	Com o scanner conectado, o início mostra a velocidade do carro em vez da do GPS: mais exata e sem atraso
