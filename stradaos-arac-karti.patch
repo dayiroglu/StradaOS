@@ -41,7 +41,7 @@ index 04e5094..3e4a554 100644
              c.drawText(unit, cx, cy + r * 0.30f, pUnit);
              pBig.setColor(ring);
 diff --git a/app/src/main/java/com/stradaos/launcher/Main.java b/app/src/main/java/com/stradaos/launcher/Main.java
-index 80fa1c6..98bdf5f 100644
+index 80fa1c6..09a595d 100644
 --- a/app/src/main/java/com/stradaos/launcher/Main.java
 +++ b/app/src/main/java/com/stradaos/launcher/Main.java
 @@ -159,6 +159,7 @@ public class Main extends Activity {
@@ -469,7 +469,50 @@ index 80fa1c6..98bdf5f 100644
          if (faroWxIc == null) return;
          Weather.Now n = weatherNow;
          faroHours.removeAllViews();
-@@ -5445,6 +5656,7 @@ public class Main extends Activity {
+@@ -4921,6 +5132,42 @@ public class Main extends Activity {
+             b.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { runDock(idx); } });
+             b.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { dockMenu(idx, null); return true; } });
+         }
++        if (Prem.plus()) buildRitmoDockSides(px, pillW, py, pillH, areaX);
++    }
++
++    /** Ritmo 2: a los lados de la barra de apps, Android Auto (o CarPlay) a la izquierda y el cambio claro / oscuro a la derecha. */
++    private void buildRitmoDockSides(float px, float pw, float py, float ph, float areaX) {
++        float bs = ph, gap = 16;
++        if (px - areaX < bs + gap + 4) return;   // la barra ocupa todo el ancho: no hay sitio a los lados
++        String cm = prefs.getString("conn_buttons", "both");
++        final boolean aaOn = "both".equals(cm) || "aa".equals(cm);
++        if (aaOn || "cp".equals(cm)) {
++            FrameLayout b = ritmoSideBtn(aaOn ? "navigation" : "phone_iphone", px - gap - bs, py, bs, ph, aaOn);
++            b.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { if (aaOn) openAndroidAuto(); else openCarPlay(); } });
++            b.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) {
++                if (aaOn) chooseConnection(null); else pickFor("carplay", "CarPlay");
++                return true;
++            }});
++        }
++        FrameLayout th = ritmoSideBtn(LIGHT ? "dark_mode" : "light_mode", px + pw + gap, py, bs, ph, false);
++        th.setOnClickListener(new View.OnClickListener() { public void onClick(View v) {
++            prefs.edit().putString("theme", LIGHT ? "dark" : "light").apply();   // pasa a manual: el botón manda
++            applyThemeNow(); applyAccent(); rebuild();
++        }});
++    }
++
++    private FrameLayout ritmoSideBtn(String ic, float x, float y, float w, float hh, boolean accent) {
++        View bg = new View(this);
++        bg.setBackground(new Faro.Card(LIGHT, Math.min(20, hh * 0.36f) * s, 8 * s, s));
++        place(board, bg, x - 8, y - 8, w + 16, hh + 16);
++        FrameLayout f = new FrameLayout(this);
++        ImageView iv = icon(ic, hh * 0.5f);
++        iv.setColorFilter(accent ? RED : Faro.pillIcon(LIGHT));
++        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams((int) (hh * 0.5f * s), (int) (hh * 0.5f * s));
++        lp.gravity = Gravity.CENTER;
++        f.addView(iv, lp);
++        place(board, f, x, y, w, hh);
++        return f;
+     }
+ 
+     /**
+@@ -5445,6 +5692,7 @@ public class Main extends Activity {
              View th;
              boolean sel = inUse && (i == 1) == LIGHT;
              if (Cobalto.ID.equals(id)) { Cobalto.Thumb t = new Cobalto.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
@@ -477,7 +520,7 @@ index 80fa1c6..98bdf5f 100644
              else if (Faro.ID.equals(id)) { Faro.Thumb t = new Faro.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
              else { Aurora.Thumb t = new Aurora.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
              col.addView(th, new LinearLayout.LayoutParams(-1, -2));
-@@ -5700,7 +5912,7 @@ public class Main extends Activity {
+@@ -5700,7 +5948,7 @@ public class Main extends Activity {
          Nav.Place p = Nav.savedPlace(this, key);
          if (p == null) {
              toast("Configura «" + label + "» primero en Navegación");
@@ -486,7 +529,7 @@ index 80fa1c6..98bdf5f 100644
              return;
          }
          startInternalNav(p);
-@@ -5896,7 +6108,7 @@ public class Main extends Activity {
+@@ -5896,7 +6144,7 @@ public class Main extends Activity {
      /** App de navegación elegida; si se elige integrada en el mapa, abre búsqueda/menú interno. */
      private void openNavApp() {
          String navPref = prefs.getString("nav_app", null);
@@ -495,7 +538,7 @@ index 80fa1c6..98bdf5f 100644
              if (Nav.active != null) openNavMenu();
              else openNavSearch();
              return;
-@@ -5918,7 +6130,7 @@ public class Main extends Activity {
+@@ -5918,7 +6166,7 @@ public class Main extends Activity {
      }
  
      private void openNavSearch(final boolean insertActive) {
@@ -504,7 +547,7 @@ index 80fa1c6..98bdf5f 100644
          final android.app.AlertDialog[] dref = new android.app.AlertDialog[1];
          final boolean[] addStopMode = {false};
          LinearLayout wrap = new LinearLayout(this);
-@@ -6756,6 +6968,8 @@ public class Main extends Activity {
+@@ -6756,6 +7004,8 @@ public class Main extends Activity {
          speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
          if (carGauge != null) carGauge.setSpeed(kmh < 2 ? 0 : v, ok);
          if (mapGauge != null) mapGauge.setSpeed(kmh < 2 ? 0 : v, ok);
@@ -513,7 +556,7 @@ index 80fa1c6..98bdf5f 100644
          if (faroGauge != null) {
              faroGauge.setSpeed(kmh < 2 ? 0 : v, ok);
              int lim = Nav.active != null && Nav.curSpeedLimitKmh > 0
-@@ -7247,13 +7461,17 @@ public class Main extends Activity {
+@@ -7247,13 +7497,17 @@ public class Main extends Activity {
              boolean on = playingState != null ? playingState
                      : ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
              playIc.setImageBitmap(asset(on ? "ic/pause.png" : "ic/play_arrow.png"));
@@ -531,7 +574,7 @@ index 80fa1c6..98bdf5f 100644
              playerArt.setProgress(p / (float) durMs);
              timePosTv.setText(fmt(p) + "  /  " + fmt(durMs));
              if (faroBar != null) faroBar.set(p / (float) durMs);
-@@ -9053,7 +9271,12 @@ public class Main extends Activity {
+@@ -9053,7 +9307,12 @@ public class Main extends Activity {
              String pid = prefs.getString("premium_theme", Aurora.ID);
              LinearLayout r = rowBase(pn, I18n.t(Prem.name(pid)) + " · " + I18n.t("En uso"), "El tema arma la pantalla de inicio. Las tarjetas, la barra y el velocímetro de aquí se usan otra vez al quitarlo en Personalización.");
              r.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_STYLE); } });
@@ -545,7 +588,7 @@ index 80fa1c6..98bdf5f 100644
                  final String[] cols = Faro.CAR_COLORS;
                  int ci = Math.max(0, java.util.Arrays.asList(cols).indexOf(Faro.car(prefs.getString("faro_car", "silver"))));
                  choice(pn, "Color del carro", "El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.", Faro.CAR_NAMES, ci, new IntCb() { public void on(int i) {
-@@ -9099,6 +9322,12 @@ public class Main extends Activity {
+@@ -9099,6 +9358,12 @@ public class Main extends Activity {
                  }});
          }
          LinearLayout mp = section(body, "Mapa");
@@ -558,7 +601,7 @@ index 80fa1c6..98bdf5f 100644
          final String[] connKeys = {"both", "aa", "cp", "none"};
          choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
              new String[]{"Android Auto y CarPlay", "Solo Android Auto", "Solo CarPlay", "Ninguno"},
-@@ -10363,7 +10592,7 @@ public class Main extends Activity {
+@@ -10363,7 +10628,7 @@ public class Main extends Activity {
  
      private void refreshStates() {
          if (navSearchBtn != null) {
