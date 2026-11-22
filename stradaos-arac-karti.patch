@@ -1,22 +1,3 @@
-From e54179a76db3ca4cb3904aada8aa7d2a36b4ae9c Mon Sep 17 00:00:00 2001
-From: Claude <noreply@anthropic.com>
-Date: Thu, 19 Nov 2026 14:56:31 +0300
-Subject: [PATCH] =?UTF-8?q?Inicio:=20quita=20la=20foto=20del=20veh=C3=ADcu?=
- =?UTF-8?q?lo=20y=20agranda=20el=20veloc=C3=ADmetro=20mixto?=
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-
-La tarjeta del vehículo queda solo con el nombre (y su etiqueta al lado). El velocímetro usa todo el ancho y el
-alto libres, centrado. En el modo mixto el número, la unidad y los números de la escala son más grandes.
-
-Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01LAQpHxjNVwsMzQEBL4eM8d
----
- .../java/com/stradaos/launcher/Gauge.java     | 14 ++--
- .../main/java/com/stradaos/launcher/Main.java | 70 ++++++-------------
- 2 files changed, 31 insertions(+), 53 deletions(-)
-
 diff --git a/app/src/main/java/com/stradaos/launcher/Gauge.java b/app/src/main/java/com/stradaos/launcher/Gauge.java
 index 04e5094..3e4a554 100644
 --- a/app/src/main/java/com/stradaos/launcher/Gauge.java
@@ -60,10 +41,18 @@ index 04e5094..3e4a554 100644
              c.drawText(unit, cx, cy + r * 0.30f, pUnit);
              pBig.setColor(ring);
 diff --git a/app/src/main/java/com/stradaos/launcher/Main.java b/app/src/main/java/com/stradaos/launcher/Main.java
-index d5035d5..e8334c9 100644
+index 80fa1c6..dc06851 100644
 --- a/app/src/main/java/com/stradaos/launcher/Main.java
 +++ b/app/src/main/java/com/stradaos/launcher/Main.java
-@@ -1646,59 +1646,32 @@ public class Main extends Activity {
+@@ -159,6 +159,7 @@ public class Main extends Activity {
+     private TextView navDistTv, navStepTv, navEtaTv, speedSignTv, camBadgeTv, topNavDistTv;
+     private final List<Nav.Place> pendingStops = new ArrayList<Nav.Place>();
+     private LiveMapView liveMap;
++    private RoadScene roadScene;   // panel central alternativo: escena de carretera en vez del mapa
+     private MediaWatcher mediaWatcher;
+     private Hcn hcn;   // pantallas HCN / Hengchen (issue #5)
+     private boolean askedPerms;
+@@ -1745,59 +1746,32 @@ public class Main extends Activity {
      private void buildCarCard() {
          final FrameLayout card = card(carX, rowY, 300, cardH, CARD);
          carCard = card;
@@ -139,7 +128,7 @@ index d5035d5..e8334c9 100644
          if (!carSpeed) box.setVisibility(View.GONE);   // se arma igual: setGps y el kilometraje siguen funcionando
  
          LinearLayout lbl = new LinearLayout(this);
-@@ -1739,14 +1712,17 @@ public class Main extends Activity {
+@@ -1838,14 +1812,17 @@ public class Main extends Activity {
              carGauge.setUnit(useMph());
              carGauge.setNumber(speedo == 2);
              // Velocímetro centrado, lo más grande que quepa; debajo (afuera del velocímetro) la barrita del mantenimiento
@@ -161,6 +150,1561 @@ index d5035d5..e8334c9 100644
          }
          if (oilHome && speedo == 0) buildOilBadge(box, 0, 0);
          if (!oilHome) { oilValTv = null; oilBar = null; oilBarBg = null; oilLblTv = null; oilIc = null; }
--- 
-2.43.0
-
+@@ -2731,8 +2708,15 @@ public class Main extends Activity {
+             .show();
+     }
+ 
++    /** Panel central en modo «escena de carretera» (Ajustes → Pantalla de inicio → Mapa → Panel central). */
++    private boolean roadMid() { return "road".equals(prefs.getString("mid_panel", "map")); }
++
++    /** Mapa en vivo realmente activo: apagado a mano o reemplazado por la escena, no hay mapa ni navegación integrada. */
++    private boolean mapLive() { return prefs.getBoolean("map_live", true) && !roadMid(); }
++
+     private void buildAaCard() {
+-        if (!showMap) {
++        roadScene = null;
++        if (!showMap || Prem.ritmo()) {   // Ritmo: sin mapa, el espacio es de la tarjeta de música
+             liveMap = null; navHud = null; navTurnIc = null; navDistTv = null; navStepTv = null;
+             navEtaTv = null; navLaneBox = null; navLaneView = null; speedSignTv = null; camBadgeTv = null;
+             mapTagBox = null; mapTagTv = null; navSearchBtn = null; aaBtnTv = null; aaSubTv = null;
+@@ -2753,6 +2737,12 @@ public class Main extends Activity {
+         mapCardView = card;
+         // fondo decorativo mientras no hay GPS; encima, el mapa en vivo (Faro: sin dibujo de relleno, el área queda limpia)
+         if (!(premium && Prem.faro())) card.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
++        if (roadMid()) {
++            // escena de carretera: cubre el fondo y sigue la velocidad; sin mapa (como con «Mapa en vivo» apagado)
++            roadScene = new RoadScene(this, s, 20 * s);
++            card.addView(roadScene, new FrameLayout.LayoutParams(-1, -1));
++            liveMap = null; seedLastLocation(); buildAaCardRest(card); return;
++        }
+         if (!prefs.getBoolean("map_live", true)) { liveMap = null; seedLastLocation(); buildAaCardRest(card); return; }
+         liveMap = new LiveMapView(this, s, 20 * s);
+         card.addView(liveMap, new FrameLayout.LayoutParams(-1, -1));
+@@ -2811,7 +2801,7 @@ public class Main extends Activity {
+         goBtn.setOnClickListener(new View.OnClickListener() {
+             public void onClick(View v) { openNavSearch(); }
+         });
+-        if (!prefs.getBoolean("map_live", true) || !"internal".equals(prefs.getString("nav_app", null))) goBtn.setVisibility(View.GONE);
++        if (!mapLive() || !"internal".equals(prefs.getString("nav_app", null))) goBtn.setVisibility(View.GONE);
+         navSearchBtn = goBtn;
+         mapTagBox = topRow;
+         placeWrap(card, topRow, 16, 16);
+@@ -2874,6 +2864,7 @@ public class Main extends Activity {
+         boolean wx = nBtn < 2 && prefs.getBoolean("weather_on", true) && !(premium && !mapOnly);
+         boolean hasPanel = nBtn > 0 || wx;
+         final float panelY = hasPanel ? mapH - 96 : mapH, panelW = mapW - 24 - insL - insR;
++        if (roadScene != null) roadScene.setInsets(52 * s, (hasPanel ? mapH - panelY + 8 : 12) * s);
+         final FrameLayout panel = new FrameLayout(this);
+         panel.setBackground(round(faroT ? Faro.glass(LIGHT) : (CARD & 0x00FFFFFF) | 0xEB000000, 16));
+         place(card, panel, 12 + insL, panelY, panelW, 84);
+@@ -3408,6 +3399,7 @@ public class Main extends Activity {
+         if (!prefs.getBoolean("map_live", true)) mapTagTv.setText(I18n.t("Mapa en vivo apagado"));
+         else if (!live && st == 1) mapTagTv.setText(I18n.t("Sin permiso de ubicación · toca aquí"));
+         else if (!live && st == 2) mapTagTv.setText(I18n.t("Ubicación apagada · toca aquí"));
++        else if (roadMid()) mapTagTv.setText(I18n.t(live ? "GPS" : gpsStartAt > 0 && SystemClock.elapsedRealtime() - gpsStartAt > 180000 ? "Sin señal GPS · toca aquí" : "Buscando GPS…"));
+         else if (liveMap == null || !liveMap.hasFix())
+             mapTagTv.setText(I18n.t(gpsStartAt > 0 && SystemClock.elapsedRealtime() - gpsStartAt > 180000 ? "Sin señal GPS · toca aquí" : "Buscando GPS…"));
+         else if (liveMap.usingFile()) mapTagTv.setText(I18n.t(live ? "Mapa sin conexión" : "Sin señal GPS · mapa sin conexión"));
+@@ -3421,7 +3413,7 @@ public class Main extends Activity {
+         boolean mph = useMph();
+         Nav.Step st = Nav.currentStep();
+         if (topNavPill != null) {
+-            boolean showPill = r != null && (!showMap || !prefs.getBoolean("map_live", true));
++            boolean showPill = r != null && (!showMap || !mapLive());
+             topNavPill.setVisibility(showPill ? View.VISIBLE : View.GONE);
+             if (showPill) {
+                 if (topNavIc != null) topNavIc.setIcon(st != null ? st.icon : 0);
+@@ -4397,6 +4389,14 @@ public class Main extends Activity {
+ 
+     private float faroColX, faroColY, faroColW, faroColH, faroRX, faroRW, faroWxY, faroWxH, faroMtY, faroMtH,
+         faroPlX, faroPlY, faroPlW, faroPlH, faroTopX;
++    // Ritmo (tema): tarjeta de música grande, clima arriba, mantenimientos bajo el carro, calzada que corre con la velocidad
++    private float ritmoX, ritmoY, ritmoW, ritmoH;
++    private Ritmo.Flow ritmoFlow;
++    private Ritmo.Eq ritmoEq;
++    private Ritmo.Lyrics ritmoLy;
++    private Faro.Icon ritmoWxIc;
++    private TextView ritmoWxTv, ritmoWxHiLoTv;
++
+     private FaroGauge faroGauge;
+     private Faro.Timeline faroBar;
+     private Faro.Icon faroWxIc;
+@@ -4408,7 +4408,189 @@ public class Main extends Activity {
+     /** Modo del último inicio armado con Faro (null = ninguno todavía): para encender o apagar los faros. */
+     private static Boolean faroLastLight;
+ 
++
++    // ───────────────────────── tema Ritmo ─────────────────────────
++
++    /**
++     * Horizontal: la columna del carro a la izquierda (velocímetro, carro y, abajo, los mantenimientos); el resto, bajo
++     * la barra de arriba, es una sola tarjeta de música hasta la barra de apps. Vertical: la tarjeta de música arriba;
++     * debajo, el carro a la izquierda y los mantenimientos a la derecha.
++     */
++    private void ritmoMetrics() {
++        float W0 = premW();
++        premHeadH = 0;
++        premWide = false;
++        premPillH = noDock ? 0 : vertical ? 60 : 56;
++        dockTop = noDock ? boardH : boardH - 10 - premPillH;
++        float bottom = dockTop - (noDock ? 12 : 10), top = 8, topH = 34;
++        faroPlH = 0; faroPlY = bottom;
++        faroWxY = 0; faroWxH = 0;
++        if (vertical) {
++            float rh = shortVertical ? 300 : Math.max(300, Math.min(470, boardH * 0.36f));
++            float ry = bottom - rh;
++            faroTopX = 12;
++            mapX = 12; mapY = top + topH + 4; mapW = W0 - 24;
++            mapH = Math.max(120, ry - 10 - mapY);
++            faroColX = 12; faroColY = ry; faroColW = 290; faroColH = rh;
++            faroRX = faroColX + faroColW + 12; faroRW = W0 - 12 - faroRX;
++            faroMtY = ry; faroMtH = rh;
++            faroPlX = 12; faroPlW = W0 - 24;
++        } else {
++            faroColX = 12; faroColY = top; faroColW = 292 + Math.min(64, ex / 6f);
++            float rx0 = faroColX + faroColW + 12;
++            faroTopX = rx0;
++            mapX = rx0; mapY = top + topH + 4; mapW = W0 - 12 - rx0;
++            mapH = Math.max(120, bottom - mapY);
++            faroMtH = Math.max(96, Math.min(150, boardH * 0.25f));
++            faroMtY = boardH - 12 - faroMtH;
++            faroColH = faroMtY - 12 - top;
++            faroRX = faroColX; faroRW = faroColW;
++            faroPlX = rx0; faroPlW = W0 - 12 - rx0;
++        }
++        ritmoX = mapX; ritmoY = mapY; ritmoW = mapW; ritmoH = mapH;
++        cardH = mapH; rowY = mapY; insL = insR = 0;
++        carX = audX = 16; audW = 248;
++    }
++
++    private void buildRitmo() {
++        premHeadViews.clear();
++        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; faroPillIc = null;
++        ritmoFlow = null; ritmoEq = null; ritmoLy = null; ritmoWxIc = null; ritmoWxTv = null; ritmoWxHiLoTv = null;
++        panelWx = null;
++        buildFaroTop();
++        buildRitmoWeather();
++        buildAaCard();            // con Ritmo no arma el mapa: solo deja en blanco lo que el mapa usaba
++        buildFaroColumn();
++        buildFaroMaint(vertical ? faroRX : faroColX, faroMtY, vertical ? faroRW : faroColW, faroMtH);
++        buildRitmoMusic(ritmoX, ritmoY, ritmoW, ritmoH);
++        if (!noDock) buildFaroDock();
++        updateOilBadge();
++    }
++
++    /** El clima en pocas palabras, arriba junto a la hora y la fecha: ícono, temperatura y máxima / mínima. */
++    private void buildRitmoWeather() {
++        if (!(premTopRow instanceof LinearLayout) || !prefs.getBoolean("weather_on", true)) return;
++        LinearLayout box = new LinearLayout(this);
++        box.setGravity(Gravity.CENTER_VERTICAL);
++        box.setPadding((int) (16 * s), 0, 0, 0);
++        ritmoWxIc = new Faro.Icon(this, Faro.I_CLOUD, TEXT);
++        ritmoWxIc.setStroke(1.35f);
++        box.addView(ritmoWxIc, new LinearLayout.LayoutParams((int) (22 * s), (int) (22 * s)));
++        ritmoWxTv = tv("--°", 16, TEXT, true);
++        ritmoWxTv.setPadding((int) (6 * s), 0, 0, 0);
++        box.addView(ritmoWxTv);
++        ritmoWxHiLoTv = tv("", 12, MUTED, false);
++        ritmoWxHiLoTv.setPadding((int) (8 * s), 0, 0, 0);
++        box.addView(ritmoWxHiLoTv);
++        ((LinearLayout) premTopRow).addView(box);
++        box.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showWeatherDetail(); } });
++        renderRitmoWx();
++    }
++
++    private void renderRitmoWx() {
++        if (ritmoWxIc == null) return;
++        Weather.Now n = weatherNow;
++        if (n == null) {
++            ritmoWxTv.setText("--°");
++            ritmoWxHiLoTv.setText("");
++            ritmoWxIc.set(Faro.I_CLOUD);
++            return;
++        }
++        ritmoWxTv.setText(deg(n.temp));
++        ritmoWxIc.set(Faro.weatherIcon(n.code, n.day));
++        Weather.Day d = n.today();
++        ritmoWxHiLoTv.setText(d != null ? deg(d.hi) + " / " + deg(d.lo) : "");
++    }
++
++    /**
++     * La tarjeta de música grande. Arriba: carátula, canción y artista. En el medio: las barras que bailan y, debajo, la
++     * letra en horizontal. Abajo: la línea de tiempo y los botones, separados del texto.
++     */
++    private void buildRitmoMusic(float x, float y, float w, float hh) {
++        final FrameLayout card = faroCard(x, y, w, hh);
++        float pad = 18;
++        float A = Math.max(46, Math.min(76, hh * 0.22f));
++        float hb = 14 + A;                                  // donde termina la cabecera
++        float ctlH = Math.max(56, Math.min(72, hh * 0.2f));
++        float ctlY = hh - 12 - ctlH;
++        float tlY = ctlY - 6 - 18;
++        float lyEnd = tlY - 20;                             // la letra termina sobre la hora
++        float avail = lyEnd - (hb + 8);
++        float eqH = avail >= 120 ? Math.max(24, Math.min(56, avail * 0.28f)) : 0;
++        float eqY = hb + 8, lyY = eqY + eqH + (eqH > 0 ? 6 : 0), lyH = Math.max(40, lyEnd - lyY);
++
++        playerArt = new PlayerArt(this, s, asset("ic/music_note.png"));
++        playerArt.setTile(LIGHT ? 0x14000000 : 0x1FFFFFFF);
++        place(card, playerArt, pad, 14, A, A);
++        float tx = pad + A + 14, tagW = Math.min(150, w * 0.22f), tw = Math.max(60, w - tx - pad - tagW);
++        trackTv = tv("Nada sonando", 20, TEXT, true);
++        place(card, trackTv, tx, 14 + A / 2f - 27, tw, 27);
++        artistTv = tv("Radio, Bluetooth o USB", 14, MUTED, false);
++        place(card, artistTv, tx, 14 + A / 2f + 2, tw, 20);
++        sourceTv = tv("", 10, MUTED, true);
++        sourceTv.setGravity(Gravity.RIGHT);
++        place(card, sourceTv, w - pad - tagW, 16, tagW, 14);
++
++        if (eqH > 0) {
++            ritmoEq = new Ritmo.Eq(this, s, RED, TEXT);
++            float ew = Math.min(w - 2 * pad, 560);
++            place(card, ritmoEq, (w - ew) / 2f, eqY, ew, eqH);
++        }
++        ritmoLy = new Ritmo.Lyrics(this, s, TEXT, MUTED, prefs.getBoolean("ritmo_lyrics", true),
++            I18n.t("Letra no disponible"), I18n.t("Buscando la letra…"));
++        place(card, ritmoLy, pad, lyY, w - 2 * pad, lyH);
++
++        timePosTv = tv("", 12, MUTED, false);
++        timePosTv.setGravity(Gravity.RIGHT);
++        place(card, timePosTv, w - pad - 180, tlY - 17, 180, 16);
++        faroBar = new Faro.Timeline(this, s, Faro.track(LIGHT), TEXT);
++        place(card, faroBar, pad - 5, tlY, w - 2 * pad + 10, 18);
++
++        // botones: anterior, reproducir y siguiente, centrados y aparte del texto
++        float bs = Math.min(56, ctlH), ps = Math.min(68, ctlH + 6), gap = 22;
++        float total = bs + ps + bs + 2 * gap, bx = (w - total) / 2f, cyc = ctlY + ctlH / 2f;
++        FrameLayout prev = faroIconBtn(Faro.I_PREV, bs, 28, Faro.tile(LIGHT)), next = faroIconBtn(Faro.I_NEXT, bs, 28, Faro.tile(LIGHT));
++        FrameLayout play = new FrameLayout(this);
++        play.setBackground(round(RED, ps / 2f));
++        playIc = new ImageView(this);
++        playIc.setImageBitmap(asset("ic/play_arrow.png"));
++        playIc.setColorFilter(0xFFFFFFFF);
++        FrameLayout.LayoutParams plp = new FrameLayout.LayoutParams((int) (ps * 0.52f * s), (int) (ps * 0.52f * s));
++        plp.gravity = Gravity.CENTER;
++        play.addView(playIc, plp);
++        place(card, prev, bx, cyc - bs / 2f, bs, bs);
++        place(card, play, bx + bs + gap, cyc - ps / 2f, ps, ps);
++        place(card, next, bx + bs + gap + ps + gap, cyc - bs / 2f, bs, bs);
++        final View.OnClickListener goPrev = mediaClick(KeyEvent.KEYCODE_MEDIA_PREVIOUS), goNext = mediaClick(KeyEvent.KEYCODE_MEDIA_NEXT);
++        prev.setOnClickListener(goPrev);
++        play.setOnClickListener(mediaClick(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE));
++        next.setOnClickListener(goNext);
++
++        // tocar la cabecera abre la app de música; presión larga, el diagnóstico; deslizar cambia de canción
++        View hdr = new View(this);
++        place(card, hdr, 0, 0, w, hb + 4);
++        hdr.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { openMusicApp(); } });
++        hdr.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { showPlayerDiag(); return true; } });
++        hdr.setOnTouchListener(new View.OnTouchListener() {
++            float x0t, y0t;
++            public boolean onTouch(View v, MotionEvent e) {
++                if (e.getActionMasked() == MotionEvent.ACTION_DOWN) { x0t = e.getX(); y0t = e.getY(); return false; }
++                if (e.getActionMasked() != MotionEvent.ACTION_UP) return false;
++                float dx = e.getX() - x0t, dy = e.getY() - y0t;
++                if (Math.abs(dx) < 50 * s || Math.abs(dx) < 2 * Math.abs(dy)) return false;
++                MotionEvent c = MotionEvent.obtain(e);
++                c.setAction(MotionEvent.ACTION_CANCEL);
++                v.onTouchEvent(c);
++                c.recycle();
++                (dx < 0 ? goNext : goPrev).onClick(v);
++                return true;
++            }
++        });
++        renderTrack();
++    }
++
+     private void faroMetrics() {
++        if (Prem.ritmo()) { ritmoMetrics(); return; }
+         float W0 = premW();
+         premHeadH = 0;
+         premWide = false;
+@@ -4448,6 +4630,7 @@ public class Main extends Activity {
+     }
+ 
+     private void buildFaro() {
++        if (Prem.ritmo()) { buildRitmo(); return; }
+         premHeadViews.clear();
+         faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; faroPillIc = null;
+         buildFaroTop();
+@@ -4557,6 +4740,13 @@ public class Main extends Activity {
+         float carY = labelY + labelH + 2, carH = Math.max(60, carSpeed ? y + hh - carY : Math.min(carMax, y + hh - carY));
+         String col = Faro.car(prefs.getString("faro_car", "silver"));
+         Faro.Car car = new Faro.Car(this, col, LIGHT);
++        ritmoFlow = null;
++        if (Prem.ritmo()) {
++            // Ritmo: la calzada pasa bajo el carro al ritmo de la velocidad; el carro no cambia
++            ritmoFlow = new Ritmo.Flow(this, s, TEXT, RED);
++            ritmoFlow.setCarHalf(Faro.carRect(w * s, carH * s).width() / 2f);
++            place(board, ritmoFlow, x, carY, w, carH);
++        }
+         place(board, car, x, carY, w, carH);
+         car.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_VEHICLE); } });
+         car.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { chooseFaroCar(); return true; } });
+@@ -4693,6 +4883,7 @@ public class Main extends Activity {
+     }
+ 
+     private void renderFaroWx() {
++        if (Prem.ritmo()) { renderRitmoWx(); return; }
+         if (faroWxIc == null) return;
+         Weather.Now n = weatherNow;
+         faroHours.removeAllViews();
+@@ -5445,6 +5636,7 @@ public class Main extends Activity {
+             View th;
+             boolean sel = inUse && (i == 1) == LIGHT;
+             if (Cobalto.ID.equals(id)) { Cobalto.Thumb t = new Cobalto.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
++            else if (Ritmo.ID.equals(id)) { Ritmo.Thumb t = new Ritmo.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
+             else if (Faro.ID.equals(id)) { Faro.Thumb t = new Faro.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
+             else { Aurora.Thumb t = new Aurora.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
+             col.addView(th, new LinearLayout.LayoutParams(-1, -2));
+@@ -5700,7 +5892,7 @@ public class Main extends Activity {
+         Nav.Place p = Nav.savedPlace(this, key);
+         if (p == null) {
+             toast("Configura «" + label + "» primero en Navegación");
+-            if (prefs.getBoolean("map_live", true)) openNavSearch();
++            if (mapLive()) openNavSearch();
+             return;
+         }
+         startInternalNav(p);
+@@ -5896,7 +6088,7 @@ public class Main extends Activity {
+     /** App de navegación elegida; si se elige integrada en el mapa, abre búsqueda/menú interno. */
+     private void openNavApp() {
+         String navPref = prefs.getString("nav_app", null);
+-        if (prefs.getBoolean("map_live", true) && "internal".equals(navPref)) {
++        if (mapLive() && "internal".equals(navPref)) {
+             if (Nav.active != null) openNavMenu();
+             else openNavSearch();
+             return;
+@@ -5918,7 +6110,7 @@ public class Main extends Activity {
+     }
+ 
+     private void openNavSearch(final boolean insertActive) {
+-        if (!prefs.getBoolean("map_live", true)) { toast("Activa el mapa en vivo en Ajustes → Mapa y clima"); return; }
++        if (!mapLive()) { toast(roadMid() ? "Cambia el panel central a «Mapa» en Ajustes" : "Activa el mapa en vivo en Ajustes → Mapa y clima"); return; }
+         final android.app.AlertDialog[] dref = new android.app.AlertDialog[1];
+         final boolean[] addStopMode = {false};
+         LinearLayout wrap = new LinearLayout(this);
+@@ -6756,6 +6948,8 @@ public class Main extends Activity {
+         speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
+         if (carGauge != null) carGauge.setSpeed(kmh < 2 ? 0 : v, ok);
+         if (mapGauge != null) mapGauge.setSpeed(kmh < 2 ? 0 : v, ok);
++        if (roadScene != null) roadScene.setSpeed(ok && kmh >= 2 ? kmh : 0);
++        if (ritmoFlow != null) ritmoFlow.setSpeed(ok && kmh >= 2 ? kmh : 0);
+         if (faroGauge != null) {
+             faroGauge.setSpeed(kmh < 2 ? 0 : v, ok);
+             int lim = Nav.active != null && Nav.curSpeedLimitKmh > 0
+@@ -7247,13 +7441,17 @@ public class Main extends Activity {
+             boolean on = playingState != null ? playingState
+                     : ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
+             playIc.setImageBitmap(asset(on ? "ic/pause.png" : "ic/play_arrow.png"));
++            if (ritmoEq != null) ritmoEq.setPlaying(on);
++            if (ritmoLy != null) ritmoLy.setPlaying(on);
+         }
++        if (ritmoLy != null) ritmoLy.setTrack(curTitle, curArtist, durMs);
+     }
+ 
+     private void updateProgress() {
+         if (playerArt == null || (curTitle == null && curArtist == null)) return;
+         if (durMs > 0 && posKnown) {
+             long p = currentPos();
++            if (ritmoLy != null) ritmoLy.setPos(p);
+             playerArt.setProgress(p / (float) durMs);
+             timePosTv.setText(fmt(p) + "  /  " + fmt(durMs));
+             if (faroBar != null) faroBar.set(p / (float) durMs);
+@@ -9053,7 +9251,12 @@ public class Main extends Activity {
+             String pid = prefs.getString("premium_theme", Aurora.ID);
+             LinearLayout r = rowBase(pn, I18n.t(Prem.name(pid)) + " · " + I18n.t("En uso"), "El tema arma la pantalla de inicio. Las tarjetas, la barra y el velocímetro de aquí se usan otra vez al quitarlo en Personalización.");
+             r.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_STYLE); } });
+-            if (Faro.ID.equals(pid)) {
++            if (Ritmo.ID.equals(pid)) {
++                toggle(pn, "Letra de la canción", "Busca la letra en internet (LRCLIB) con el título y el artista de lo que suena. Apágalo si no quieres que salgan de la pantalla.", prefs.getBoolean("ritmo_lyrics", true), new IntCb() { public void on(int i) {
++                    prefs.edit().putBoolean("ritmo_lyrics", i == 1).apply(); rebuild(); showSettings(C_HOME);
++                }});
++            }
++            if (Faro.ID.equals(pid) || Ritmo.ID.equals(pid)) {
+                 final String[] cols = Faro.CAR_COLORS;
+                 int ci = Math.max(0, java.util.Arrays.asList(cols).indexOf(Faro.car(prefs.getString("faro_car", "silver"))));
+                 choice(pn, "Color del carro", "El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.", Faro.CAR_NAMES, ci, new IntCb() { public void on(int i) {
+@@ -9099,6 +9302,12 @@ public class Main extends Activity {
+                 }});
+         }
+         LinearLayout mp = section(body, "Mapa");
++        final String[] midKeys = {"map", "road"};
++        choice(mp, "Panel central", "Mapa, o una escena de carretera animada con tu auto rojo. Con la escena no hay navegación integrada",
++            new String[]{"Mapa", "Escena de carretera"},
++            Math.max(0, java.util.Arrays.asList(midKeys).indexOf(prefs.getString("mid_panel", "map"))), new IntCb() { public void on(int i) {
++                prefs.edit().putString("mid_panel", midKeys[i]).apply(); rebuild();
++            }});
+         final String[] connKeys = {"both", "aa", "cp", "none"};
+         choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
+             new String[]{"Android Auto y CarPlay", "Solo Android Auto", "Solo CarPlay", "Ninguno"},
+@@ -10363,7 +10572,7 @@ public class Main extends Activity {
+ 
+     private void refreshStates() {
+         if (navSearchBtn != null) {
+-            boolean showGo = prefs.getBoolean("map_live", true) && "internal".equals(prefs.getString("nav_app", null));
++            boolean showGo = mapLive() && "internal".equals(prefs.getString("nav_app", null));
+             navSearchBtn.setVisibility(showGo ? View.VISIBLE : View.GONE);
+         }
+         if (aaBtnTv == null && cpSubTv == null) return;
+diff --git a/app/src/main/java/com/stradaos/launcher/Prem.java b/app/src/main/java/com/stradaos/launcher/Prem.java
+index 6bba6b7..a9c8fa5 100644
+--- a/app/src/main/java/com/stradaos/launcher/Prem.java
++++ b/app/src/main/java/com/stradaos/launcher/Prem.java
+@@ -10,13 +10,13 @@ import android.graphics.Canvas;
+ final class Prem {
+     private Prem() { }
+ 
+-    static final String[] IDS = {Aurora.ID, Cobalto.ID, Faro.ID};
++    static final String[] IDS = {Aurora.ID, Cobalto.ID, Faro.ID, Ritmo.ID};
+     static String style = Aurora.ID;
+ 
+-    static boolean known(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Faro.ID.equals(id); }
++    static boolean known(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Faro.ID.equals(id) || Ritmo.ID.equals(id); }
+ 
+     /** Temas premium que se regalan a todos (lanzamiento de la 2.24). Los que vengan después se desbloquean con una donación (Fase 3). */
+-    static boolean free(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id); }
++    static boolean free(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Ritmo.ID.equals(id); }
+     /** Cuántos temas se desbloquean con donación. Con dos o más, la app ofrece sola el paquete de 8 USD por dos temas. */
+     static int paidCount() {
+         int n = 0;
+@@ -27,12 +27,16 @@ final class Prem {
+     static boolean forceBundle;
+     static boolean bundle() { return forceBundle || paidCount() >= 2; }
+     static boolean cob() { return Cobalto.ID.equals(style); }
+-    static boolean faro() { return Faro.ID.equals(style); }
++    /** Ritmo comparte los colores, el fondo y casi todo el armado de Faro: por eso «faro()» también es verdad con Ritmo. */
++    static boolean faro() { return Faro.ID.equals(style) || Ritmo.ID.equals(style); }
++    static boolean ritmo() { return Ritmo.ID.equals(style); }
+     /** Solo Aurora tiene «Solo mapa» (Cobalto y Faro son fijos). */
+     static boolean mapOnlyOk() { return Aurora.ID.equals(style); }
+ 
+-    static String name(String id) { return Cobalto.ID.equals(id) ? "Cobalto" : Faro.ID.equals(id) ? "Faro" : "Aurora"; }
++    static String name(String id) { return Cobalto.ID.equals(id) ? "Cobalto" : Faro.ID.equals(id) ? "Faro" : Ritmo.ID.equals(id) ? "Ritmo" : "Aurora"; }
+     static String desc(String id) {
++        if (Ritmo.ID.equals(id))
++            return "Una tarjeta de música enorme al centro: canción, barras que bailan y la letra en horizontal, con los botones aparte. El clima va arriba junto a la fecha, el mantenimiento bajo el carro, y la calzada pasa bajo el carro según la velocidad.";
+         if (Faro.ID.equals(id))
+             return "Fondo carbón (o perla en claro) con un haz de luz diagonal. A la izquierda, el velocímetro y un carro visto desde arriba que enciende los faros de noche; en el centro, el mapa integrado al fondo; a la derecha, el clima por horas y tus próximos mantenimientos, con el reproductor y la barra de apps debajo.";
+         return Cobalto.ID.equals(id)
+diff --git a/app/src/main/java/com/stradaos/launcher/Ritmo.java b/app/src/main/java/com/stradaos/launcher/Ritmo.java
+new file mode 100644
+index 0000000..2213380
+--- /dev/null
++++ b/app/src/main/java/com/stradaos/launcher/Ritmo.java
+@@ -0,0 +1,602 @@
++package com.stradaos.launcher;
++
++import android.content.Context;
++import android.graphics.Bitmap;
++import android.graphics.Canvas;
++import android.graphics.Paint;
++import android.graphics.RectF;
++import android.graphics.Shader;
++import android.graphics.Typeface;
++import android.os.SystemClock;
++import android.view.View;
++
++import org.json.JSONArray;
++import org.json.JSONObject;
++
++import java.net.URLEncoder;
++import java.util.ArrayList;
++import java.util.Collections;
++import java.util.Comparator;
++import java.util.HashMap;
++
++/**
++ * Tema «Ritmo»: los colores y el fondo de Faro, pero el mapa, el clima y los mantenimientos se van de la zona central
++ * y todo ese espacio es una sola tarjeta de música grande: carátula, canción y artista arriba, barras que bailan en
++ * el medio, la letra en horizontal y, abajo, la línea de tiempo y los botones (anterior, reproducir, siguiente).
++ * El clima va arriba junto a la fecha y los mantenimientos bajo el carro. El carro no cambia: lo único que se mueve es
++ * la calzada que pasa por debajo, al ritmo de la velocidad.
++ *
++ * Aquí viven las vistas nuevas (barras, letra, calzada) y la miniatura de la galería; el armado está en Main.
++ */
++final class Ritmo {
++    private Ritmo() { }
++
++    static final String ID = "ritmo";
++
++    private static int al(int c, float a) {
++        int a0 = (c >>> 24) & 0xFF;
++        return (Math.max(0, Math.min(255, (int) (a0 * a))) << 24) | (c & 0xFFFFFF);
++    }
++
++    // ───────────────────────── calzada que pasa bajo el carro ─────────────────────────
++
++    /**
++     * Rayas de carril y bordes de la calzada que corren hacia abajo (el carro va hacia arriba, visto desde arriba).
++     * La velocidad real manda: detenido queda quieto (y no gasta batería); a 100 km/h pasan rápido.
++     */
++    static final class Flow extends View {
++        private final float s;
++        private final int text, accent;
++        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++        private final RectF r = new RectF();
++        private float speed, shown, off, carHalf;
++        private long last;
++
++        Flow(Context c, float scale, int textColor, int accentColor) {
++            super(c);
++            s = scale;
++            text = textColor;
++            accent = accentColor;
++        }
++
++        /** Mitad del ancho del carro en px (para dejarle sitio a los lados). */
++        void setCarHalf(float px) { carHalf = px; }
++
++        void setSpeed(float kmh) {
++            boolean was = speed > 0.2f || shown > 0.3f;
++            speed = kmh < 2 ? 0 : Math.min(kmh, 220f);
++            if (!was && speed > 0.2f) { last = 0; invalidate(); }
++        }
++
++        private static float fade(float y, float h) {
++            float t = y / h;
++            return Math.max(0f, Math.min(1f, t / 0.22f)) * Math.max(0f, Math.min(1f, (1f - t) / 0.16f));
++        }
++
++        @Override protected void onDraw(Canvas c) {
++            int w = getWidth(), h = getHeight();
++            if (w <= 0 || h <= 0) return;
++            long now = SystemClock.uptimeMillis();
++            float dt = last == 0 ? 0f : Math.min(0.06f, (now - last) / 1000f);
++            last = now;
++            shown += (speed - shown) * Math.min(1f, dt * 2.5f);
++            if (Math.abs(speed - shown) < 0.3f) shown = speed;
++            off += shown * 2.3f * s * dt;
++
++            float cx = w / 2f;
++            float edge = w / 2f - 10 * s;
++            float half = carHalf > 0 ? carHalf : w * 0.2f;
++            float lane = Math.min(edge - 12 * s, Math.max(half + 16 * s, edge * 0.64f));
++            p.setStyle(Paint.Style.FILL);
++
++            // rayas de carril
++            float period = 64 * s, dash = 26 * s, o = off % period;
++            for (float y = o - period; y < h; y += period) {
++                float a = fade(y + dash / 2f, h);
++                if (a <= 0.02f) continue;
++                p.setColor(al(text, 0.34f * a));
++                r.set(cx - lane - 1.3f * s, y, cx - lane + 1.3f * s, y + dash);
++                c.drawRoundRect(r, 1.3f * s, 1.3f * s, p);
++                r.set(cx + lane - 1.3f * s, y, cx + lane + 1.3f * s, y + dash);
++                c.drawRoundRect(r, 1.3f * s, 1.3f * s, p);
++            }
++            // bordes de la calzada, con el color del tema
++            float seg = 6 * s;
++            for (float y = 0; y < h; y += seg) {
++                float a = fade(y + seg / 2f, h);
++                if (a <= 0.02f) continue;
++                p.setColor(al(accent, 0.55f * a));
++                c.drawRect(cx - edge - 1.3f * s, y, cx - edge + 1.3f * s, y + seg + 0.5f, p);
++                c.drawRect(cx + edge - 1.3f * s, y, cx + edge + 1.3f * s, y + seg + 0.5f, p);
++            }
++            // bandas sonoras del borde: dan la sensación de velocidad
++            float p2 = 18 * s, o2 = off % p2;
++            for (float y = o2 - p2; y < h; y += p2) {
++                float a = fade(y, h);
++                if (a <= 0.02f) continue;
++                p.setColor(al(accent, 0.30f * a));
++                c.drawRect(cx - edge + 1.3f * s, y, cx - edge + 7 * s, y + 2.2f * s, p);
++                c.drawRect(cx + edge - 7 * s, y, cx + edge - 1.3f * s, y + 2.2f * s, p);
++            }
++            if (speed > 0.2f || shown > 0.3f) postInvalidateDelayed(33); else last = 0;
++        }
++    }
++
++    // ───────────────────────── barras que bailan ─────────────────────────
++
++    /** Ecualizador animado: baila cuando suena la música y se aquieta cuando está en pausa. */
++    static final class Eq extends View {
++        private final float s;
++        private final int accent, text;
++        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++        private final RectF r = new RectF();
++        private boolean playing;
++        private float level = 0.06f;
++        private long last;
++        private float t;
++
++        Eq(Context c, float scale, int accentColor, int textColor) {
++            super(c);
++            s = scale;
++            accent = accentColor;
++            text = textColor;
++        }
++
++        void setPlaying(boolean on) {
++            if (on == playing) return;
++            playing = on;
++            last = 0;
++            invalidate();
++        }
++
++        @Override protected void onDraw(Canvas c) {
++            int w = getWidth(), h = getHeight();
++            if (w <= 0 || h <= 0) return;
++            long now = SystemClock.uptimeMillis();
++            float dt = last == 0 ? 0f : Math.min(0.08f, (now - last) / 1000f);
++            last = now;
++            t += dt;
++            float target = playing ? 1f : 0.06f;
++            level += (target - level) * Math.min(1f, dt * 5f);
++            int n = Math.max(12, Math.min(56, (int) (w / (9 * s))));
++            float slot = w / (float) n, bw = slot * 0.56f, mid = h / 2f;
++            p.setStyle(Paint.Style.FILL);
++            for (int i = 0; i < n; i++) {
++                float ph = i * 0.73f;
++                float a1 = 0.5f * ((float) Math.sin(t * (2.1f + (i % 5) * 0.37f) + ph) + 1f);
++                float a2 = 0.5f * ((float) Math.sin(t * (3.3f + (i % 3) * 0.5f) + ph * 1.7f) + 1f);
++                float a = 0.6f * a1 + 0.4f * a2;
++                float pos = (i + 0.5f) / n;
++                float env = 0.40f + 0.60f * (float) Math.sin(Math.PI * pos);   // más altas en el centro
++                float bh = Math.max(3 * s, h * (0.10f + 0.90f * a * env) * level);
++                bh = Math.min(bh, h);
++                float edge = 1f - Math.abs(pos - 0.5f) * 1.2f;
++                p.setColor(al(accent, 0.45f + 0.55f * Math.max(0f, edge)));
++                float x = i * slot + (slot - bw) / 2f;
++                r.set(x, mid - bh / 2f, x + bw, mid + bh / 2f);
++                c.drawRoundRect(r, bw / 2f, bw / 2f, p);
++            }
++            if (playing || level > 0.075f) postInvalidateDelayed(40); else last = 0;
++        }
++    }
++
++    // ───────────────────────── letra de la canción ─────────────────────────
++
++    private static final HashMap<String, Object[]> CACHE = new HashMap<String, Object[]>();
++
++    private static String enc(String v) {
++        try { return URLEncoder.encode(v == null ? "" : v, "UTF-8"); } catch (Throwable e) { return ""; }
++    }
++
++    /** Quita lo que estorba al buscar: «(feat. …)», «[Remastered]» y los espacios de sobra. */
++    static String clean(String t) {
++        if (t == null) return "";
++        return t.replaceAll("\\s*[\\(\\[][^\\)\\]]*[\\)\\]]", "").replaceAll("\\s+", " ").trim();
++    }
++
++    static String firstArtist(String a) {
++        if (a == null) return "";
++        String x = a;
++        String[] seps = {",", ";", " & ", " feat", " ft.", " ft ", " x ", "/"};
++        for (String sp : seps) {
++            int i = x.toLowerCase().indexOf(sp);
++            if (i > 0) x = x.substring(0, i);
++        }
++        return x.trim();
++    }
++
++    private static long parseTag(String tag) {
++        try {
++            int i = tag.indexOf(':');
++            if (i < 1) return -1;
++            int mm = Integer.parseInt(tag.substring(0, i).trim());
++            double ss = Double.parseDouble(tag.substring(i + 1).trim());
++            return (long) (mm * 60000L + ss * 1000);
++        } catch (Throwable e) { return -1; }
++    }
++
++    /** Busca la letra en LRCLIB (gratis, sin cuenta). Devuelve {tiempos|null, líneas, sincronizada} o null si no hay. */
++    private static Object[] lookup(String title, String artist, long durMs) {
++        String key = title.toLowerCase() + "|" + artist.toLowerCase();
++        synchronized (CACHE) {
++            Object[] hit = CACHE.get(key);
++            if (hit != null) return hit;
++        }
++        try {
++            String q = "track_name=" + enc(title) + "&artist_name=" + enc(artist);
++            JSONObject o = null;
++            try {
++                String u = "https://lrclib.net/api/get?" + q + (durMs > 0 ? "&duration=" + (durMs / 1000) : "");
++                o = new JSONObject(new String(Net.get(u, 8000), "UTF-8"));
++            } catch (Throwable e) { o = null; }
++            if (o == null || (o.optString("syncedLyrics", "").length() == 0 && o.optString("plainLyrics", "").length() == 0)) {
++                JSONArray arr = new JSONArray(new String(Net.get("https://lrclib.net/api/search?" + q, 8000), "UTF-8"));
++                o = null;
++                JSONObject plain = null;
++                for (int i = 0; i < arr.length(); i++) {
++                    JSONObject x = arr.optJSONObject(i);
++                    if (x == null) continue;
++                    if (!x.isNull("syncedLyrics") && x.optString("syncedLyrics", "").length() > 0) { o = x; break; }
++                    if (plain == null && !x.isNull("plainLyrics") && x.optString("plainLyrics", "").length() > 0) plain = x;
++                }
++                if (o == null) o = plain;
++            }
++            if (o == null) return null;
++            Object[] res = null;
++            String syn = o.isNull("syncedLyrics") ? "" : o.optString("syncedLyrics", "");
++            if (syn.length() > 0) res = parseSynced(syn);
++            if (res == null) {
++                String pl = o.isNull("plainLyrics") ? "" : o.optString("plainLyrics", "");
++                ArrayList<String> ls = new ArrayList<String>();
++                for (String ln : pl.split("\n")) { ln = ln.trim(); if (ln.length() > 0) ls.add(ln); }
++                if (!ls.isEmpty()) res = new Object[]{null, ls.toArray(new String[0]), Boolean.FALSE};
++            }
++            if (res != null) synchronized (CACHE) {
++                if (CACHE.size() > 40) CACHE.clear();
++                CACHE.put(key, res);
++            }
++            return res;
++        } catch (Throwable e) {
++            return null;
++        }
++    }
++
++    private static Object[] parseSynced(String syn) {
++        ArrayList<Object[]> items = new ArrayList<Object[]>();   // {ms, texto}
++        for (String ln : syn.split("\n")) {
++            ln = ln.trim();
++            int pos = 0;
++            ArrayList<Long> stamps = new ArrayList<Long>();
++            while (pos < ln.length() && ln.charAt(pos) == '[') {
++                int e = ln.indexOf(']', pos);
++                if (e < 0) break;
++                long ms = parseTag(ln.substring(pos + 1, e));
++                if (ms >= 0) stamps.add(ms);
++                pos = e + 1;
++            }
++            String tx = ln.substring(pos).trim();
++            for (Long ms : stamps) items.add(new Object[]{ms, tx});
++        }
++        if (items.isEmpty()) return null;
++        Collections.sort(items, new Comparator<Object[]>() {
++            public int compare(Object[] a, Object[] b) { return ((Long) a[0]).compareTo((Long) b[0]); }
++        });
++        long[] ts = new long[items.size()];
++        String[] ls = new String[items.size()];
++        for (int i = 0; i < ts.length; i++) { ts[i] = (Long) items.get(i)[0]; ls[i] = (String) items.get(i)[1]; }
++        return new Object[]{ts, ls, Boolean.TRUE};
++    }
++
++    /**
++     * La letra, en horizontal y con la línea que suena grande al centro (y la anterior y las siguientes más suaves).
++     * Con letra sincronizada la línea cambia en su momento; si solo hay letra sin tiempos, avanza según lo que lleva
++     * la canción. Se busca por internet (LRCLIB) con el título y el artista; se puede apagar en Ajustes.
++     */
++    static final class Lyrics extends View {
++        private final float s;
++        private final int text, muted;
++        private final String msgNone, msgLoad;
++        private final boolean online;
++        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++        private String key = "";
++        private long[] times;
++        private String[] lines;
++        private boolean synced, loading;
++        private long posBase, posAt, dur, animAt;
++        private boolean playing, ticking;
++        private int idx = -1;
++
++        Lyrics(Context c, float scale, int textColor, int mutedColor, boolean online, String none, String load) {
++            super(c);
++            s = scale;
++            text = textColor;
++            muted = mutedColor;
++            this.online = online;
++            msgNone = none;
++            msgLoad = load;
++            p.setTextAlign(Paint.Align.CENTER);
++        }
++
++        private long curPos() {
++            long now = SystemClock.elapsedRealtime();
++            return Math.max(0, posBase + (playing ? now - posAt : 0));
++        }
++
++        void setTrack(String title, String artist, long durMs) {
++            dur = durMs;
++            String k = title == null && artist == null ? "" : clean(title) + "|" + clean(artist);
++            if (k.equals(key)) return;
++            key = k;
++            times = null; lines = null; synced = false; idx = -1; loading = false;
++            posBase = 0; posAt = SystemClock.elapsedRealtime();
++            invalidate();
++            if (!online || title == null || k.length() == 0) return;
++            loading = true;
++            final String kk = k, t = clean(title), a = firstArtist(artist);
++            final long d = durMs;
++            new Thread(new Runnable() { public void run() {
++                final Object[] res = lookup(t, a, d);
++                post(new Runnable() { public void run() {
++                    if (!kk.equals(key)) return;
++                    loading = false;
++                    if (res != null) { times = (long[]) res[0]; lines = (String[]) res[1]; synced = Boolean.TRUE.equals(res[2]); }
++                    idx = -1;
++                    animAt = 0;
++                    invalidate();
++                    kick();
++                }});
++            }}).start();
++        }
++
++        void setPos(long ms) {
++            posBase = ms;
++            posAt = SystemClock.elapsedRealtime();
++            invalidate();
++        }
++
++        void setPlaying(boolean on) {
++            if (on == playing) return;
++            posBase = curPos();
++            posAt = SystemClock.elapsedRealtime();
++            playing = on;
++            kick();
++        }
++
++        private final Runnable tick = new Runnable() { public void run() {
++            ticking = false;
++            invalidate();
++            if (playing && lines != null) kick();
++        }};
++
++        private void kick() {
++            if (ticking || lines == null || !playing) return;
++            ticking = true;
++            postDelayed(tick, 150);
++        }
++
++        @Override protected void onDetachedFromWindow() {
++            super.onDetachedFromWindow();
++            removeCallbacks(tick);
++            ticking = false;
++        }
++
++        private void update() {
++            if (lines == null) return;
++            int n = lines.length, i = -1;
++            long pos = curPos();
++            if (synced && times != null) {
++                for (int k = 0; k < n; k++) { if (times[k] <= pos + 200) i = k; else break; }
++            } else i = dur > 0 ? (int) Math.min(n - 1, pos * n / dur) : 0;
++            if (i != idx) { idx = i; animAt = SystemClock.uptimeMillis(); }
++        }
++
++        private ArrayList<String> wrap(String t, float maxW) {
++            ArrayList<String> out = new ArrayList<String>();
++            String[] words = t.split(" ");
++            StringBuilder cur = new StringBuilder();
++            for (String wd : words) {
++                if (wd.length() == 0) continue;
++                String tryS = cur.length() == 0 ? wd : cur + " " + wd;
++                if (cur.length() > 0 && p.measureText(tryS) > maxW) { out.add(cur.toString()); cur = new StringBuilder(wd); }
++                else { cur = new StringBuilder(tryS); }
++            }
++            if (cur.length() > 0) out.add(cur.toString());
++            if (out.isEmpty()) out.add("");
++            return out;
++        }
++
++        private String fit(String t, float maxW) {
++            if (p.measureText(t) <= maxW) return t;
++            int n = p.breakText(t, true, maxW, null);
++            return t.substring(0, Math.max(0, n - 1)) + "…";
++        }
++
++        private String lineAt(int i) {
++            if (lines == null || i < 0 || i >= lines.length) return null;
++            String t = lines[i];
++            return t.length() == 0 ? "♪" : t;
++        }
++
++        @Override protected void onDraw(Canvas c) {
++            int w = getWidth(), h = getHeight();
++            if (w <= 0 || h <= 0 || !online || key.length() == 0) return;
++            float cx = w / 2f, maxW = w - 8 * s;
++            String msg = loading ? msgLoad : lines == null ? msgNone : null;
++            if (msg != null) {
++                p.setTypeface(Typeface.DEFAULT);
++                p.setTextSize(15 * s);
++                p.setColor(al(muted, 0.9f));
++                c.drawText(msg, cx, h / 2f + 5 * s, p);
++                return;
++            }
++            update();
++            String curT = idx < 0 ? "♪" : lineAt(idx);
++            float size = Math.min(34 * s, h * 0.34f);
++            ArrayList<String> cl;
++            p.setTypeface(Typeface.DEFAULT_BOLD);
++            while (true) {
++                p.setTextSize(size);
++                cl = wrap(curT, maxW);
++                if (cl.size() <= 2 || size <= 17 * s) break;
++                size -= 2 * s;
++            }
++            float lh = size * 1.2f, block = cl.size() * lh, top = h / 2f - block / 2f;
++            float a = Math.max(0f, Math.min(1f, (SystemClock.uptimeMillis() - animAt) / 300f));
++            float dy = (1f - a) * size * 1.3f;
++            c.save();
++            c.translate(0, dy);
++            p.setColor(al(text, 0.5f + 0.5f * a));
++            for (int i = 0; i < cl.size(); i++) c.drawText(cl.get(i), cx, top + lh * i + size * 0.92f, p);
++            // la anterior y las que vienen: más chicas y suaves
++            float sec = size * 0.58f, gap = sec * 0.55f;
++            p.setTypeface(Typeface.DEFAULT);
++            p.setTextSize(sec);
++            String pv = idx >= 1 ? lineAt(idx - 1) : null;
++            if (pv != null) { p.setColor(al(muted, 0.55f)); c.drawText(fit(pv, maxW), cx, top - gap, p); }
++            String n1 = lineAt(idx + 1), n2 = lineAt(idx + 2);
++            float by = top + block + gap + sec * 0.8f;
++            if (n1 != null) { p.setColor(al(muted, 0.95f)); c.drawText(fit(n1, maxW), cx, by, p); }
++            if (n2 != null && by + sec * 1.5f < h + 4 * s) { p.setColor(al(muted, 0.5f)); c.drawText(fit(n2, maxW), cx, by + sec * 1.5f, p); }
++            c.restore();
++            if (a < 1f) postInvalidateDelayed(16);
++        }
++    }
++
++    // ───────────────────────── miniatura de la galería ─────────────────────────
++
++    /** Miniatura: columna del carro a la izquierda, la tarjeta de música grande con las barras y la barra de apps. */
++    static final class Thumb extends View {
++        final boolean portrait, light;
++        boolean selected;
++        private final float s;
++        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++        private final RectF r = new RectF();
++        private Bitmap bg;
++
++        Thumb(Context c, float s, boolean portrait, boolean light) {
++            super(c);
++            this.s = s;
++            this.portrait = portrait;
++            this.light = light;
++        }
++
++        @Override protected void onMeasure(int wSpec, int hSpec) {
++            int w = MeasureSpec.getSize(wSpec);
++            setMeasuredDimension(w, (int) (w * (portrait ? 1.42f : 0.586f)));
++        }
++
++        private void rr(Canvas c, float l, float t, float rt, float b, float rad, int color) {
++            p.setStyle(Paint.Style.FILL);
++            p.setShader(null);
++            p.setColor(color);
++            r.set(l, t, rt, b);
++            c.drawRoundRect(r, rad, rad, p);
++        }
++
++        private void card(Canvas c, float l, float t, float rt, float b, float rad) {
++            rr(c, l, t, rt, b, rad, Faro.glass(light));
++            p.setStyle(Paint.Style.STROKE);
++            p.setStrokeWidth(Math.max(1f, s * 0.6f));
++            p.setColor(Faro.glassEdge(light));
++            r.set(l, t, rt, b);
++            c.drawRoundRect(r, rad, rad, p);
++        }
++
++        @Override protected void onDraw(Canvas c) {
++            int w = getWidth(), h = getHeight();
++            if (w <= 0 || h <= 0) return;
++            float u = portrait ? w : h, rad = u * 0.06f, crad = u * 0.035f;
++            if (bg == null || bg.getWidth() != w || bg.getHeight() != h) {
++                try {
++                    bg = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
++                    Faro.paint(new Canvas(bg), w, h, light, Main.RED);
++                    Aurora.grain(bg, Faro.grain(light));
++                } catch (Throwable e) { bg = null; }
++            }
++            r.set(0, 0, w, h);
++            if (bg != null) {
++                p.setStyle(Paint.Style.FILL);
++                p.setShader(new android.graphics.BitmapShader(bg, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
++                c.drawRoundRect(r, rad, rad, p);
++                p.setShader(null);
++            } else rr(c, 0, 0, w, h, rad, Faro.base(light));
++            int text = light ? 0xFF15171B : 0xFFF2F3F5, muted = light ? 0xFF6C717A : 0xFF8C919A;
++            float pad = u * 0.035f, gap = u * 0.025f;
++            float pillH = u * (portrait ? 0.075f : 0.10f), pillY = h - pad * 0.8f - pillH;
++            if (portrait) {
++                // arriba la tarjeta de música; abajo el carro y los mantenimientos
++                float topH = u * 0.05f, mh = (pillY - gap) * 0.56f;
++                rr(c, pad, pad, w * 0.30f, pad + topH * 0.5f, topH * 0.25f, muted);
++                float cy0 = pad + topH + gap;
++                card(c, pad, cy0, w - pad, cy0 + mh, crad);
++                eq(c, pad, cy0, w - pad, cy0 + mh, text);
++                float ry = cy0 + mh + gap;
++                card(c, pad, ry, w * 0.38f, pillY - gap, crad);
++                card(c, w * 0.38f + gap, ry, w - pad, pillY - gap, crad);
++            } else {
++                float colW = w * 0.27f;
++                // columna: velocímetro, carro y mantenimientos
++                p.setStyle(Paint.Style.STROKE);
++                p.setStrokeWidth(Math.max(1.5f, s * 1.1f));
++                p.setColor(muted);
++                c.drawCircle(pad + colW / 2f, pad + colW * 0.42f, colW * 0.36f, p);
++                float carT = pad + colW * 0.95f, mtT = h - pad - h * 0.17f;
++                rr(c, pad + colW * 0.32f, carT, pad + colW * 0.68f, mtT - gap * 2, colW * 0.12f, Main.RED);
++                card(c, pad, mtT, pad + colW, h - pad, crad);
++                // barra de arriba (hora y clima)
++                float x0 = pad + colW + gap * 2, topH = h * 0.06f;
++                rr(c, x0, pad, x0 + w * 0.10f, pad + topH, topH * 0.4f, text);
++                rr(c, x0 + w * 0.12f, pad, x0 + w * 0.22f, pad + topH, topH * 0.4f, muted);
++                // la tarjeta de música grande
++                float cy0 = pad + topH + gap, cy1 = pillY - gap;
++                card(c, x0, cy0, w - pad, cy1, crad);
++                eq(c, x0, cy0, w - pad, cy1, text);
++                float aw = (cy1 - cy0) * 0.2f;
++                rr(c, x0 + gap * 1.5f, cy0 + gap * 1.5f, x0 + gap * 1.5f + aw, cy0 + gap * 1.5f + aw, aw * 0.22f, light ? 0x14000000 : 0x1FFFFFFF);
++                rr(c, x0 + gap * 1.5f + aw + gap, cy0 + gap * 1.8f, x0 + gap * 1.5f + aw + gap + (w - pad - x0) * 0.34f, cy0 + gap * 1.8f + aw * 0.22f, aw * 0.1f, text);
++                rr(c, x0 + gap * 1.5f + aw + gap, cy0 + gap * 1.8f + aw * 0.4f, x0 + gap * 1.5f + aw + gap + (w - pad - x0) * 0.22f, cy0 + gap * 1.8f + aw * 0.58f, aw * 0.08f, muted);
++                // la letra: una línea grande y dos suaves
++                float lx = x0 + (w - pad - x0) * 0.18f, lw = (w - pad - x0) * 0.64f, ly = cy0 + (cy1 - cy0) * 0.62f;
++                rr(c, lx + lw * 0.2f, ly, lx + lw * 0.8f, ly + (cy1 - cy0) * 0.06f, 3, muted);
++                rr(c, lx, ly + (cy1 - cy0) * 0.10f, lx + lw, ly + (cy1 - cy0) * 0.17f, 3, text);
++                rr(c, lx + lw * 0.15f, ly + (cy1 - cy0) * 0.21f, lx + lw * 0.85f, ly + (cy1 - cy0) * 0.26f, 3, muted);
++                // botones: anterior, reproducir, siguiente
++                float by = cy1 - (cy1 - cy0) * 0.13f, mx = (x0 + w - pad) / 2f, br = (cy1 - cy0) * 0.055f;
++                p.setStyle(Paint.Style.FILL);
++                p.setColor(muted);
++                c.drawCircle(mx - br * 4.2f, by, br * 0.8f, p);
++                c.drawCircle(mx + br * 4.2f, by, br * 0.8f, p);
++                p.setColor(Main.RED);
++                c.drawCircle(mx, by, br * 1.5f, p);
++            }
++            // barra de apps compacta
++            float pw = portrait ? w - 2 * pad : (w - pad - (pad + w * 0.27f + gap * 2)) * 0.6f;
++            float px = portrait ? pad : (w - pad) - pw - ((w - pad - (pad + w * 0.27f + gap * 2)) - pw) / 2f;
++            card(c, px, pillY, px + pw, pillY + pillH, pillH * 0.36f);
++            if (selected) {
++                p.setStyle(Paint.Style.STROKE);
++                p.setStrokeWidth(Math.max(2f, s * 1.6f));
++                p.setColor(Main.RED);
++                r.set(1, 1, w - 1, h - 1);
++                c.drawRoundRect(r, rad, rad, p);
++            }
++        }
++
++        private void eq(Canvas c, float l, float t, float rt, float b, int color) {
++            int n = 18;
++            float cx = (l + rt) / 2f, cy = t + (b - t) * 0.40f, span = (rt - l) * 0.46f, slot = span / n, bw = slot * 0.55f;
++            float maxH = (b - t) * 0.16f;
++            p.setStyle(Paint.Style.FILL);
++            p.setShader(null);
++            for (int i = 0; i < n; i++) {
++                float pos = (i + 0.5f) / n;
++                float v = (0.35f + 0.65f * Math.abs((float) Math.sin(i * 1.7f))) * (0.4f + 0.6f * (float) Math.sin(Math.PI * pos));
++                float bh = Math.max(2f, maxH * v);
++                float x = cx - span / 2f + i * slot;
++                p.setColor(al(Main.RED, 0.5f + 0.5f * (float) Math.sin(Math.PI * pos)));
++                r.set(x, cy - bh, x + bw, cy + bh);
++                c.drawRoundRect(r, bw / 2f, bw / 2f, p);
++            }
++        }
++    }
++}
+diff --git a/app/src/main/java/com/stradaos/launcher/RoadScene.java b/app/src/main/java/com/stradaos/launcher/RoadScene.java
+new file mode 100644
+index 0000000..4cb5599
+--- /dev/null
++++ b/app/src/main/java/com/stradaos/launcher/RoadScene.java
+@@ -0,0 +1,507 @@
++package com.stradaos.launcher;
++
++import android.content.Context;
++import android.graphics.Bitmap;
++import android.graphics.Canvas;
++import android.graphics.LinearGradient;
++import android.graphics.Paint;
++import android.graphics.Path;
++import android.graphics.RadialGradient;
++import android.graphics.RectF;
++import android.graphics.Shader;
++import android.os.SystemClock;
++import android.view.View;
++
++/**
++ * Panel central alternativo al mapa: un auto rojo (hatchback compacto) visto desde atrás, con las luces traseras
++ * encendidas, avanzando por una autopista de tres carriles. Los bordes de la calzada usan el color de acento del tema
++ * y los colores del cielo y del asfalto salen del tema (claro / oscuro). Con velocidad, las rayas, el guardarraíl y las
++ * farolas avanzan al ritmo de la velocidad real; detenido, la escena queda quieta y no gasta batería.
++ *
++ * Todo se dibuja con código (sin imágenes). Lo que no se mueve (cielo, calzada, auto) se guarda en un bitmap y solo se
++ * repinta lo que avanza, así que va ligero también en pantallas lentas.
++ */
++public class RoadScene extends View {
++    private static final float ZFAR = 170f, ZC = 7f, CAR_M = 1.8f, ROAD_HALF = 5.4f, SHOULDER = 7.3f;
++
++    private final float s, radius;
++    private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
++    private final Path path = new Path();
++    private final Path clip = new Path();
++    private final RectF rf = new RectF();
++    private final int[] c2 = new int[2];
++    private final float[] p2 = {0f, 1f};
++
++    private float topInset, bottomInset;
++    private float speed, shown;     // km/h pedidos y km/h mostrados (suavizados)
++    private double dist;            // metros recorridos (módulo 120: todos los períodos lo dividen)
++    private float t;
++    private long last;
++
++    // geometría
++    private int lw, lh, lkey;
++    private float cx, hz, f, hc, zNear, carW, ycb;
++    private int skyHz, ink;
++    private boolean light;
++    private int bg, accent;
++
++    private Bitmap bgBmp, carBmp;
++    private float carOx, carOy;
++    private Shader hazeShader;
++
++    public RoadScene(Context ctx, float scale, float radiusPx) {
++        super(ctx);
++        s = scale;
++        radius = radiusPx;
++        topInset = 52 * s;
++        bottomInset = 108 * s;
++        setLayerType(LAYER_TYPE_SOFTWARE, null);   // clipPath fiable en GPUs antiguas (igual que el mapa)
++    }
++
++    /** Márgenes en px: arriba (etiqueta del GPS) y abajo (panel de Android Auto / CarPlay). El auto queda entre los dos. */
++    public void setInsets(float topPx, float bottomPx) {
++        topInset = topPx;
++        bottomInset = bottomPx;
++        lw = 0;   // fuerza reconstruir
++        postInvalidate();
++    }
++
++    /** Velocidad real en km/h (0 = detenido). */
++    public void setSpeed(float kmh) {
++        speed = Math.max(0f, kmh);
++        postInvalidate();
++    }
++
++    @Override
++    protected void onDetachedFromWindow() {
++        super.onDetachedFromWindow();
++        release();
++        lw = 0;
++        last = 0;
++    }
++
++    private void release() {
++        if (bgBmp != null) { bgBmp.recycle(); bgBmp = null; }
++        if (carBmp != null) { carBmp.recycle(); carBmp = null; }
++    }
++
++    // ───────────────────────── colores ─────────────────────────
++
++    private static int mix(int a, int b, float k) {
++        int aa = (int) ((a >>> 24) + ((b >>> 24) - (a >>> 24)) * k);
++        int r = (int) (((a >> 16) & 255) + (((b >> 16) & 255) - ((a >> 16) & 255)) * k);
++        int g = (int) (((a >> 8) & 255) + (((b >> 8) & 255) - ((a >> 8) & 255)) * k);
++        int bl = (int) ((a & 255) + ((b & 255) - (a & 255)) * k);
++        return (aa << 24) | (r << 16) | (g << 8) | bl;
++    }
++
++    private static int al(int c, float a) {
++        return (((int) (255 * Math.max(0f, Math.min(1f, a)))) << 24) | (c & 0x00FFFFFF);
++    }
++
++    private void fill(int color) {
++        p.setShader(null);
++        p.setStyle(Paint.Style.FILL);
++        p.setColor(color);
++    }
++
++    private void fillShader(Shader sh) {
++        p.setStyle(Paint.Style.FILL);
++        p.setColor(0xFFFFFFFF);
++        p.setShader(sh);
++    }
++
++    private void stroke(int color, float width) {
++        p.setShader(null);
++        p.setStyle(Paint.Style.STROKE);
++        p.setColor(color);
++        p.setStrokeWidth(Math.max(1f, width));
++    }
++
++    private Shader lin(float x0, float y0, float x1, float y1, int a, int b) {
++        c2[0] = a; c2[1] = b;
++        return new LinearGradient(x0, y0, x1, y1, c2.clone(), p2, Shader.TileMode.CLAMP);
++    }
++
++    private Shader lin3(float x0, float y0, float x1, float y1, int a, int b, int c, float mid) {
++        return new LinearGradient(x0, y0, x1, y1, new int[]{a, b, c}, new float[]{0f, mid, 1f}, Shader.TileMode.CLAMP);
++    }
++
++    private Shader rad(float r, int a, int b) {
++        c2[0] = a; c2[1] = b;
++        return new RadialGradient(0, 0, r, c2.clone(), p2, Shader.TileMode.CLAMP);
++    }
++
++    private Shader rad3(float r, int a, int b, int c, float mid) {
++        return new RadialGradient(0, 0, r, new int[]{a, b, c}, new float[]{0f, mid, 1f}, Shader.TileMode.CLAMP);
++    }
++
++    private void rr(Canvas c, float x, float y, float w, float h, float r) {
++        rf.set(x, y, x + w, y + h);
++        c.drawRoundRect(rf, r, r, p);
++    }
++
++    /** Dibuja un degradado radial centrado en (x, y), con alto escalado por sy (para óvalos). */
++    private void glow(Canvas c, float x, float y, float r, float sy, Shader sh) {
++        c.save();
++        c.translate(x, y);
++        c.scale(1f, sy);
++        fillShader(sh);
++        c.drawRect(-r * 1.05f, -r * 1.05f, r * 1.05f, r * 1.05f, p);
++        c.restore();
++        p.setShader(null);
++    }
++
++    // ───────────────────────── proyección ─────────────────────────
++
++    private float sx(float x, float z) { return cx + x * f / z; }
++    private float sy(float z, float ht) { return hz + (hc - ht) * f / z; }
++    private float clampZ(float z) { return Math.max(zNear, Math.min(ZFAR, z)); }
++
++    /** Franja del suelo entre x0..x1 y distancias za..zb (con alturas ha..hb para el guardarraíl). */
++    private void strip(Canvas c, float x0, float x1, float za, float zb, float ha, float hb, int col) {
++        za = clampZ(za);
++        zb = clampZ(zb);
++        if (zb <= za) return;
++        fill(col);
++        path.reset();
++        path.moveTo(sx(x0, za), sy(za, ha));
++        path.lineTo(sx(x1, za), sy(za, ha));
++        path.lineTo(sx(x1, zb), sy(zb, hb));
++        path.lineTo(sx(x0, zb), sy(zb, hb));
++        path.close();
++        c.drawPath(path, p);
++    }
++
++    private void layout(int w, int h) {
++        cx = w / 2f;
++        hz = h * 0.31f;
++        ycb = h - bottomInset;
++        carW = Math.min(w * 0.30f, 0.92f * (ycb - topInset) / 0.82f);
++        if (carW < 20) carW = 20;
++        f = carW * ZC / CAR_M;
++        hc = (ycb - hz) * ZC / f;
++        if (hc < 0.9f) hc = 0.9f;
++        zNear = hc * f / (h - hz);
++        light = Main.LIGHT;
++        bg = Main.CARD;
++        accent = Main.RED;
++        ink = light ? 0xFF2A2D35 : 0xFFFFFFFF;
++        skyHz = light ? mix(0xFFF4E9E4, accent, 0.20f) : mix(bg, accent, 0.42f);
++        hazeShader = lin(0, hz - 2, 0, hz + h * 0.16f, al(skyHz, 0.95f), al(skyHz, 0f));
++    }
++
++    private int themeKey() { return Main.RED * 31 + Main.CARD * 17 + (Main.LIGHT ? 1 : 0); }
++
++    private void rebuild(int w, int h) {
++        lw = w;
++        lh = h;
++        lkey = themeKey();
++        layout(w, h);
++        release();
++        try {
++            bgBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
++            drawBackground(new Canvas(bgBmp), w, h);
++            int cw = (int) Math.ceil(carW * 2.1f), ch = (int) Math.ceil(carW * 1.45f);
++            carBmp = Bitmap.createBitmap(cw, ch, Bitmap.Config.ARGB_8888);
++            carOx = carW * 1.05f;
++            carOy = carW * 1.2f;
++            drawCar(new Canvas(carBmp), carOx, carOy, carW);
++        } catch (Throwable e) {   // sin memoria: se dibuja directo, más lento pero igual
++            release();
++        }
++    }
++
++    // ───────────────────────── dibujo ─────────────────────────
++
++    @Override
++    protected void onDraw(Canvas cv) {
++        int w = getWidth(), h = getHeight();
++        if (w < 10 || h < 10) return;
++        if (w != lw || h != lh || themeKey() != lkey) rebuild(w, h);
++
++        long now = SystemClock.uptimeMillis();
++        float dt = last == 0 ? 0f : Math.min(0.1f, (now - last) / 1000f);
++        last = now;
++        shown += (speed - shown) * Math.min(1f, dt * 4f);
++        if (Math.abs(speed - shown) < 0.3f) shown = speed;
++        dist = (dist + shown / 3.6f * dt) % 120.0;
++        t += dt;
++
++        clip.reset();
++        rf.set(0, 0, w, h);
++        clip.addRoundRect(rf, radius, radius, Path.Direction.CW);
++        cv.save();
++        cv.clipPath(clip);
++
++        if (bgBmp != null) cv.drawBitmap(bgBmp, 0, 0, null);
++        else drawBackground(cv, w, h);
++        drawMoving(cv, w, h);
++
++        boolean moving = shown > 0.2f;
++        float sway = moving ? (float) Math.sin(t * 1.7f) * 0.004f * carW : 0f;
++        float bob = moving ? (float) Math.sin(t * 5.3f) * 0.0025f * carW : 0f;
++        if (carBmp != null) cv.drawBitmap(carBmp, cx + sway - carOx, ycb + bob - carOy, null);
++        else drawCar(cv, cx + sway, ycb + bob, carW);
++        cv.restore();
++
++        // ~30 cuadros por segundo mientras haya velocidad pedida o el movimiento se esté frenando; detenido no se repinta
++        if (speed > 0.2f || moving) postInvalidateDelayed(33);
++        else last = 0;
++    }
++
++    /** Lo que no se mueve: cielo, estrellas, siluetas, suelo, calzada, hombros y líneas de borde con el acento. */
++    private void drawBackground(Canvas c, int w, int h) {
++        final int skyTop = light ? mix(bg, 0xFF9FB4CC, 0.55f) : mix(bg, 0xFF000000, 0.45f);
++        final int terrain = light ? mix(bg, 0xFF8E9AA3, 0.45f) : mix(bg, 0xFF000000, 0.55f);
++        final int asphalt = light ? 0xFF6D727C : 0xFF2B2E37;
++        final int asphaltFar = mix(asphalt, skyHz, 0.35f);
++
++        // cielo
++        fillShader(lin(0, 0, 0, hz, skyTop, skyHz));
++        c.drawRect(0, 0, w, hz + 1, p);
++        p.setShader(null);
++        if (!light) {   // estrellas fijas
++            for (int i = 0; i < 40; i++) {
++                float a = (float) (Math.sin(i * 91.7) * 43758.5), b = (float) (Math.sin(i * 12.9) * 14375.3), d = (float) (Math.sin(i * 7.1) * 999.0);
++                a -= (float) Math.floor(a);
++                b -= (float) Math.floor(b);
++                d -= (float) Math.floor(d);
++                fill(al(0xFFFFFFFF, 0.18f + 0.25f * d));
++                float px = a * w, py = b * hz * 0.7f, sz = 1.1f * s;
++                c.drawRect(px, py, px + sz, py + sz, p);
++            }
++        }
++        // brillo del horizonte con el color de acento
++        glow(c, cx, hz, w * 0.62f, 0.30f, rad3(w * 0.62f, al(accent, light ? 0.28f : 0.46f), al(accent, light ? 0.10f : 0.16f), al(accent, 0f), 0.5f));
++        // siluetas lejanas (colinas / ciudad), más bajas donde está la ruta
++        fill(mix(skyHz, light ? 0xFF6E7A88 : 0xFF000000, light ? 0.35f : 0.55f));
++        path.reset();
++        path.moveTo(0, hz);
++        for (int i = 0; i <= 60; i++) {
++            float x = w * i / 60f;
++            float n = ((float) (Math.sin(x * 0.013) * 0.5 + Math.sin(x * 0.047 + 1.3) * 0.3 + Math.sin(x * 0.151) * 0.2) + 1f) / 2f;
++            float bump = Math.abs(x - cx) < w * 0.12f ? 0.35f : 1f;
++            path.lineTo(x, hz - (0.010f + 0.050f * n) * h * bump);
++        }
++        path.lineTo(w, hz);
++        path.close();
++        c.drawPath(path, p);
++
++        // suelo
++        fillShader(lin3(0, hz, 0, h, mix(terrain, skyHz, 0.45f), terrain, mix(terrain, 0xFF000000, 0.3f), 0.5f));
++        c.drawRect(0, hz, w, h, p);
++        p.setShader(null);
++
++        // calzada con degradado vertical (neblina lejana → asfalto)
++        c.save();
++        path.reset();
++        path.moveTo(sx(-SHOULDER, ZFAR), sy(ZFAR, 0));
++        path.lineTo(sx(SHOULDER, ZFAR), sy(ZFAR, 0));
++        path.lineTo(sx(SHOULDER, zNear), h);
++        path.lineTo(sx(-SHOULDER, zNear), h);
++        path.close();
++        c.clipPath(path);
++        fillShader(lin3(0, hz, 0, h, asphaltFar, mix(asphalt, asphaltFar, 0.35f), asphalt, 0.35f));
++        c.drawRect(0, hz, w, h, p);
++        p.setShader(null);
++        c.restore();
++
++        // hombros
++        int shade = al(0xFF000000, light ? 0.10f : 0.22f);
++        strip(c, -SHOULDER, -ROAD_HALF, zNear, ZFAR, 0, 0, shade);
++        strip(c, ROAD_HALF, SHOULDER, zNear, ZFAR, 0, 0, shade);
++        // líneas de borde con el acento (+ halo)
++        strip(c, -ROAD_HALF - 0.18f, -ROAD_HALF + 0.30f, zNear, ZFAR, 0, 0, al(accent, 0.22f));
++        strip(c, ROAD_HALF - 0.30f, ROAD_HALF + 0.18f, zNear, ZFAR, 0, 0, al(accent, 0.22f));
++        strip(c, -ROAD_HALF, -ROAD_HALF + 0.17f, zNear, ZFAR, 0, 0, al(accent, 0.95f));
++        strip(c, ROAD_HALF - 0.17f, ROAD_HALF, zNear, ZFAR, 0, 0, al(accent, 0.95f));
++
++        // cuerpo del guardarraíl (banda lateral y dos rieles)
++        int railBand = al(mix(ink, bg, light ? 0.35f : 0.55f), 0.35f);
++        int rail = al(mix(ink, bg, light ? 0.35f : 0.55f), 0.55f);
++        for (int sd = -1; sd <= 1; sd += 2) {
++            float xr = sd * 7.9f;
++            fill(railBand);
++            path.reset();
++            path.moveTo(sx(xr, zNear), sy(zNear, 0.82f));
++            path.lineTo(sx(xr, ZFAR), sy(ZFAR, 0.82f));
++            path.lineTo(sx(xr, ZFAR), sy(ZFAR, 0.48f));
++            path.lineTo(sx(xr, zNear), sy(zNear, 0.48f));
++            path.close();
++            c.drawPath(path, p);
++            strip(c, xr - 0.05f, xr + 0.05f, zNear, ZFAR, 0.50f, 0.50f, rail);
++            strip(c, xr - 0.05f, xr + 0.05f, zNear, ZFAR, 0.80f, 0.80f, rail);
++        }
++    }
++
++    /** Lo que avanza con la velocidad: rayas de carril, postes del guardarraíl y farolas; y la neblina del horizonte. */
++    private void drawMoving(Canvas c, int w, int h) {
++        final float d = (float) dist;
++        // rayas discontinuas a los lados del auto (carril central)
++        final float period = 10f, dash = 3.2f;
++        for (int k = (int) Math.floor((zNear + d) / period) - 1; k * period - d < ZFAR; k++) {
++            float z0 = k * period - d, z1 = z0 + dash;
++            if (z1 < zNear) continue;
++            float fade = 1f - Math.min(1f, Math.max(0f, (z0 - 30f) / (ZFAR - 30f)));
++            float near = Math.min(1f, Math.max(0f, (z0 - 5f) / 5f));
++            int col = al(ink, 0.70f * fade * near);
++            strip(c, -1.8f - 0.07f, -1.8f + 0.07f, z0, z1, 0, 0, col);
++            strip(c, 1.8f - 0.07f, 1.8f + 0.07f, z0, z1, 0, 0, col);
++        }
++        // postes del guardarraíl
++        int post = al(mix(ink, bg, 0.5f), 0.7f);
++        for (int sd = -1; sd <= 1; sd += 2) {
++            float xr = sd * 7.9f;
++            for (int k = (int) Math.floor((zNear + d) / 6f) - 1; k * 6f - d < ZFAR * 0.8f; k++) {
++                float z = k * 6f - d;
++                if (z < zNear) continue;
++                float wpx = Math.max(1f, 0.12f * f / z);
++                float x = sx(xr, z), y0 = sy(z, 0.85f), y1 = sy(z, 0);
++                fill(post);
++                c.drawRect(x - wpx / 2, y0, x + wpx / 2, y1, p);
++            }
++        }
++        // farolas alternadas con halo cálido
++        int pole = mix(ink, bg, light ? 0.4f : 0.6f);
++        for (int sd = -1; sd <= 1; sd += 2) {
++            final float per = 40f, off = sd < 0 ? 0f : 20f;
++            for (int k = (int) Math.floor((zNear + d - off) / per) - 1; k * per + off - d < ZFAR; k++) {
++                float z = k * per + off - d;
++                if (z < 16f) continue;
++                float xb = sd * 9.2f, ph = 7.5f;
++                float px = sx(xb, z), pb = sy(z, 0), pt = sy(z, ph);
++                float wpx = Math.max(1.2f, 0.22f * f / z);
++                float fade = (1f - Math.min(1f, Math.max(0f, (z - 60f) / (ZFAR - 60f)))) * Math.min(1f, (z - 16f) / 12f);
++                fill(al(pole, 0.9f * fade));
++                c.drawRect(px - wpx / 2, pt, px + wpx / 2, pb, p);
++                float lx = sx(xb - sd * 2.2f, z);
++                stroke(al(pole, 0.9f * fade), wpx * 0.8f);
++                c.drawLine(px, pt, lx, pt, p);
++                float gr = Math.max(6f, 3.2f * f / z);
++                c.save();
++                c.translate(lx, pt);
++                fillShader(rad3(gr, al(0xFFFFE2B0, 0.95f * fade), al(0xFFFFD08A, 0.45f * fade), al(0xFFFFD08A, 0f), 0.25f));
++                c.drawRect(-gr, -gr, gr, gr, p);
++                c.restore();
++                p.setShader(null);
++            }
++        }
++        // neblina del horizonte sobre lo lejano
++        fillShader(hazeShader);
++        c.drawRect(0, hz - 2, w, hz + h * 0.16f, p);
++        p.setShader(null);
++    }
++
++    /** Auto rojo visto desde atrás (u = ancho en px; origen: centro de las llantas, sobre el suelo). */
++    private void drawCar(Canvas c, float ox, float oy, float u) {
++        // brillo de las luces sobre el camino, detrás del auto
++        glow(c, ox, oy + 0.02f * u, 0.95f * u, 0.28f, rad3(0.95f * u, al(0xFFFF2A2A, 0.55f), al(0xFFFF2A2A, 0.20f), al(0xFFFF2A2A, 0f), 0.45f));
++        // sombra
++        glow(c, ox, oy, 0.62f * u, 0.10f, rad3(0.62f * u, al(0xFF000000, 0.75f), al(0xFF000000, 0.40f), al(0xFF000000, 0f), 0.7f));
++        // llantas
++        fill(0xFF0C0D10);
++        for (int sd = -1; sd <= 1; sd += 2) {
++            float x0 = sd < 0 ? -0.475f : 0.355f;
++            rr(c, ox + x0 * u, oy - 0.20f * u, 0.12f * u, 0.20f * u, 0.03f * u);
++        }
++        // defensa inferior (plástico oscuro)
++        fillShader(lin(0, oy - 0.17f * u, 0, oy - 0.03f * u, 0xFF23252B, 0xFF0F1013));
++        rr(c, ox - 0.425f * u, oy - 0.17f * u, 0.85f * u, 0.14f * u, 0.05f * u);
++        p.setShader(null);
++
++        // carrocería (hatchback compacto, alto 0.82 u)
++        int bodyTop = light ? 0xFFE63B3B : 0xFFE2262C, bodyBot = 0xFF8E0F16;
++        fillShader(lin3(0, oy - 0.82f * u, 0, oy - 0.10f * u, bodyTop, mix(bodyTop, bodyBot, 0.45f), bodyBot, 0.55f));
++        path.reset();
++        path.moveTo(ox - 0.485f * u, oy - 0.15f * u);
++        path.lineTo(ox - 0.492f * u, oy - 0.47f * u);
++        path.quadTo(ox - 0.490f * u, oy - 0.54f * u, ox - 0.445f * u, oy - 0.58f * u);   // hombro
++        path.quadTo(ox - 0.405f * u, oy - 0.72f * u, ox - 0.33f * u, oy - 0.795f * u);   // pilar C
++        path.quadTo(ox, oy - 0.835f * u, ox + 0.33f * u, oy - 0.795f * u);               // techo
++        path.quadTo(ox + 0.405f * u, oy - 0.72f * u, ox + 0.445f * u, oy - 0.58f * u);
++        path.quadTo(ox + 0.490f * u, oy - 0.54f * u, ox + 0.492f * u, oy - 0.47f * u);
++        path.lineTo(ox + 0.485f * u, oy - 0.15f * u);
++        path.quadTo(ox + 0.48f * u, oy - 0.07f * u, ox + 0.40f * u, oy - 0.065f * u);
++        path.lineTo(ox - 0.40f * u, oy - 0.065f * u);
++        path.quadTo(ox - 0.48f * u, oy - 0.07f * u, ox - 0.485f * u, oy - 0.15f * u);
++        path.close();
++        c.drawPath(path, p);
++        p.setShader(null);
++
++        // brillo suave en el hombro
++        fillShader(lin(0, oy - 0.585f * u, 0, oy - 0.50f * u, al(0xFFFFFFFF, 0.28f), al(0xFFFFFFFF, 0f)));
++        path.reset();
++        path.moveTo(ox - 0.47f * u, oy - 0.52f * u);
++        path.quadTo(ox - 0.46f * u, oy - 0.575f * u, ox - 0.42f * u, oy - 0.585f * u);
++        path.lineTo(ox + 0.42f * u, oy - 0.585f * u);
++        path.quadTo(ox + 0.46f * u, oy - 0.575f * u, ox + 0.47f * u, oy - 0.52f * u);
++        path.close();
++        c.drawPath(path, p);
++        p.setShader(null);
++
++        // luneta grande
++        fillShader(lin(0, oy - 0.77f * u, 0, oy - 0.57f * u, 0xFF2B303B, 0xFF12141A));
++        path.reset();
++        path.moveTo(ox - 0.315f * u, oy - 0.575f * u);
++        path.lineTo(ox + 0.315f * u, oy - 0.575f * u);
++        path.quadTo(ox + 0.285f * u, oy - 0.70f * u, ox + 0.235f * u, oy - 0.765f * u);
++        path.lineTo(ox - 0.235f * u, oy - 0.765f * u);
++        path.quadTo(ox - 0.285f * u, oy - 0.70f * u, ox - 0.315f * u, oy - 0.575f * u);
++        path.close();
++        c.drawPath(path, p);
++        p.setShader(null);
++        fill(al(0xFFFFFFFF, 0.10f));
++        path.reset();
++        path.moveTo(ox - 0.22f * u, oy - 0.575f * u);
++        path.lineTo(ox - 0.10f * u, oy - 0.575f * u);
++        path.lineTo(ox + 0.03f * u, oy - 0.765f * u);
++        path.lineTo(ox - 0.12f * u, oy - 0.765f * u);
++        path.close();
++        c.drawPath(path, p);
++
++        // alerón y tercera luz de freno
++        fill(0xFF7C0C12);
++        rr(c, ox - 0.27f * u, oy - 0.793f * u, 0.54f * u, 0.026f * u, 0.012f * u);
++        fill(0xFFFF4A3C);
++        rr(c, ox - 0.14f * u, oy - 0.789f * u, 0.28f * u, 0.014f * u, 0.007f * u);
++
++        // junta del portón y manija
++        stroke(al(0xFF000000, 0.28f), 0.006f * u);
++        c.drawLine(ox - 0.285f * u, oy - 0.575f * u, ox - 0.285f * u, oy - 0.18f * u, p);
++        c.drawLine(ox + 0.285f * u, oy - 0.575f * u, ox + 0.285f * u, oy - 0.18f * u, p);
++        fillShader(lin(0, oy - 0.395f * u, 0, oy - 0.380f * u, 0xFFD9DCE2, 0xFF8D929C));
++        rr(c, ox - 0.09f * u, oy - 0.395f * u, 0.18f * u, 0.014f * u, 0.005f * u);
++        p.setShader(null);
++
++        // placa (en blanco, sin texto)
++        fill(0xFFE9EAEE);
++        rr(c, ox - 0.165f * u, oy - 0.325f * u, 0.33f * u, 0.095f * u, 0.012f * u);
++        stroke(0xFF4A4D55, 0.005f * u);
++        rr(c, ox - 0.165f * u, oy - 0.325f * u, 0.33f * u, 0.095f * u, 0.012f * u);
++
++        // luces traseras encendidas (altas, a los lados del portón)
++        for (int sd = -1; sd <= 1; sd += 2) {
++            glow(c, ox + sd * 0.385f * u, oy - 0.455f * u, 0.38f * u, 1f,
++                rad3(0.38f * u, al(0xFFFF2A22, 0.70f), al(0xFFFF2A22, 0.28f), al(0xFFFF2A22, 0f), 0.35f));
++            fillShader(lin3(ox + sd * 0.28f * u, 0, ox + sd * 0.49f * u, 0, 0xFFFF6A55, 0xFFEA1B1B, 0xFFA30B14, 0.5f));
++            path.reset();
++            path.moveTo(ox + sd * 0.283f * u, oy - 0.505f * u);
++            path.lineTo(ox + sd * 0.470f * u, oy - 0.560f * u);
++            path.quadTo(ox + sd * 0.492f * u, oy - 0.505f * u, ox + sd * 0.490f * u, oy - 0.385f * u);
++            path.lineTo(ox + sd * 0.283f * u, oy - 0.395f * u);
++            path.close();
++            c.drawPath(path, p);
++            p.setShader(null);
++            stroke(al(0xFFFFD2C8, 0.95f), 0.013f * u);
++            c.drawLine(ox + sd * 0.298f * u, oy - 0.480f * u, ox + sd * 0.462f * u, oy - 0.500f * u, p);
++            stroke(al(0xFFFFFFFF, 0.5f), 0.006f * u);
++            c.drawLine(ox + sd * 0.298f * u, oy - 0.440f * u, ox + sd * 0.458f * u, oy - 0.452f * u, p);
++            // reflector inferior
++            fill(al(0xFFFF3B2E, 0.75f));
++            rr(c, ox + (sd < 0 ? -0.40f : 0.31f) * u, oy - 0.145f * u, 0.09f * u, 0.022f * u, 0.008f * u);
++        }
++        // brillo de la tercera luz
++        glow(c, ox, oy - 0.785f * u, 0.16f * u, 1f, rad(0.16f * u, al(0xFFFF4A3C, 0.50f), al(0xFFFF4A3C, 0f)));
++    }
++}
