@@ -1,6 +1,6 @@
 {
-  "version": "2.30.0",
-  "notes": "# StradaOS 2.30.0\n\n- **Clima sin internet:** StradaOS guarda el último pronóstico (5 días, hora por hora) y, si arranca sin conexión, muestra el de la hora que toca en vez de quedar vacío. Cuando vuelve internet se actualiza solo (#46).\n- **Música con Android Auto o CarPlay:** si Android Auto o CarPlay está reproduciendo, ▶ ya no arranca la app de música de la pantalla (antes podían sonar dos canciones a la vez) (#50).\n- **Audio Bluetooth al conectar el celular:** en Android 5 y más nuevos, después de abrir un momento la app de música Bluetooth, StradaOS vuelve solo al inicio como debía (#47).\n- El diagnóstico del reproductor muestra las apps de Android Auto / CarPlay que detecta.\n",
-  "url": "https://github.com/lordnordic-debug/StradaOS/releases/tag/v2.30.0",
-  "apk": "https://github.com/lordnordic-debug/StradaOS/releases/download/v2.30.0/StradaOS-2.30.0.apk"
+  "version": "2.32.0",
+  "notes": "# StradaOS 2.32.0\n\n- **Traducciones completas.** Las partes nuevas de las últimas versiones (panel del escáner OBD-II, tarjetas y widgets del inicio, viaje e IA) ya están traducidas en los 12 idiomas; antes, en varios idiomas aparecían en español. Los diagnósticos del reproductor y del mapa también salen completos en cada idioma.\n- **Turco:** completo y con su ficha en la tienda. Gracias a **mryusufcan**.\n- **Polaco:** correcciones en mantenimientos (gracias a **darlo-Pl**), en «Velocímetro sobre el mapa» y en el tema automático.\n- Revisión automática de los archivos de idioma en cada cambio, para que no vuelvan a quedar frases sin traducir sin darnos cuenta (gracias a **mryusufcan**).\n",
+  "url": "https://github.com/lordnordic-debug/StradaOS/releases/tag/v2.32.0",
+  "apk": "https://github.com/lordnordic-debug/StradaOS/releases/download/v2.32.0/StradaOS-2.32.0.apk"
 }

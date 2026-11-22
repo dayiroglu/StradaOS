@@ -1702,3 +1702,142 @@ Aplicar ahora	立即应用
 Se desbloquea con una donación de 5 USD, o 8 USD por dos temas. Todas las funciones de StradaOS siguen siendo gratis.	捐赠 5 美元解锁，两个主题 8 美元。StradaOS 的所有功能仍然免费。
 Usar la velocidad del escáner	使用扫描仪的车速
 Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso	连接扫描仪后，主屏幕显示汽车的车速而不是 GPS 车速：更准确，无延迟
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Bluetooth: emparéjalo con la clave 1234 o 0000. Wi-Fi: conecta la pantalla a la red del escáner y escribe su IP y puerto (casi siempre 192.168.0.10:35000). Cable USB: conéctalo a la pantalla y acepta el permiso que pide Android.\n3. Elígelo arriba en «Escáner».	1. 将 ELM327 诊断仪插入 OBD 接口（方向盘下方）并打开点火开关。\n2. 蓝牙：用 PIN 1234 或 0000 配对。Wi-Fi：将车机连接到诊断仪的网络并输入其 IP 和端口（几乎总是 192.168.0.10:35000）。USB 线：插到屏幕上，并允许 Android 请求的权限。\n3. 在上方“诊断仪”中选择它。
+Escáner por cable USB	USB 线诊断仪
+Cable ELM327 USB (chips CH340, FTDI, PL2303 o CP2102)	ELM327 USB 线（CH340、FTDI、PL2303 或 CP2102 芯片）
+Bluetooth emparejado, Wi-Fi (IP y puerto), cable USB o un auto simulado para probar	已配对的蓝牙、Wi-Fi（IP 和端口）、USB 线或用于测试的模拟车辆
+No veo ningún escáner USB conectado. Conecta el cable ELM327 USB a la pantalla (si hace falta, con un adaptador OTG), enchúfalo en el conector OBD con el contacto puesto y vuelve a intentar. Sirven los cables con chip CH340, FTDI, PL2303 o CP2102.	没有看到已连接的 USB 诊断仪。把 ELM327 USB 线插到屏幕上（需要时用 OTG 转接头），在打开点火的情况下插入 OBD 接口，然后重试。带 CH340、FTDI、PL2303 或 CP2102 芯片的线都可以。
+No veo el cable USB del escáner: revisa que esté conectado	看不到诊断仪的 USB 线：请检查是否已连接
+Falta el permiso para usar el cable USB: acéptalo en la pantalla	缺少使用 USB 线的权限：请在屏幕上允许
+El cable USB no responde como un escáner ELM327	USB 线没有像 ELM327 诊断仪那样响应
+Este cable USB no parece un escáner	这条 USB 线看起来不是诊断仪
+Android no dejó abrir el cable USB	Android 不允许打开 USB 线
+Este equipo no tiene USB para accesorios	此设备没有用于配件的 USB
+No se pudo preparar el cable USB	无法设置 USB 线
+El cable USB no tiene canal de datos	USB 线没有数据通道
+Otra app está usando el cable USB	另一个应用正在使用 USB 线
+El cable USB no aceptó la velocidad	USB 线不接受该速率
+Se desconectó el cable USB	USB 线已断开
+Panel de datos	数据面板
+Datos del panel	面板数据
+Máximo 6 datos	最多 6 项
+Hasta 6 datos del escáner, por ejemplo RPM, velocidad, refrigerante y consumo	最多 6 项诊断仪数据，例如转速、车速、冷却液和油耗
+Conecta tu escáner OBD-II	连接你的 OBD-II 诊断仪
+1. Enchufa el escáner ELM327 en el conector OBD (bajo el volante) y pon el contacto.\n2. Si es Bluetooth, emparéjalo primero en los ajustes de Bluetooth del equipo (clave 1234 o 0000).\n3. Toca ⚙ para elegirlo y luego Conectar.\n\nStradaOS vigila la temperatura, el voltaje, la mezcla y los códigos de falla, y te avisa por voz aunque estés en otra app.	1. 把 ELM327 诊断仪插入 OBD 接口（方向盘下方），打开点火开关。\n2. 如果是蓝牙的，先在车机的蓝牙设置里配对（密码 1234 或 0000）。\n3. 点 ⚙ 选择它，然后点连接。\n\nStradaOS 会监测温度、电压、混合气和故障码，即使你在别的应用里也会语音提醒。
+Elegir escáner	选择诊断仪
+Probar con un auto simulado	用模拟车辆试试
+Todo normal por ahora.	目前一切正常。
+Sin monitor activo.	监测未开启。
+El auto no tiene códigos guardados.	车辆没有存储的故障码。
+Se revisan al conectar y cada 30 segundos.	连接时及每 30 秒检查一次。
+Toca para ver qué hacer	点击查看怎么做
+Hace {} min	{} 分钟前
+Para que una IA explique los códigos, pon tu API key (Claude, Groq, Gemini u otra) en ⚙ → Inteligencia artificial. Las explicaciones se guardan en el equipo y después funcionan sin internet.	要让 AI 解释故障码，请在 ⚙ → 人工智能 中填写你的 API 密钥（Claude、Groq、Gemini 或其他）。解释会保存在车机上，之后无需联网也能查看。
+Se apaga la luz del motor y se borran los datos que usa el taller para diagnosticar. Si la falla sigue, el código volverá a aparecer. Anota los códigos antes.	发动机故障灯会熄灭，维修店用于诊断的数据会被清除。如果故障仍在，故障码会再次出现。请先记下故障码。
+Mi vehículo (para la IA)	我的车辆（供 AI 使用）
+Encender el monitor al iniciar StradaOS	启动 StradaOS 时开启监测
+Ej.: Kia Sorento 2010 2.4 bencina 4x4 automático	例如：Kia Sorento 2010 2.4 汽油 四驱 自动挡
+La IA recibe solo el código, el vehículo que escribiste y los datos del motor; nunca tu ubicación. Cada consulta la cobra tu proveedor con tu API key.	AI 只会收到故障码、你填写的车辆和发动机数据，绝不会收到你的位置。每次查询由你的服务商按你的 API 密钥计费。
+alerta sobre	高于报警
+alerta bajo	低于报警
+alerta sobre ±	超出 ± 报警
+Con el motor en marcha debe estar entre 13,5 y 14,8 V. Con el motor apagado, 12,4 a 12,8 V es normal.	发动机运转时应在 13.5 到 14.8 V 之间。熄火时 12.4 到 12.8 V 属正常。
+Normal en marcha: 85 a 98 °C. También avisa si sube más de 4 °C por minuto sobre 95 °C.	行驶中正常：85 到 98 °C。超过 95 °C 后每分钟升高超过 4 °C 也会提醒。
+Cuánto corrige el computador la mezcla. Positivo = le falta combustible (fuga de aire); negativo = le sobra.	电脑对混合气的修正量。正值 = 燃油不足（漏气）；负值 = 燃油过多。
+Solo informativo: este dato no genera alertas.	仅供参考：此数据不会触发报警。
+VEHÍCULO	车辆
+Qué muestra cada tarjeta	各卡片显示什么
+Música, el monitor del vehículo (temperatura, voltaje, RPM y alertas) o un gráfico en vivo	音乐、车辆监测（温度、电压、转速和报警）或实时图表
+Gráfico en vivo	实时图表
+Gráfico del reproductor	播放器卡片图表
+Dato del escáner que se grafica (últimos 5 minutos)	要绘制的诊断仪数据（最近 5 分钟）
+Tarjeta del centro	中间卡片
+El mapa, el monitor del vehículo o un gráfico en vivo. Sin el mapa, Android Auto y CarPlay se abren desde la barra de botones	地图、车辆监测或实时图表。没有地图时，Android Auto 和 CarPlay 从按钮栏打开
+Gráfico del centro	中间卡片图表
+Velocidad (GPS)	车速（GPS）
+Recuadro de la velocidad	车速框
+La velocidad del GPS o, en grande, otro dato del escáner (por ejemplo la temperatura del refrigerante)	GPS 车速，或以大字显示其他诊断仪数据（例如冷却液温度）
+Esta tarjeta	此卡片
+Cambiar esta tarjeta…	更换此卡片…
+¿Qué dato graficar?	绘制哪项数据？
+Cambiar qué muestra…	更改显示内容…
+◀  Mover a la izquierda	◀  向左移动
+Mover a la derecha  ▶	向右移动  ▶
+Ancho de la tarjeta…	卡片宽度…
+Ancho de la tarjeta	卡片宽度
+Volver al orden y tamaño de siempre	恢复默认顺序和大小
+Ya está a la izquierda	已经在最左边
+Ya está a la derecha	已经在最右边
+Ancha	宽
+Muy ancha	很宽
+✋  Ajustar con el dedo (mover y cambiar tamaño)	✋  用手指调整（移动和改变大小）
+Arrastra la manija entre dos tarjetas para cambiar el ancho · arrastra una tarjeta para moverla	拖动两张卡片之间的手柄可改变宽度 · 拖动卡片可移动它
+se ajusta solo	自动调整
+VIAJE	行程
+ALTITUD	海拔
+pendiente —	坡度 —
+Mantén presionado para reiniciar el viaje o cambiar los widgets	长按可重置行程或更换小组件
+Quitar este acceso	移除此快捷方式
+Acceso directo {}	快捷方式 {}
+Altitud, pendiente y rumbo	海拔、坡度和方向
+Viaje (km, tiempo, consumo)	行程（公里、时间、油耗）
+Dato del vehículo…	车辆数据…
+Accesos directos (3 apps)	快捷方式（3 个应用）
+Dato del vehículo	车辆数据
+Widget	小组件
+Reiniciar el viaje	重置行程
+Quitar la franja	移除横条
+Franja de widgets	小组件横条
+¿Qué dato mostrar?	显示哪项数据？
+Viaje reiniciado	行程已重置
+Quitar la franja de widgets de abajo	移除下方的小组件横条
+Franja de widgets debajo (altitud, viaje, apps…)	下方小组件横条（海拔、行程、应用…）
+Arrastra las manijas para cambiar tamaños · arrastra una tarjeta para moverla · toca un widget para cambiarlo	拖动手柄可改变大小 · 拖动卡片可移动它 · 点击小组件可更换
+Agregar franja de widgets	添加小组件横条
+Agregar un widget	添加小组件
+Ajustar tamaños con el dedo	用手指调整大小
+Quitar este widget	移除此小组件
+Accesos directos (apps)	快捷方式（应用）
+MÚSICA	音乐
+Música (canción y controles)	音乐（歌曲和控制）
+Arrastra las manijas para cambiar tamaños · arrastra una tarjeta para moverla · toca un widget para cambiarlo · ✕ oculta una tarjeta	拖动手柄可改变大小 · 拖动卡片可移动它 · 点击小组件可更换 · ✕ 隐藏卡片
+Ocultar la tarjeta del vehículo	隐藏车辆卡片
+Ocultar la tarjeta de música	隐藏音乐卡片
+Mostrar la tarjeta del vehículo	显示车辆卡片
+Mostrar la tarjeta de música	显示音乐卡片
+La IA recibe solo el código, el vehículo que escribiste y los datos del motor; nunca tu ubicación. El VIN solo se envía si lo activas aquí. Cada consulta la cobra tu proveedor con tu API key.	AI 只会收到故障码、你填写的车辆和发动机数据，绝不会收到你的位置。只有在这里开启后才会发送 VIN。每次查询由你的服务商按你的 API 密钥计费。
+Apps de Android Auto / CarPlay con notificación: {} · multimedia: {}	有通知的 Android Auto / CarPlay 应用：{} · 媒体：{}
+▶ sin nada sonando abre tu app de música: {}	▶ 没有播放时打开你的音乐应用：{}
+no (Android Auto / CarPlay conectado)	否（Android Auto / CarPlay 已连接）
+Música de cualquier app (Android 5+): {}	任意应用的音乐（Android 5+）：{}
+no aplica en este Android	此 Android 版本不支持
+acceso a notificaciones {} · lector conectado {}	通知访问权限 {} · 读取器已连接 {}
+SÍ	是
+NO	否
+Sonido de música en el sistema: {}	系统中的音乐声音：{}
+Sesiones multimedia: {}	媒体会话：{}
+ninguna (ninguna app publica lo que suena)	无（没有应用发布正在播放的内容）
+el lector no arrancó	读取器未启动
+sin acceso ({})	无权访问（{}）
+Pantalla HCN (servicio sourceinfo): {}	HCN 屏幕（sourceinfo 服务）：{}
+no aplica (esta pantalla no es HCN)	不适用（此屏幕不是 HCN）
+no se probó	未测试
+conectado, se consulta cada 2 s (sin avisos)	已连接，每 2 秒查询一次（无通知）
+conectado, con avisos del servicio	已连接，有服务通知
+Bluetooth del sistema (AVRCP): {}	系统蓝牙（AVRCP）：{}
+ningún aviso	无通知
+{} avisos, el último hace {} s: {}	{} 条通知，最后一条在 {} 秒前：{}
+Tráfico en vivo: {}	实时路况：{}
+activo	开启
+inactivo	关闭
+fuente del equipo: {}	车机来源：{}
+última lectura: {}	最后读取：{}
+avisos recibidos: {}	收到的通知：{}
+etiquetas del archivo: {}	文件标签：{}
+{} s, hace {} s	{} 秒，{} 秒前
+simulado (gancho de prueba)	模拟（测试钩子）
+leída: «{}» — {} · {}/{} s · {}	已读取：«{}» — {} · {}/{} 秒 · {}
+«{}» — {} · {} · {} s	«{}» — {} · {} · {} 秒
+sonando	正在播放
+en pausa	已暂停
+estado ?	状态 ?
