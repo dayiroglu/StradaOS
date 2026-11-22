@@ -1,0 +1,74 @@
+name: APK derle (arac karti yamasi)
+
+# Elle calistirilir: Actions > "APK derle (arac karti yamasi)" > Run workflow
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Yamayi uygula
+        run: |
+          # Telefon dosya adini degistirmis olabilir ("... (1).patch"): en buyuk (en yeni) yamayi kullan
+          PATCH=$(ls -S stradaos-arac-karti*.patch 2>/dev/null | head -n 1)
+          test -n "$PATCH" || { echo "stradaos-arac-karti*.patch deponun ana dizininde yok"; exit 1; }
+          echo "Kullanilan yama: $PATCH"
+          git apply --ignore-whitespace --verbose "$PATCH"
+
+      - name: Ceviri satirlarini ekle (Turkce ve Ingilizce)
+        run: |
+          TAB=$(printf '\t')
+          add() {
+            f="app/src/main/assets/i18n/$1.txt"
+            if ! grep -qxF -- "$2$TAB$3" "$f"; then
+              if [ -n "$(tail -c1 "$f")" ]; then echo >> "$f"; fi
+              printf '%s\t%s\n' "$2" "$3" >> "$f"
+            fi
+          }
+          add tr 'Panel central' 'Orta panel'
+          add tr 'Mapa, o una escena de carretera animada con tu auto rojo. Con la escena no hay navegación integrada' 'Harita veya kırmızı aracınızla animasyonlu bir otoyol sahnesi. Sahnede dahili navigasyon kullanılamaz'
+          add tr 'Escena de carretera' 'Otoyol sahnesi'
+          add tr 'Cambia el panel central a «Mapa» en Ajustes' 'Ayarlar bölümünden orta paneli «Harita» yapın'
+          add tr 'Una tarjeta de música enorme al centro: canción, barras que bailan y la letra en horizontal, con los botones aparte. El clima va arriba junto a la fecha, el mantenimiento bajo el carro, y la calzada pasa bajo el carro según la velocidad.' 'Ortada büyük bir müzik kartı: şarkı adı, dans eden ses çubukları ve yatay şarkı sözleri; tuşlar ayrı. Hava durumu üstte tarihin yanında, bakım kartı aracın altında; yol çizgileri hıza göre aracın altından akar.'
+          add tr 'Letra no disponible' 'Şarkı sözü bulunamadı'
+          add tr 'Buscando la letra…' 'Şarkı sözü aranıyor…'
+          add tr 'Letra de la canción' 'Şarkı sözleri'
+          add tr 'Busca la letra en internet (LRCLIB) con el título y el artista de lo que suena. Apágalo si no quieres que salgan de la pantalla.' 'Çalan şarkının adı ve sanatçısıyla sözleri internette (LRCLIB) arar. Bu bilgilerin ekrandan çıkmasını istemiyorsanız kapatın.'
+          add en 'Panel central' 'Center panel'
+          add en 'Mapa, o una escena de carretera animada con tu auto rojo. Con la escena no hay navegación integrada' 'Map, or an animated highway scene with your red car. The scene has no built-in navigation'
+          add en 'Escena de carretera' 'Highway scene'
+          add en 'Cambia el panel central a «Mapa» en Ajustes' 'Set the center panel to “Map” in Settings'
+          add en 'Una tarjeta de música enorme al centro: canción, barras que bailan y la letra en horizontal, con los botones aparte. El clima va arriba junto a la fecha, el mantenimiento bajo el carro, y la calzada pasa bajo el carro según la velocidad.' 'A huge music card in the center: song, dancing bars and horizontal lyrics, with the buttons separate. Weather sits at the top next to the date, maintenance under the car, and the road scrolls under the car with your speed.'
+          add en 'Letra no disponible' 'Lyrics not available'
+          add en 'Buscando la letra…' 'Looking for lyrics…'
+          add en 'Letra de la canción' 'Song lyrics'
+          add en 'Busca la letra en internet (LRCLIB) con el título y el artista de lo que suena. Apágalo si no quieres que salgan de la pantalla.' 'Looks up lyrics online (LRCLIB) using the title and artist of what is playing. Turn it off if you do not want that leaving the screen.'
+
+      - name: Debug APK derle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Release olarak yayinla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=$(find app/build/outputs/apk/debug -name '*.apk' | head -n 1)
+          echo "APK: $APK"
+          cp "$APK" StradaOS-arac-karti.apk
+          gh release delete arac-karti --yes --cleanup-tag || true
+          gh release create arac-karti StradaOS-arac-karti.apk \
+            --title "StradaOS Prueba (arac karti)" \
+            --notes "Yeni tema Ritmo (Ayarlar > Kisisellestirme > Tema): buyuk muzik karti, ses cubuklari, soz, ustte hava, aracin altinda bakim, hiza gore akan yol. Arac karti + yol sahnesi dahil." \
+            --target "${{ github.sha }}"
