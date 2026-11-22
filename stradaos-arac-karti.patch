@@ -41,7 +41,7 @@ index 04e5094..3e4a554 100644
              c.drawText(unit, cx, cy + r * 0.30f, pUnit);
              pBig.setColor(ring);
 diff --git a/app/src/main/java/com/stradaos/launcher/Main.java b/app/src/main/java/com/stradaos/launcher/Main.java
-index 80fa1c6..dc06851 100644
+index 80fa1c6..98bdf5f 100644
 --- a/app/src/main/java/com/stradaos/launcher/Main.java
 +++ b/app/src/main/java/com/stradaos/launcher/Main.java
 @@ -159,6 +159,7 @@ public class Main extends Activity {
@@ -229,7 +229,7 @@ index 80fa1c6..dc06851 100644
      private FaroGauge faroGauge;
      private Faro.Timeline faroBar;
      private Faro.Icon faroWxIc;
-@@ -4408,7 +4408,189 @@ public class Main extends Activity {
+@@ -4408,7 +4408,209 @@ public class Main extends Activity {
      /** Modo del último inicio armado con Faro (null = ninguno todavía): para encender o apagar los faros. */
      private static Boolean faroLastLight;
  
@@ -241,6 +241,9 @@ index 80fa1c6..dc06851 100644
 +     * la barra de arriba, es una sola tarjeta de música hasta la barra de apps. Vertical: la tarjeta de música arriba;
 +     * debajo, el carro a la izquierda y los mantenimientos a la derecha.
 +     */
++    /** Ritmo 2 en pantalla horizontal (en vertical se arma como Ritmo). */
++    private boolean plusH() { return Prem.plus() && !vertical; }
++
 +    private void ritmoMetrics() {
 +        float W0 = premW();
 +        premHeadH = 0;
@@ -250,7 +253,21 @@ index 80fa1c6..dc06851 100644
 +        float bottom = dockTop - (noDock ? 12 : 10), top = 8, topH = 34;
 +        faroPlH = 0; faroPlY = bottom;
 +        faroWxY = 0; faroWxH = 0;
-+        if (vertical) {
++        if (plusH()) {
++            // Ritmo 2: el carro llega abajo; a la derecha, la música (más baja) y debajo mantenimientos y clima
++            faroColX = 12; faroColY = top; faroColW = 292 + Math.min(64, ex / 6f); faroColH = boardH - top;
++            float rx0 = faroColX + faroColW + 12;
++            faroTopX = rx0;
++            float cardsH = Math.max(150, Math.min(190, boardH * 0.31f));
++            float cardsY = bottom - cardsH;
++            mapX = rx0; mapY = top + topH + 4; mapW = W0 - 12 - rx0;
++            mapH = Math.max(120, cardsY - 14 - mapY);
++            float mw = (mapW - 14) * 0.47f;
++            faroMtY = cardsY; faroMtH = cardsH;
++            faroWxY = cardsY; faroWxH = Math.round(cardsH);
++            faroRX = rx0 + mw + 14; faroRW = mapW - mw - 14;
++            faroPlX = rx0; faroPlW = mapW;
++        } else if (vertical) {
 +            float rh = shortVertical ? 300 : Math.max(300, Math.min(470, boardH * 0.36f));
 +            float ry = bottom - rh;
 +            faroTopX = 12;
@@ -283,10 +300,13 @@ index 80fa1c6..dc06851 100644
 +        ritmoFlow = null; ritmoEq = null; ritmoLy = null; ritmoWxIc = null; ritmoWxTv = null; ritmoWxHiLoTv = null;
 +        panelWx = null;
 +        buildFaroTop();
-+        buildRitmoWeather();
++        if (!plusH()) buildRitmoWeather();
 +        buildAaCard();            // con Ritmo no arma el mapa: solo deja en blanco lo que el mapa usaba
 +        buildFaroColumn();
-+        buildFaroMaint(vertical ? faroRX : faroColX, faroMtY, vertical ? faroRW : faroColW, faroMtH);
++        if (plusH()) {
++            buildFaroMaint(faroPlX, faroMtY, faroRX - 14 - faroPlX, faroMtH);
++            buildFaroWeather(faroRX, faroWxY, faroRW, faroWxH);
++        } else buildFaroMaint(vertical ? faroRX : faroColX, faroMtY, vertical ? faroRW : faroColW, faroMtH);
 +        buildRitmoMusic(ritmoX, ritmoY, ritmoW, ritmoH);
 +        if (!noDock) buildFaroDock();
 +        updateOilBadge();
@@ -334,14 +354,14 @@ index 80fa1c6..dc06851 100644
 +    private void buildRitmoMusic(float x, float y, float w, float hh) {
 +        final FrameLayout card = faroCard(x, y, w, hh);
 +        float pad = 18;
-+        float A = Math.max(46, Math.min(76, hh * 0.22f));
++        float A = Math.max(44, Math.min(76, hh * 0.19f));
 +        float hb = 14 + A;                                  // donde termina la cabecera
-+        float ctlH = Math.max(56, Math.min(72, hh * 0.2f));
++        float ctlH = Math.max(48, Math.min(72, hh * 0.18f));
 +        float ctlY = hh - 12 - ctlH;
 +        float tlY = ctlY - 6 - 18;
 +        float lyEnd = tlY - 20;                             // la letra termina sobre la hora
 +        float avail = lyEnd - (hb + 8);
-+        float eqH = avail >= 120 ? Math.max(24, Math.min(56, avail * 0.28f)) : 0;
++        float eqH = avail >= 80 ? Math.max(22, Math.min(56, avail * 0.30f)) : 0;
 +        float eqY = hb + 8, lyY = eqY + eqH + (eqH > 0 ? 6 : 0), lyH = Math.max(40, lyEnd - lyY);
 +
 +        playerArt = new PlayerArt(this, s, asset("ic/music_note.png"));
@@ -419,7 +439,7 @@ index 80fa1c6..dc06851 100644
          float W0 = premW();
          premHeadH = 0;
          premWide = false;
-@@ -4448,6 +4630,7 @@ public class Main extends Activity {
+@@ -4448,6 +4650,7 @@ public class Main extends Activity {
      }
  
      private void buildFaro() {
@@ -427,7 +447,7 @@ index 80fa1c6..dc06851 100644
          premHeadViews.clear();
          faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; faroPillIc = null;
          buildFaroTop();
-@@ -4557,6 +4740,13 @@ public class Main extends Activity {
+@@ -4557,6 +4760,13 @@ public class Main extends Activity {
          float carY = labelY + labelH + 2, carH = Math.max(60, carSpeed ? y + hh - carY : Math.min(carMax, y + hh - carY));
          String col = Faro.car(prefs.getString("faro_car", "silver"));
          Faro.Car car = new Faro.Car(this, col, LIGHT);
@@ -441,23 +461,23 @@ index 80fa1c6..dc06851 100644
          place(board, car, x, carY, w, carH);
          car.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_VEHICLE); } });
          car.setOnLongClickListener(new View.OnLongClickListener() { public boolean onLongClick(View v) { chooseFaroCar(); return true; } });
-@@ -4693,6 +4883,7 @@ public class Main extends Activity {
+@@ -4693,6 +4903,7 @@ public class Main extends Activity {
      }
  
      private void renderFaroWx() {
-+        if (Prem.ritmo()) { renderRitmoWx(); return; }
++        if (Prem.ritmo() && !plusH()) { renderRitmoWx(); return; }
          if (faroWxIc == null) return;
          Weather.Now n = weatherNow;
          faroHours.removeAllViews();
-@@ -5445,6 +5636,7 @@ public class Main extends Activity {
+@@ -5445,6 +5656,7 @@ public class Main extends Activity {
              View th;
              boolean sel = inUse && (i == 1) == LIGHT;
              if (Cobalto.ID.equals(id)) { Cobalto.Thumb t = new Cobalto.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
-+            else if (Ritmo.ID.equals(id)) { Ritmo.Thumb t = new Ritmo.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
++            else if (Prem.isRitmo(id)) { Ritmo.Thumb t = new Ritmo.Thumb(this, s, portrait, i == 1); t.selected = sel; t.plus = Ritmo.ID2.equals(id); th = t; }
              else if (Faro.ID.equals(id)) { Faro.Thumb t = new Faro.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
              else { Aurora.Thumb t = new Aurora.Thumb(this, s, portrait, i == 1); t.selected = sel; th = t; }
              col.addView(th, new LinearLayout.LayoutParams(-1, -2));
-@@ -5700,7 +5892,7 @@ public class Main extends Activity {
+@@ -5700,7 +5912,7 @@ public class Main extends Activity {
          Nav.Place p = Nav.savedPlace(this, key);
          if (p == null) {
              toast("Configura «" + label + "» primero en Navegación");
@@ -466,7 +486,7 @@ index 80fa1c6..dc06851 100644
              return;
          }
          startInternalNav(p);
-@@ -5896,7 +6088,7 @@ public class Main extends Activity {
+@@ -5896,7 +6108,7 @@ public class Main extends Activity {
      /** App de navegación elegida; si se elige integrada en el mapa, abre búsqueda/menú interno. */
      private void openNavApp() {
          String navPref = prefs.getString("nav_app", null);
@@ -475,7 +495,7 @@ index 80fa1c6..dc06851 100644
              if (Nav.active != null) openNavMenu();
              else openNavSearch();
              return;
-@@ -5918,7 +6110,7 @@ public class Main extends Activity {
+@@ -5918,7 +6130,7 @@ public class Main extends Activity {
      }
  
      private void openNavSearch(final boolean insertActive) {
@@ -484,7 +504,7 @@ index 80fa1c6..dc06851 100644
          final android.app.AlertDialog[] dref = new android.app.AlertDialog[1];
          final boolean[] addStopMode = {false};
          LinearLayout wrap = new LinearLayout(this);
-@@ -6756,6 +6948,8 @@ public class Main extends Activity {
+@@ -6756,6 +6968,8 @@ public class Main extends Activity {
          speedTv.setText(ok ? String.valueOf(Math.round(kmh < 2 ? 0 : v)) : "--");
          if (carGauge != null) carGauge.setSpeed(kmh < 2 ? 0 : v, ok);
          if (mapGauge != null) mapGauge.setSpeed(kmh < 2 ? 0 : v, ok);
@@ -493,7 +513,7 @@ index 80fa1c6..dc06851 100644
          if (faroGauge != null) {
              faroGauge.setSpeed(kmh < 2 ? 0 : v, ok);
              int lim = Nav.active != null && Nav.curSpeedLimitKmh > 0
-@@ -7247,13 +7441,17 @@ public class Main extends Activity {
+@@ -7247,13 +7461,17 @@ public class Main extends Activity {
              boolean on = playingState != null ? playingState
                      : ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
              playIc.setImageBitmap(asset(on ? "ic/pause.png" : "ic/play_arrow.png"));
@@ -511,21 +531,21 @@ index 80fa1c6..dc06851 100644
              playerArt.setProgress(p / (float) durMs);
              timePosTv.setText(fmt(p) + "  /  " + fmt(durMs));
              if (faroBar != null) faroBar.set(p / (float) durMs);
-@@ -9053,7 +9251,12 @@ public class Main extends Activity {
+@@ -9053,7 +9271,12 @@ public class Main extends Activity {
              String pid = prefs.getString("premium_theme", Aurora.ID);
              LinearLayout r = rowBase(pn, I18n.t(Prem.name(pid)) + " · " + I18n.t("En uso"), "El tema arma la pantalla de inicio. Las tarjetas, la barra y el velocímetro de aquí se usan otra vez al quitarlo en Personalización.");
              r.setOnClickListener(new View.OnClickListener() { public void onClick(View v) { showSettings(C_STYLE); } });
 -            if (Faro.ID.equals(pid)) {
-+            if (Ritmo.ID.equals(pid)) {
++            if (Prem.isRitmo(pid)) {
 +                toggle(pn, "Letra de la canción", "Busca la letra en internet (LRCLIB) con el título y el artista de lo que suena. Apágalo si no quieres que salgan de la pantalla.", prefs.getBoolean("ritmo_lyrics", true), new IntCb() { public void on(int i) {
 +                    prefs.edit().putBoolean("ritmo_lyrics", i == 1).apply(); rebuild(); showSettings(C_HOME);
 +                }});
 +            }
-+            if (Faro.ID.equals(pid) || Ritmo.ID.equals(pid)) {
++            if (Faro.ID.equals(pid) || Prem.isRitmo(pid)) {
                  final String[] cols = Faro.CAR_COLORS;
                  int ci = Math.max(0, java.util.Arrays.asList(cols).indexOf(Faro.car(prefs.getString("faro_car", "silver"))));
                  choice(pn, "Color del carro", "El carro del tema Faro, visto desde arriba. También se cambia con una presión larga sobre el carro.", Faro.CAR_NAMES, ci, new IntCb() { public void on(int i) {
-@@ -9099,6 +9302,12 @@ public class Main extends Activity {
+@@ -9099,6 +9322,12 @@ public class Main extends Activity {
                  }});
          }
          LinearLayout mp = section(body, "Mapa");
@@ -538,7 +558,7 @@ index 80fa1c6..dc06851 100644
          final String[] connKeys = {"both", "aa", "cp", "none"};
          choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
              new String[]{"Android Auto y CarPlay", "Solo Android Auto", "Solo CarPlay", "Ninguno"},
-@@ -10363,7 +10572,7 @@ public class Main extends Activity {
+@@ -10363,7 +10592,7 @@ public class Main extends Activity {
  
      private void refreshStates() {
          if (navSearchBtn != null) {
@@ -548,7 +568,7 @@ index 80fa1c6..dc06851 100644
          }
          if (aaBtnTv == null && cpSubTv == null) return;
 diff --git a/app/src/main/java/com/stradaos/launcher/Prem.java b/app/src/main/java/com/stradaos/launcher/Prem.java
-index 6bba6b7..a9c8fa5 100644
+index 6bba6b7..6bc4f1f 100644
 --- a/app/src/main/java/com/stradaos/launcher/Prem.java
 +++ b/app/src/main/java/com/stradaos/launcher/Prem.java
 @@ -10,13 +10,13 @@ import android.graphics.Canvas;
@@ -556,32 +576,37 @@ index 6bba6b7..a9c8fa5 100644
      private Prem() { }
  
 -    static final String[] IDS = {Aurora.ID, Cobalto.ID, Faro.ID};
-+    static final String[] IDS = {Aurora.ID, Cobalto.ID, Faro.ID, Ritmo.ID};
++    static final String[] IDS = {Aurora.ID, Cobalto.ID, Faro.ID, Ritmo.ID, Ritmo.ID2};
      static String style = Aurora.ID;
  
 -    static boolean known(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Faro.ID.equals(id); }
-+    static boolean known(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Faro.ID.equals(id) || Ritmo.ID.equals(id); }
++    static boolean known(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Faro.ID.equals(id) || Ritmo.ID.equals(id) || Ritmo.ID2.equals(id); }
  
      /** Temas premium que se regalan a todos (lanzamiento de la 2.24). Los que vengan después se desbloquean con una donación (Fase 3). */
 -    static boolean free(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id); }
-+    static boolean free(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Ritmo.ID.equals(id); }
++    static boolean free(String id) { return Aurora.ID.equals(id) || Cobalto.ID.equals(id) || Ritmo.ID.equals(id) || Ritmo.ID2.equals(id); }
      /** Cuántos temas se desbloquean con donación. Con dos o más, la app ofrece sola el paquete de 8 USD por dos temas. */
      static int paidCount() {
          int n = 0;
-@@ -27,12 +27,16 @@ final class Prem {
+@@ -27,12 +27,21 @@ final class Prem {
      static boolean forceBundle;
      static boolean bundle() { return forceBundle || paidCount() >= 2; }
      static boolean cob() { return Cobalto.ID.equals(style); }
 -    static boolean faro() { return Faro.ID.equals(style); }
 +    /** Ritmo comparte los colores, el fondo y casi todo el armado de Faro: por eso «faro()» también es verdad con Ritmo. */
-+    static boolean faro() { return Faro.ID.equals(style) || Ritmo.ID.equals(style); }
-+    static boolean ritmo() { return Ritmo.ID.equals(style); }
++    static boolean faro() { return Faro.ID.equals(style) || ritmo(); }
++    /** Ritmo y Ritmo 2 comparten la tarjeta de música, el carro con calzada y la letra. */
++    static boolean ritmo() { return Ritmo.ID.equals(style) || Ritmo.ID2.equals(style); }
++    static boolean plus() { return Ritmo.ID2.equals(style); }
++    static boolean isRitmo(String id) { return Ritmo.ID.equals(id) || Ritmo.ID2.equals(id); }
      /** Solo Aurora tiene «Solo mapa» (Cobalto y Faro son fijos). */
      static boolean mapOnlyOk() { return Aurora.ID.equals(style); }
  
 -    static String name(String id) { return Cobalto.ID.equals(id) ? "Cobalto" : Faro.ID.equals(id) ? "Faro" : "Aurora"; }
-+    static String name(String id) { return Cobalto.ID.equals(id) ? "Cobalto" : Faro.ID.equals(id) ? "Faro" : Ritmo.ID.equals(id) ? "Ritmo" : "Aurora"; }
++    static String name(String id) { return Cobalto.ID.equals(id) ? "Cobalto" : Faro.ID.equals(id) ? "Faro" : Ritmo.ID.equals(id) ? "Ritmo" : Ritmo.ID2.equals(id) ? "Ritmo 2" : "Aurora"; }
      static String desc(String id) {
++        if (Ritmo.ID2.equals(id))
++            return "Como Ritmo, pero con el carro grande a la izquierda (con la calzada que corre según la velocidad) y la tarjeta de música más baja. Debajo van los mantenimientos a la izquierda y el clima por horas a la derecha.";
 +        if (Ritmo.ID.equals(id))
 +            return "Una tarjeta de música enorme al centro: canción, barras que bailan y la letra en horizontal, con los botones aparte. El clima va arriba junto a la fecha, el mantenimiento bajo el carro, y la calzada pasa bajo el carro según la velocidad.";
          if (Faro.ID.equals(id))
@@ -589,10 +614,10 @@ index 6bba6b7..a9c8fa5 100644
          return Cobalto.ID.equals(id)
 diff --git a/app/src/main/java/com/stradaos/launcher/Ritmo.java b/app/src/main/java/com/stradaos/launcher/Ritmo.java
 new file mode 100644
-index 0000000..2213380
+index 0000000..f609a78
 --- /dev/null
 +++ b/app/src/main/java/com/stradaos/launcher/Ritmo.java
-@@ -0,0 +1,602 @@
+@@ -0,0 +1,634 @@
 +package com.stradaos.launcher;
 +
 +import android.content.Context;
@@ -627,6 +652,8 @@ index 0000000..2213380
 +    private Ritmo() { }
 +
 +    static final String ID = "ritmo";
++    /** Segunda versión: carro grande a la izquierda, la tarjeta de música más baja y debajo mantenimientos y clima. */
++    static final String ID2 = "ritmo2";
 +
 +    private static int al(int c, float a) {
 +        int a0 = (c >>> 24) & 0xFF;
@@ -1047,11 +1074,11 @@ index 0000000..2213380
 +            p.setTypeface(Typeface.DEFAULT);
 +            p.setTextSize(sec);
 +            String pv = idx >= 1 ? lineAt(idx - 1) : null;
-+            if (pv != null) { p.setColor(al(muted, 0.55f)); c.drawText(fit(pv, maxW), cx, top - gap, p); }
++            if (pv != null && top - gap - sec * 0.85f >= -dy) { p.setColor(al(muted, 0.55f)); c.drawText(fit(pv, maxW), cx, top - gap, p); }
 +            String n1 = lineAt(idx + 1), n2 = lineAt(idx + 2);
 +            float by = top + block + gap + sec * 0.8f;
-+            if (n1 != null) { p.setColor(al(muted, 0.95f)); c.drawText(fit(n1, maxW), cx, by, p); }
-+            if (n2 != null && by + sec * 1.5f < h + 4 * s) { p.setColor(al(muted, 0.5f)); c.drawText(fit(n2, maxW), cx, by + sec * 1.5f, p); }
++            if (n1 != null && by + sec * 0.3f <= h - dy) { p.setColor(al(muted, 0.95f)); c.drawText(fit(n1, maxW), cx, by, p); }
++            if (n2 != null && by + sec * 1.5f + sec * 0.3f <= h - dy) { p.setColor(al(muted, 0.5f)); c.drawText(fit(n2, maxW), cx, by + sec * 1.5f, p); }
 +            c.restore();
 +            if (a < 1f) postInvalidateDelayed(16);
 +        }
@@ -1062,7 +1089,7 @@ index 0000000..2213380
 +    /** Miniatura: columna del carro a la izquierda, la tarjeta de música grande con las barras y la barra de apps. */
 +    static final class Thumb extends View {
 +        final boolean portrait, light;
-+        boolean selected;
++        boolean selected, plus;
 +        private final float s;
 +        private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
 +        private final RectF r = new RectF();
@@ -1128,6 +1155,36 @@ index 0000000..2213380
 +                float ry = cy0 + mh + gap;
 +                card(c, pad, ry, w * 0.38f, pillY - gap, crad);
 +                card(c, w * 0.38f + gap, ry, w - pad, pillY - gap, crad);
++            } else if (plus) {
++                float colW = w * 0.27f;
++                // columna: velocímetro y el carro grande con la calzada
++                p.setStyle(Paint.Style.STROKE);
++                p.setStrokeWidth(Math.max(1.5f, s * 1.1f));
++                p.setColor(muted);
++                c.drawCircle(pad + colW / 2f, pad + colW * 0.42f, colW * 0.36f, p);
++                float carT = pad + colW * 0.95f;
++                p.setStyle(Paint.Style.FILL);
++                p.setColor(al(Main.RED, 0.55f));
++                c.drawRect(pad + colW * 0.06f, carT, pad + colW * 0.06f + 1.5f * s, h - pad, p);
++                c.drawRect(pad + colW * 0.94f - 1.5f * s, carT, pad + colW * 0.94f, h - pad, p);
++                rr(c, pad + colW * 0.3f, carT + (h - pad - carT) * 0.12f, pad + colW * 0.7f, h - pad - (h - pad - carT) * 0.05f, colW * 0.12f, Main.RED);
++                float x0 = pad + colW + gap * 2, topH = h * 0.06f;
++                rr(c, x0, pad, x0 + w * 0.10f, pad + topH, topH * 0.4f, text);
++                rr(c, x0 + w * 0.12f, pad, x0 + w * 0.22f, pad + topH, topH * 0.4f, muted);
++                // tarjeta de música más baja, y debajo mantenimientos (izquierda) y clima (derecha)
++                float cy0 = pad + topH + gap, cy1 = pillY - gap, cardsT = cy1 - (cy1 - cy0) * 0.34f, mid = x0 + (w - pad - x0) * 0.47f;
++                card(c, x0, cy0, w - pad, cardsT - gap, crad);
++                eq(c, x0, cy0, w - pad, cardsT - gap, text);
++                float aw = (cardsT - gap - cy0) * 0.26f;
++                rr(c, x0 + gap * 1.5f, cy0 + gap * 1.5f, x0 + gap * 1.5f + aw, cy0 + gap * 1.5f + aw, aw * 0.22f, light ? 0x14000000 : 0x1FFFFFFF);
++                rr(c, x0 + gap * 1.5f + aw + gap, cy0 + gap * 1.8f, x0 + gap * 1.5f + aw + gap + (w - pad - x0) * 0.30f, cy0 + gap * 1.8f + aw * 0.22f, aw * 0.1f, text);
++                float lx = x0 + (w - pad - x0) * 0.2f, lw = (w - pad - x0) * 0.6f, ly = cy0 + (cardsT - gap - cy0) * 0.58f;
++                rr(c, lx, ly, lx + lw, ly + (cardsT - gap - cy0) * 0.08f, 3, text);
++                card(c, x0, cardsT, mid - gap / 2f, cy1, crad);
++                card(c, mid + gap / 2f, cardsT, w - pad, cy1, crad);
++                rr(c, x0 + gap, cardsT + gap, x0 + gap + (mid - x0) * 0.4f, cardsT + gap + (cy1 - cardsT) * 0.12f, 3, text);
++                rr(c, mid + gap * 1.5f, cardsT + gap, mid + gap * 1.5f + (w - pad - mid) * 0.3f, cardsT + gap + (cy1 - cardsT) * 0.22f, 3, text);
++                rr(c, mid + gap * 1.5f, cardsT + gap * 2f + (cy1 - cardsT) * 0.22f, mid + gap * 1.5f + (w - pad - mid) * 0.8f, cardsT + gap * 2f + (cy1 - cardsT) * 0.32f, 3, muted);
 +            } else {
 +                float colW = w * 0.27f;
 +                // columna: velocímetro, carro y mantenimientos
@@ -1151,7 +1208,7 @@ index 0000000..2213380
 +                rr(c, x0 + gap * 1.5f + aw + gap, cy0 + gap * 1.8f, x0 + gap * 1.5f + aw + gap + (w - pad - x0) * 0.34f, cy0 + gap * 1.8f + aw * 0.22f, aw * 0.1f, text);
 +                rr(c, x0 + gap * 1.5f + aw + gap, cy0 + gap * 1.8f + aw * 0.4f, x0 + gap * 1.5f + aw + gap + (w - pad - x0) * 0.22f, cy0 + gap * 1.8f + aw * 0.58f, aw * 0.08f, muted);
 +                // la letra: una línea grande y dos suaves
-+                float lx = x0 + (w - pad - x0) * 0.18f, lw = (w - pad - x0) * 0.64f, ly = cy0 + (cy1 - cy0) * 0.62f;
++                float lx = x0 + (w - pad - x0) * 0.18f, lw = (w - pad - x0) * 0.64f, ly = cy0 + (cy1 - cy0) * 0.50f;
 +                rr(c, lx + lw * 0.2f, ly, lx + lw * 0.8f, ly + (cy1 - cy0) * 0.06f, 3, muted);
 +                rr(c, lx, ly + (cy1 - cy0) * 0.10f, lx + lw, ly + (cy1 - cy0) * 0.17f, 3, text);
 +                rr(c, lx + lw * 0.15f, ly + (cy1 - cy0) * 0.21f, lx + lw * 0.85f, ly + (cy1 - cy0) * 0.26f, 3, muted);
