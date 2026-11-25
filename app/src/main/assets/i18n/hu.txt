@@ -1837,3 +1837,79 @@ Beige moderno	Modern bézs
 Próximo mantenimiento	Következő karbantartás
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	A Carbono téma autója felülnézetből. Az autón hosszan nyomva is megváltoztathatod.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Letisztult kártyák texturált karbon háttéren, alulról jövő lágy fénnyel (világos módban gyöngyszürke). A járműved nagyban a sebességmérővel és a két legközelebbi karbantartással, a térkép a lejátszóval és az időjárással felette, és egy kapszula alakú alkalmazássáv.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	Fordulatszám a sebességmérő mellett
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	Kis fordulatszámmérő mellette, az OBD-szkenner fordulatszámával (csak amíg csatlakoztatva van)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Kilométeróra
+Kilometraje del auto (escáner OBD)	Az autó futásteljesítménye (OBD-szkenner)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	Az autó kilométeróra-állása {}, és esedékes az olajcsere ({} gyakorisággal).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	A középső kártyán
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	Térkép és videó: húzd el a kártyát, hogy a térképről a memória és az USB-meghajtók videóira válts
+Mapa y video	Térkép és videó
+Carpeta de videos	Videómappa
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	Koppints a választáshoz. Ha nem választasz, a teljes memóriában és a pendrive-okon keres
+Todas	Összes
+Video en movimiento	Videó menet közben
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	5 km/h felett. A törvény tiltja a videónézést vezetés közben
+Tapar siempre	Mindig takarja
+Sin permiso de almacenamiento no se pueden buscar videos	Tárhely-engedély nélkül nem lehet videókat keresni
+Buscando videos…	Videók keresése…
+videos	videó
+No se puede reproducir aquí	Itt nem játszható le
+ábrelo en pantalla completa	nyisd meg teljes képernyőn
+Buscando videos en la memoria y las USB…	Videók keresése a memóriában és a pendrive-okon…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	Nincsenek videók. Másolj videókat (MP4 vagy MKV) a memóriába vagy egy pendrive-ra, vagy válaszd ki a mappát itt: Beállítások → Térkép és időjárás.
+Ver en pantalla completa	Megtekintés teljes képernyőn
+No hay una app de video para la pantalla completa	Nincs videóalkalmazás a teljes képernyőhöz
+¿Quieres seguir viendo el video?	Szeretnéd tovább nézni a videót?
+Imagen en pausa mientras manejas · el audio sigue	Kép szüneteltetve vezetés közben · a hang szól tovább
+Solo se muestra con el carro detenido	Csak álló autónál látható
+Sin GPS ni escáner no se sabe si el carro va andando	GPS és szkenner nélkül nem tudni, hogy az autó halad-e
+Elegir video	Videó kiválasztása
+Cuidado al manejar	Vigyázz vezetés közben
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	Figyeld az utat. Vezetés közben videót nézni veszélyes, és sok országban tilos. Ha folytatod, a saját felelősségedre teszed.
+Seguir viendo	Tovább nézem
+Almacenamientos	Tárolók
+No hay videos en esta carpeta	Ebben a mappában nincs videó
+Sin videos	Nincs videó
+Reproduciendo	Lejátszás
+Miniatura en curso: se abre igual	Bélyegkép készül: megnyitás mégis
+Abrir	Megnyitás
+reintento	újrapróbálás
+Preparado	Kész
+Primer cuadro	Első képkocka
+sin imagen	nincs kép
+La pantalla no puede mostrar la imagen de este video	A kijelző nem tudja megjeleníteni ennek a videónak a képét
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	Tartsd lenyomva a teljes képernyő gombot, hogy VLC-ben vagy más alkalmazásban nyisd meg
+Ningún video de la lista se pudo abrir	A lista egyik videóját sem sikerült megnyitni
+sin video	nincs videó
+Diagnóstico del video	Videó diagnosztika
+Formato de cada video y lo que decodifica la pantalla	Az egyes videók formátuma és amit a kijelző dekódolni tud
+Decodificadores de video	Videó dekóderek
+Últimos videos	Legutóbbi videók
+Todavía no se ha abierto ningún video	Még nem nyílt meg videó
+Se guarda en StradaDiag/video.txt	Mentve: StradaDiag/video.txt
+se leen con el video detenido	leállított videónál olvasva
+la pantalla no tiene decodificador	a kijelzőnek nincs dekódere ehhez:
+pide más de lo que decodifica la pantalla	többet kér, mint amit a kijelző dekódolni tud
+No compatible con esta pantalla	Nem kompatibilis ezzel a kijelzővel
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	Alakítsd át H.264 formátumba, 720p vagy 1080p fekvő, 30 képkocka/másodperc
+Sin miniatura	Nincs bélyegkép
+Leer varios datos por consulta	Több adat lekérése egyszerre
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	A szkenner nem támogatja: a StradaOS egyesével olvassa az adatokat. Kapcsold be az újrapróbáláshoz
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	Gyorsabb. Kapcsold ki, ha a szkenner folyton lecsatlakozik
+Miniatura tomada del video	Bélyegkép a videóból
+Enorme	Óriási
+«Muy grande» y «Enorme» también agrandan los nombres	Az «Extra nagy» és az «Óriási» a neveket is felnagyítja
+Buscar carátulas en internet	Albumborító keresése az interneten
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	Ha a dal borító nélkül érkezik (pl. Bluetooth-on), a MusicBrainz és a Cover Art Archive oldalon, ha ott nincs, az iTunes-ban vagy a Deezeren keresi meg. Csak a cím és az előadó kerül elküldésre
+Borrar carátulas guardadas	Mentett borítók törlése
+Las que se bajaron de internet y se guardaron en el equipo	Az internetről letöltött és az eszközön mentett borítók
+Carátulas borradas	Borítók törölve
+Probando…	Tesztelés…
+Probar la búsqueda de carátulas	Borítókeresés tesztelése
+Prueba cada servidor con la canción que suena y muestra el error exacto	Minden szervert tesztel az éppen szóló dallal, és megmutatja a pontos hibát
+Prueba de carátulas	Borítóteszt
+Se guarda en StradaDiag/caratulas.txt	Mentve ide: StradaDiag/caratulas.txt

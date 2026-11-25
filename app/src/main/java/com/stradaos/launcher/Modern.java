@@ -73,4 +73,28 @@ public class Modern {
     static String usbProductName(android.hardware.usb.UsbDevice d) {
         return d.getProductName();
     }
+
+    /** 2.35: la miniatura que Android ya tiene hecha de un video (Android 10+, API 29). */
+    static android.graphics.Bitmap videoThumb(android.content.Context c, long id, int w, int h) throws java.io.IOException {
+        return c.getContentResolver().loadThumbnail(android.content.ContentUris.withAppendedId(
+                android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id), new android.util.Size(w, h), null);
+    }
+
+    /** 2.35: cuadro de un video ya achicado (Android 8.1+, API 27): no arma la imagen a tamaño completo en memoria. */
+    static android.graphics.Bitmap scaledFrame(android.media.MediaMetadataRetriever r, long us, int w, int h) {
+        return r.getScaledFrameAtTime(us, android.media.MediaMetadataRetriever.OPTION_CLOSEST_SYNC, w, h);
+    }
+
+    /** 2.35 r5: tamaño máximo que declara un decodificador de video (Android 5+, API 21), p. ej. «≤1920×1088». */
+    static String videoMax(android.media.MediaCodecInfo.CodecCapabilities c) {
+        android.media.MediaCodecInfo.VideoCapabilities v = c.getVideoCapabilities();
+        if (v == null) return "";
+        return "≤" + v.getSupportedWidths().getUpper() + "×" + v.getSupportedHeights().getUpper();
+    }
+
+    /** 2.35 r5: ¿el decodificador declara que puede con ese tamaño? (Android 5+, API 21) */
+    static boolean videoSizeOk(android.media.MediaCodecInfo.CodecCapabilities c, int w, int h) {
+        android.media.MediaCodecInfo.VideoCapabilities v = c.getVideoCapabilities();
+        return v == null || w <= 0 || h <= 0 || v.isSizeSupported(w, h);
+    }
 }

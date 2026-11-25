@@ -1852,3 +1852,79 @@ Beige moderno	Beige moderno
 Próximo mantenimiento	Prossima manutenzione
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	L'auto del tema Carbono, vista dall'alto. Si cambia anche tenendo premuto sull'auto.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Schede pulite su uno sfondo carbonio con texture e una luce morbida dal basso (o grigio perla in chiaro). Il tuo veicolo in grande con il tachimetro e le due manutenzioni più vicine, la mappa con il lettore e il meteo sopra, e una barra delle app a pillola.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	Giri accanto al tachimetro
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	Un piccolo contagiri accanto, con i giri dello scanner OBD (solo mentre è collegato)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Contachilometri
+Kilometraje del auto (escáner OBD)	Chilometraggio dell'auto (scanner OBD)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	Il chilometraggio dell'auto è {} ed è ora del cambio dell'olio (ogni {}).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	Nella scheda centrale
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	Mappa e video: scorri la scheda per passare dalla mappa ai video della memoria e delle chiavette USB
+Mapa y video	Mappa e video
+Carpeta de videos	Cartella dei video
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	Tocca per scegliere. Se non ne scegli una, cerca in tutta la memoria e nelle chiavette USB
+Todas	Tutte
+Video en movimiento	Video in movimento
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	Sopra i 5 km/h. La legge vieta di guardare video mentre si guida
+Tapar siempre	Copri sempre
+Sin permiso de almacenamiento no se pueden buscar videos	Senza il permesso di archiviazione non si possono cercare i video
+Buscando videos…	Ricerca dei video…
+videos	video
+No se puede reproducir aquí	Impossibile riprodurlo qui
+ábrelo en pantalla completa	aprilo a schermo intero
+Buscando videos en la memoria y las USB…	Ricerca dei video nella memoria e nelle chiavette USB…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	Nessun video. Copia dei video (MP4 o MKV) nella memoria o su una chiavetta USB, oppure scegli la cartella in Impostazioni → Mappa e meteo.
+Ver en pantalla completa	Guarda a schermo intero
+No hay una app de video para la pantalla completa	Nessuna app video per lo schermo intero
+¿Quieres seguir viendo el video?	Vuoi continuare a guardare il video?
+Imagen en pausa mientras manejas · el audio sigue	Immagine in pausa durante la guida · l'audio continua
+Solo se muestra con el carro detenido	Si vede solo con l'auto ferma
+Sin GPS ni escáner no se sabe si el carro va andando	Senza GPS né scanner non si sa se l'auto è in movimento
+Elegir video	Scegli video
+Cuidado al manejar	Attenzione alla guida
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	Tieni gli occhi sulla strada. Guardare video mentre guidi è pericoloso e in molti paesi è vietato. Se continui, lo fai sotto la tua responsabilità.
+Seguir viendo	Continua a guardare
+Almacenamientos	Archivi
+No hay videos en esta carpeta	Nessun video in questa cartella
+Sin videos	Nessun video
+Reproduciendo	In riproduzione
+Miniatura en curso: se abre igual	Miniatura in corso: si apre comunque
+Abrir	Apri
+reintento	nuovo tentativo
+Preparado	Pronto
+Primer cuadro	Primo fotogramma
+sin imagen	nessuna immagine
+La pantalla no puede mostrar la imagen de este video	Lo schermo non può mostrare l'immagine di questo video
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	Tieni premuto il pulsante schermo intero per aprirlo in VLC o in un'altra app
+Ningún video de la lista se pudo abrir	Nessun video della lista si è potuto aprire
+sin video	nessun video
+Diagnóstico del video	Diagnostica video
+Formato de cada video y lo que decodifica la pantalla	Formato di ogni video e cosa può decodificare lo schermo
+Decodificadores de video	Decodificatori video
+Últimos videos	Ultimi video
+Todavía no se ha abierto ningún video	Nessun video è stato ancora aperto
+Se guarda en StradaDiag/video.txt	Salvato in StradaDiag/video.txt
+se leen con el video detenido	letti con il video fermo
+la pantalla no tiene decodificador	lo schermo non ha un decodificatore
+pide más de lo que decodifica la pantalla	richiede più di quanto lo schermo possa decodificare
+No compatible con esta pantalla	Non compatibile con questo schermo
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	Convertilo in H.264 a 720p o 1080p orizzontale, 30 fotogrammi al secondo
+Sin miniatura	Nessuna miniatura
+Leer varios datos por consulta	Leggi più dati per richiesta
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	Il tuo scanner non lo supporta: StradaOS legge un dato alla volta. Attivalo per riprovare
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	Più veloce. Disattivalo se lo scanner si disconnette di continuo
+Miniatura tomada del video	Miniatura presa dal video
+Enorme	Enorme
+«Muy grande» y «Enorme» también agrandan los nombres	«Molto grande» ed «Enorme» ingrandiscono anche i nomi
+Buscar carátulas en internet	Cerca copertine su internet
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	Se il brano arriva senza copertina (ad es. via Bluetooth), la cerca su MusicBrainz e Cover Art Archive e, se non c'è, su iTunes o Deezer. Vengono inviati solo titolo e artista
+Borrar carátulas guardadas	Elimina copertine salvate
+Las que se bajaron de internet y se guardaron en el equipo	Quelle scaricate da internet e salvate sul dispositivo
+Carátulas borradas	Copertine eliminate
+Probando…	Test in corso…
+Probar la búsqueda de carátulas	Prova la ricerca delle copertine
+Prueba cada servidor con la canción que suena y muestra el error exacto	Prova ogni server con il brano in riproduzione e mostra l'errore esatto
+Prueba de carátulas	Prova delle copertine
+Se guarda en StradaDiag/caratulas.txt	Salvato in StradaDiag/caratulas.txt

@@ -167,6 +167,14 @@ public class Main extends Activity {
     // estado de la pista
     private String curTitle, curArtist, curSource;
     private Bitmap curArt;
+    /** Canción cuya carátula de internet ya se pidió (clave de CoverFetch): no se pide dos veces. */
+    private String coverAsked;
+    /**
+     * Carátula de internet y su canción. Va aparte de curArt: algunas fuentes (ZLink por MediaSession) mandan «sin
+     * carátula» en cada aviso de tiempo o de play/pausa y borrarían la de internet a cada segundo.
+     */
+    private String coverKey;
+    private Bitmap coverArt;
     private long durMs = -1, posBaseMs = 0, posBaseAt = 0;
     // para el diagnóstico del reproductor: de dónde salió el tiempo y el último que mandó Bluetooth
     private String posSrc = "—";
@@ -481,7 +489,9 @@ public class Main extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        if (videoCard != null) videoCard.onResume();
         Obd.addListener(obdWatch);
+        try { odoFromObd(); } catch (Throwable ignored) { }   // lo recorrido con el escáner mientras StradaOS estaba detrás
         if (homeFixing && SDK < 29) h.postDelayed(new Runnable() { public void run() { homeResult(); } }, 700);
         immersive();
         if (SDK >= 23 && !askedPerms) {
@@ -628,6 +638,11 @@ public class Main extends Activity {
             h.post(new Runnable() { public void run() { chooseMapToDownload(""); } });
             return;
         }
+        if (req == REQ_VIDEO) {   // con permiso, la tarjeta vuelve a buscar los videos
+            if (res.length > 0 && res[0] == PackageManager.PERMISSION_GRANTED) rebuild();
+            else toast("Sin permiso de almacenamiento no se pueden buscar videos");
+            return;
+        }
         if (req == REQ_STORAGE) {
             if (res.length > 0 && res[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) pickMapFile();
             else toast("Sin permiso de almacenamiento no se pueden buscar mapas");
@@ -648,6 +663,7 @@ public class Main extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        if (videoCard != null) videoCard.onPause();
         Obd.removeListener(obdWatch);
         if (obdDlg != null) obdDlg.stopDiscovery();
         h.removeCallbacks(idleRun);
@@ -709,10 +725,44 @@ public class Main extends Activity {
                 else if ("cajon".equals(v)) openDrawer();
                 else if ("obd-demo".equals(v)) obdDialogs().choose("demo", I18n.t("Auto simulado"));
                 else if ("obd-off".equals(v)) obdDialogs().turnOff();
+                else if ("actualizacion-demo".equals(v)) {
+                    // 2.35 r7: la ventana de «Nueva versión» con notas en español e inglés (sale la del idioma elegido)
+                    Updates.Release r = new Updates.Release();
+                    r.version = "9.9.9";
+                    r.notes = "# StradaOS 9.9.9\n\n- **Prueba.** Notas en español.\n\n[](#lang-en)\n# StradaOS 9.9.9 (English)\n\n- **Test.** Notes in English.\n\n---\n**Cómo instalar:** …";
+                    updateDialog(r);
+                }
                 else if ("obd-elegir".equals(v)) obdDialogs().pickAdapter();
                 else if ("obd-usb".equals(v)) obdDialogs().pickUsb();
                 else if (v.startsWith("obd-addr:")) obdDialogs().choose(v.substring(9), "Prueba " + v.substring(9));
                 else if (v.startsWith("obd-vel-demo:")) { obdSpeedDemo = v.endsWith("1"); showSpeed(); }
+                // 2.35: tarjeta del centro. centro:solo (solo mapa) | centro:mapa / centro:video (carrusel en esa página)
+                else if (v.startsWith("centro:")) {
+                    String c = v.substring(7);
+                    prefs.edit().putString("center_card", "solo".equals(c) ? "map" : "both").putInt("center_page", "video".equals(c) ? 1 : 0).apply();
+                    rebuild();
+                }
+                else if (v.startsWith("pagina:")) { if (centerPager != null) centerPager.flip(Integer.parseInt(v.substring(7))); }
+                // velocidad para el video: «video-vel:0», «video-vel:40», «video-vel:nan» (sin datos), «video-vel:x» (la real)
+                else if (v.startsWith("video-vel:")) {
+                    String k = v.substring(10);
+                    testKmhOn = !"x".equals(k);
+                    testKmh = "nan".equals(k) || !testKmhOn ? Float.NaN : Float.parseFloat(k);
+                }
+                else if (v.startsWith("video-modo:")) { if (videoCard != null) videoMode(videoCard, Integer.parseInt(v.substring(11))); }
+                else if (v.startsWith("video-aviso:")) { prefs.edit().putString("video_moving", v.endsWith("cover") ? "cover" : "ask").apply(); }
+                else if ("video-elegir".equals(v)) { if (videoCard != null) pickVideo(videoCard); }
+                // 2.35 r3: selector en los almacenamientos («video-elegir:arriba») o en una carpeta («video-elegir:/ruta»)
+                else if (v.startsWith("video-elegir:")) { String a = v.substring(13); if (videoCard != null) pickVideo(videoCard, "arriba".equals(a) ? "" : a); }
+                // toca la fila n del selector abierto (carpeta: entra; video: lo elige)
+                else if (v.startsWith("video-fila:")) { if (videoPicker != null) videoPicker.tapRow(Integer.parseInt(v.substring(11))); }
+                // controles a la vista (con la línea de tiempo) y saltar a un segundo
+                else if ("video-controles".equals(v)) { if (videoCard != null) videoCard.showControls(); }
+                else if (v.startsWith("video-ir:")) { if (videoCard != null) videoCard.seekTest(Integer.parseInt(v.substring(9)) * 1000); }
+                else if ("video-cuidado".equals(v)) { if (videoCard != null) confirmVideoMoving(videoCard); }
+                else if ("video-diag".equals(v)) { showVideoDiag(); }
+                else if (v.startsWith("explorar:")) { if (liveMap != null) { if (v.endsWith("1")) liveMap.explore(); else liveMap.follow(); } }
+                else if (v.startsWith("explorar-zoom:")) { if (liveMap != null) { int d = Integer.parseInt(v.substring(14)); for (int k = 0; k < Math.abs(d); k++) liveMap.zoomBy(d > 0 ? 1 : -1); } }
                 else if ("obd-panel".equals(v)) openVehiclePanel();
                 else if (v.startsWith("obd-ajustes:")) { settingsSub = v.substring(12); showSettings(C_VEHICLE); }
                 else if ("ocultas".equals(v)) manageHidden(null);
@@ -747,6 +797,14 @@ public class Main extends Activity {
                             a.length > 4 ? Long.parseLong(a[4]) * 1000 : 0));
                 }
                 else if ("diag-reproductor".equals(v)) showPlayerDiag();
+                else if ("caratula-prueba".equals(v)) testCovers();   // 2.36: prueba de la carátula por internet
+                else if (v.startsWith("pista-sin-caratula:")) {
+                    // 2.36: canción por Bluetooth sin carátula, para la búsqueda en internet: «pista-sin-caratula:Título,Artista»
+                    String[] a = v.substring(19).split(",");
+                    curTitle = a[0].replace('_', ' '); curArtist = a.length > 1 ? a[1].replace('_', ' ') : null; curSource = "Bluetooth";
+                    curArt = null; durMs = 215000; posBaseMs = 30000; posBaseAt = SystemClock.elapsedRealtime(); posKnown = true; playingState = true;
+                    renderTrack();
+                }
                 else if (v.startsWith("aa-notif:")) {
                     // notificación de Open Headunit con el tiempo: «aa-notif:Título,posición_s,duración_s»
                     String[] a = v.substring(9).split(",");
@@ -1070,6 +1128,8 @@ public class Main extends Activity {
 
     @Override
     public void onBackPressed() {
+        if (videoBig != null && videoCard != null) { videoMode(videoCard, 0); return; }
+        if (liveMap != null && liveMap.isExploring()) { liveMap.follow(); return; }
         if (vpanel != null && vpanel.isOpen()) { vpanel.close(); return; }
         if (settingsView != null) {
             if (settingsSub != null && settingsCat == C_VEHICLE) { settingsBack(); return; }
@@ -1351,7 +1411,7 @@ public class Main extends Activity {
             root.addView(dockBg, 0, dlp);
         }
 
-        carbMaintBox = null;
+        carbMaintBox = null; carbRpm = null;
         if (premium) buildPremium();
         else {
             buildTop();
@@ -1889,6 +1949,9 @@ public class Main extends Activity {
     private void odoStep(Location l) {
         if (!validLoc(l)) return;
         if (!odoNeeded()) return;
+        // con el escáner OBD entregando la velocidad, la distancia la pone el escáner (#52): el GPS no suma, pero
+        // sigue la posición para no sumar de golpe el tramo recorrido cuando el escáner se desconecte
+        if (obdDistOn()) { odoLast = l; return; }
         if (l.hasAccuracy() && l.getAccuracy() > 40) return;
         if (odoLast == null) { odoLast = l; return; }
         float d = odoLast.distanceTo(l);
@@ -1896,6 +1959,11 @@ public class Main extends Activity {
         if (d < 20) return;                                 // ruido del GPS con el carro quieto
         if (d / dt > 70) { odoLast = l; return; }           // salto imposible (> 250 km/h): se descarta
         odoLast = l;
+        odoAdd(d);
+    }
+
+    /** Suma metros al kilometraje estimado; se guarda cada 200 m o cada minuto. */
+    private void odoAdd(float d) {
         odoPending += d;
         long now = SystemClock.elapsedRealtime();
         if (odoPending >= 200 || now - odoSavedAt > 60000) {
@@ -1907,6 +1975,44 @@ public class Main extends Activity {
     }
 
     private boolean odoRunning;
+
+    /** El auto simulado no cuenta para el kilometraje ni la velocidad (salvo el ajuste de prueba). */
+    private boolean obdDemoAddr() {
+        return "demo".equals(prefs.getString("obd_addr", "demo")) && !obdSpeedDemo
+            && !(getPackageName().endsWith(".debug") && prefs.getBoolean("obd_speed_demo", false));
+    }
+
+    /** El escáner está entregando la velocidad ahora (lectura de hace menos de 3 s). */
+    private boolean obdDistOn() {
+        return obdOn() && Obd.status == Obd.LIVE && Obd.SPEED.has()
+            && SystemClock.elapsedRealtime() - Obd.SPEED.at <= 3000 && !obdDemoAddr();
+    }
+
+    /** El odómetro del auto llegó por el escáner hace poco (PID A6): el kilometraje es el del tablero, no estimado. */
+    private boolean odoFromCar() {
+        return obdOn() && Obd.ODO.has() && Obd.ODO.value > 0 && SystemClock.elapsedRealtime() - Obd.ODO.at < 120000
+            && !obdDemoAddr();
+    }
+
+    /**
+     * #52: kilometraje con el escáner OBD, sin internet. Si el auto entrega su odómetro (PID A6) se toma tal cual;
+     * si no, se suma lo recorrido con la velocidad del escáner (la misma que usa el tablero, así que se aleja menos
+     * del odómetro real que el GPS). Se llama con cada lectura del escáner y al volver a StradaOS.
+     */
+    private void odoFromObd() {
+        double m = Obd.takeDistance();
+        if (!obdOn() || obdDemoAddr()) return;
+        if (odoFromCar()) {
+            float km = Obd.ODO.value;
+            if (Math.abs(km - prefs.getFloat("odo_base_km", -1)) >= 0.1f || prefs.getFloat("odo_gps_m", 0) != 0 || odoPending != 0) {
+                odoPending = 0;
+                prefs.edit().putFloat("odo_base_km", km).putFloat("odo_gps_m", 0).apply();
+                updateOilBadge();
+            }
+            return;
+        }
+        if (m > 0 && odoNeeded()) odoAdd((float) m);
+    }
 
     /** Solo escucha el GPS en segundo plano si el recordatorio está activo. */
     private void startOdo() {
@@ -2033,7 +2139,8 @@ public class Main extends Activity {
     private void oilMenu() {
         if (!oilOn()) { oilSetup(); return; }
         float left = oilNextKm() - odoKm();
-        String head = I18n.t("Kilometraje estimado") + ": ≈ " + fmtDist(odoKm()) + "\n"
+        String head = (odoFromCar() ? I18n.t("Kilometraje del auto (escáner OBD)") + ": " : I18n.t("Kilometraje estimado") + ": ≈ ")
+            + fmtDist(odoKm()) + "\n"
             + I18n.t("Último cambio") + ": " + fmtDist(prefs.getFloat("oil_last_km", 0)) + "\n"
             + I18n.t("Próximo cambio") + ": " + fmtDist(oilNextKm())
             + "\n" + (Math.round(toUnit(left)) > 0 ? I18n.t("Faltan " + fmtDist(left)) : I18n.t("¡Ya toca!"));
@@ -2172,7 +2279,7 @@ public class Main extends Activity {
         if (now < oilNextKm() || now < prefs.getFloat("oil_snooze_km", 0)) return false;
         oilDlg = new TB(this, dlg())
             .setTitle("Es hora del cambio de aceite")
-            .setMessage(I18n.t("El kilometraje estimado es ≈ " + fmtDist(now) + " y ya toca el cambio de aceite (cada " + fmtDist(prefs.getFloat("oil_interval_km", 5000)) + ").")
+            .setMessage(I18n.t((odoFromCar() ? "El kilometraje del auto es " : "El kilometraje estimado es ≈ ") + fmtDist(now) + " y ya toca el cambio de aceite (cada " + fmtDist(prefs.getFloat("oil_interval_km", 5000)) + ").")
                 + "\n\n" + I18n.t("¿Ya lo hiciste?"))
             .setPositiveButton("Ya lo hice", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) { oilDone(); } })
             .setNegativeButton("Aún no", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
@@ -2732,7 +2839,81 @@ public class Main extends Activity {
             .show();
     }
 
+    /** Video en lugar del mapa («center_card» = «video»), o null. */
+    private VideoCard videoCard;
+
+    /** Pruebas (solo StradaOS Prueba): velocidad fija para el video y el mapa («video-vel:»). */
+    private boolean testKmhOn;
+    private float testKmh = Float.NaN;
+
+    /**
+     * Velocidad de ahora para la tarjeta de video y el regreso de «Explorar»: la del GPS (de hace menos de 5 s) o la
+     * del escáner, la mayor. NaN si no hay ninguna (el video lo cuenta como en movimiento).
+     */
+    private float currentKmh() {
+        if (testKmhOn) return testKmh;
+        long now = SystemClock.elapsedRealtime();
+        float v = lastOk && now - lastFix < 5000 ? lastKmh : Float.NaN;
+        if (Obd.SPEED.has() && now - Obd.SPEED.at < 5000) v = Float.isNaN(v) ? Obd.SPEED.value : Math.max(v, Obd.SPEED.value);
+        return v;
+    }
+
+    /**
+     * Tamaños del video dentro de StradaOS: 0 en su tarjeta, 1 «Solo video» (como el «Solo mapa» de Aurora, en todos los
+     * temas: ocupa el inicio entre la hora y el dock, con el fondo del tema) y 2 pantalla completa. La tarjeta se mueve a
+     * una capa y vuelve a su lugar; el video sigue desde el mismo segundo.
+     */
+    private FrameLayout videoBig;
+    private ViewGroup videoHome;
+    private int videoHomeAt, videoBigMode;
+    private ViewGroup.LayoutParams videoHomeLp;
+
+    private void videoMode(VideoCard v, int mode) {
+        if (videoBig != null) {                     // primero de vuelta a su tarjeta
+            videoBig.removeView(v);
+            ((ViewGroup) videoBig.getParent()).removeView(videoBig);
+            videoBig = null;
+            if (videoHome != null) videoHome.addView(v, Math.min(videoHomeAt, videoHome.getChildCount()), videoHomeLp);
+            videoHome = null;
+        }
+        if (mode != 0 && v.getParent() instanceof ViewGroup) {
+            videoHome = (ViewGroup) v.getParent();
+            videoHomeAt = videoHome.indexOfChild(v);
+            videoHomeLp = v.getLayoutParams();
+            videoHome.removeView(v);
+            videoBig = new FrameLayout(this);
+            videoBig.setClickable(true);
+            videoBig.addView(v, new FrameLayout.LayoutParams(-1, -1));
+            if (mode == 2) {
+                videoBig.setBackgroundColor(Color.BLACK);
+                root.addView(videoBig, new FrameLayout.LayoutParams(-1, -1));
+            } else {
+                videoBig.setBackgroundColor(premium ? Prem.base(LIGHT) : BG);
+                if (premium && Prem.carb()) {
+                    // Carbono: tarjeta del vehículo + mapa (debajo de su barra de arriba y sin tapar la barra de apps)
+                    place(board, videoBig, cbVX, cbVY, mapX + mapW - cbVX, mapY + mapH - cbVY);
+                } else {
+                    float top = 62, bottom = dockTop - (noDock ? 16 : 12);
+                    place(board, videoBig, 12, top, premW() - 24, bottom - top);
+                }
+                if (SDK >= 21) videoBig.setElevation(40 * s);   // encima de las tarjetas con sombra de los temas
+            }
+        }
+        videoBigMode = videoBig != null ? mode : 0;
+        v.setMode(videoBigMode);
+    }
+
+    /** «Mapa y video» (2.35): el carrusel de la tarjeta del centro, o null con «Mapa». */
+    private CenterPager centerPager;
+    /** Carbono: la caja del reproductor y el clima flotantes (se esconde en el video y al explorar el mapa). */
+    private FrameLayout carbOvLive;
+
     private void buildAaCard() {
+        if (videoBig != null) { ((ViewGroup) videoBig.getParent()).removeView(videoBig); videoBig = null; videoHome = null; }
+        if (videoCard != null) { videoCard.release(); videoCard = null; }
+        centerPager = null;
+        carbOvLive = null;
+        LiveMapView.speedSrc = new LiveMapView.Speed() { public float kmh() { return currentKmh(); } };
         if (!showMap) {
             liveMap = null; navHud = null; navTurnIc = null; navDistTv = null; navStepTv = null;
             navEtaTv = null; navLaneBox = null; navLaneView = null; speedSignTv = null; camBadgeTv = null;
@@ -2752,9 +2933,28 @@ public class Main extends Activity {
             mapClipView = clip;
         } else place(board, card, mapX, mapY, mapW, mapH);
         mapCardView = card;
+        // 2.35 «Mapa y video»: la tarjeta es un carrusel. La página del mapa lleva todo lo de siempre (botones, clima,
+        // navegación); la del video, solo el video (sin el mapa de adorno: alrededor se ve el fondo del tema).
+        final boolean carousel = "both".equals(prefs.getString("center_card", "map"));
+        if (carousel) {
+            final FrameLayout outer = card;
+            centerPager = new CenterPager(this, s);
+            outer.addView(centerPager, new FrameLayout.LayoutParams(-1, -1));
+            card = new FrameLayout(this);
+            centerPager.addPage(card);
+            FrameLayout vp = new FrameLayout(this);
+            videoCard = new VideoCard(this, s, prefs, new VideoCard.Speed() { public float kmh() { return currentKmh(); } },
+                new VideoCard.Host() {
+                    public void videoMode(VideoCard v, int mode) { Main.this.videoMode(v, mode); }
+                    public void pickVideo(VideoCard v) { Main.this.pickVideo(v); }
+                    public void confirmMoving(VideoCard v) { Main.this.confirmVideoMoving(v); }
+                });
+            vp.addView(videoCard, new FrameLayout.LayoutParams(-1, -1));
+            centerPager.addPage(vp);
+        }
         // fondo decorativo mientras no hay GPS; encima, el mapa en vivo (Faro: sin dibujo de relleno, el área queda limpia)
         if (!(premium && Prem.faroFam())) card.addView(new MapView(this, s, 20 * s), new FrameLayout.LayoutParams(-1, -1));
-        if (!prefs.getBoolean("map_live", true)) { liveMap = null; seedLastLocation(); buildAaCardRest(card); return; }
+        if (!prefs.getBoolean("map_live", true)) { liveMap = null; seedLastLocation(); buildAaCardRest(card); startCenterPager(); return; }
         liveMap = new LiveMapView(this, s, 20 * s);
         card.addView(liveMap, new FrameLayout.LayoutParams(-1, -1));
         // Aurora: esquinas redondas de verdad sobre el fondo y el mapa un poco translúcido
@@ -2763,19 +2963,52 @@ public class Main extends Activity {
         // Cobalto: el mapa se difumina hasta donde empieza el reproductor (abajo, hacia las tarjetas, en vertical)
         if (premium && Prem.cob() && !mapOnly && premBg != null) liveMap.setFade(vertical ? 2 : 1, (vertical ? 150 : Math.max(260, mapW * 0.5f)) * s);
         liveMap.setVisibility(premium && Prem.faroFam() ? View.VISIBLE : View.INVISIBLE);
-        liveMap.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) { liveMap.cycleZoom(); }
-        });
+        // 2.35: tocar el mapa entra a «Explorar» (antes cambiaba el zoom); mantener presionado abre el diagnóstico
         liveMap.setOnLongClickListener(new View.OnLongClickListener() {
             public boolean onLongClick(View v) {
                 showMapDiag();
                 return true;
             }
         });
+        liveMap.setOwnButtons(premium && Prem.faroFam());   // Faro y Carbono ya tienen + − y centrar
+        liveMap.setDragExplores(!carousel);
+        liveMap.exploreListener = new LiveMapView.Listener() { public void onExplore(boolean on) { applyCenterOverlays(); } };
         seedLastLocation();
 
         buildAaCardRest(card);
+        startCenterPager();
     }
+
+    /** Deja el carrusel en la página de la última vez (el video solo se activa si se ve). */
+    private void startCenterPager() {
+        if (centerPager == null) return;
+        centerPager.setListener(new CenterPager.Listener() { public void onPage(int p) {
+            prefs.edit().putInt("center_page", p).apply();
+            if (videoCard != null && videoBig == null) videoCard.setActive(p == 1);
+            if (p == 1 && liveMap != null) liveMap.follow();
+            applyCenterOverlays();
+        }});
+        centerPager.setPage(prefs.getInt("center_page", 0));
+    }
+
+    /** Carbono: el reproductor y el clima flotantes se esconden en la página del video y mientras se explora el mapa. */
+    private void applyCenterOverlays() {
+        final FrameLayout ov = carbOvLive;
+        if (ov == null) return;
+        boolean hide = (centerPager != null && centerPager.page() == 1) || (liveMap != null && liveMap.isExploring());
+        ov.animate().cancel();
+        if (hide) {
+            if (ov.getVisibility() != View.VISIBLE) return;
+            ov.animate().alpha(0f).setDuration(200).withEndAction(new Runnable() { public void run() { ov.setVisibility(View.INVISIBLE); } });
+        } else {
+            if (ov.getVisibility() == View.VISIBLE && ov.getAlpha() == 1f) return;
+            ov.setVisibility(View.VISIBLE);
+            ov.animate().alpha(1f).setDuration(200);
+        }
+    }
+
+    /** Mientras se arma la tarjeta: lo que el velocímetro chico ocupa a la derecha (para los botones de «Explorar»). */
+    private float ctlTopEdge, ctlBottomEdge = 9999;
 
     private void buildAaCardRest(FrameLayout card) {
         final boolean faroT = premium && Prem.faroFam();
@@ -2892,12 +3125,12 @@ public class Main extends Activity {
         if (nbSize == 3 || faroT) navBtn.setVisibility(View.GONE);   // Faro: el buscador de arriba abre la navegación
         // 2.20 (Daniel): mini velocímetro sobre el mapa cuando la tarjeta del vehículo está oculta
         mapGauge = null;
+        ctlTopEdge = 0; ctlBottomEdge = 9999;
         boolean gaugeTopLeft = false;
         // Aurora con «Solo mapa»: velocímetro mixto abajo a la izquierda (horizontal y vertical)
         final boolean premGauge = premium && mapOnly && carSpeed;
         if (premGauge || (!premium && !showCar && carSpeed && prefs.getBoolean("map_gauge", false))) {
             FrameLayout gb = new FrameLayout(this);
-            gb.setBackground(round((CARD & 0x00FFFFFF) | 0xE0000000, 66));
             mapGauge = new Gauge(this, s);
             mapGauge.setColors(RED, TEXT, SOFT);
             mapGauge.setUnit(useMph());
@@ -2908,7 +3141,8 @@ public class Main extends Activity {
             int gsz = premGauge ? 1 : prefs.getInt("map_gauge_size", 1);
             float gs = gsz == 0 ? 108 : gsz == 2 ? 160 : 132;
             gs = Math.min(gs, Math.min(mapH * 0.45f, mapW * 0.42f));
-            gb.setBackground(round((CARD & 0x00FFFFFF) | 0xE0000000, gs / 2));
+            // sin círculo de fondo (2.34, Andrés): el velocímetro y las revoluciones van directo sobre el mapa
+            gb.setBackground(null);
             if (premGauge) gb.setBackground(round(LIGHT ? 0xD9FFFFFF : 0xD91B1724, gs / 2));
             // esquina: automático = arriba, en el lado contrario al botón del navegador (como antes)
             String corner = premGauge ? "bl" : prefs.getString("map_gauge_corner", "auto");
@@ -2924,7 +3158,16 @@ public class Main extends Activity {
                 mapGaugeBox = gb;
             } else mapGaugeBox = null;
             place(card, gb, gx, gy, gs, gs);
+            if (!gLeft) { if (gBottom) ctlBottomEdge = Math.min(ctlBottomEdge, gy); else ctlTopEdge = Math.max(ctlTopEdge, gy + gs); }
         } else mapGaugeBox = null;
+        // 2.35: los botones de «Explorar» (a la derecha) quedan entre lo de arriba y lo de abajo de este tema
+        if (liveMap != null && !faroT) {
+            float cb = Math.min(hasPanel ? panelY - 28 : mapH, ctlBottomEdge);
+            boolean nbShown = nbSize != 3;
+            liveMap.setControlsInset(Math.max(56, ctlTopEdge) * s, (mapH - cb) * s, !nbShown ? 0 : nbLeft ? -1 : 1,
+                    nbShown ? (panelY - 12 - nb) * s : -1, (nb + 12) * s);
+        }
+        ctlTopEdge = 0; ctlBottomEdge = 9999;
 
         FrameLayout laneBox = new FrameLayout(this);
         laneBox.setBackground(round((CARD & 0x00FFFFFF) | 0xEB000000, 10));
@@ -3779,16 +4022,29 @@ public class Main extends Activity {
         // 2.19: cantidad de botones (4 a 10) y tamaño de los íconos (Tinoyevski #18, MIGSGx #12). 7 y normal = lo de siempre.
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : 1f;
-        final float railX = railLeft ? 16 : 1016 + ex, step = (boardH - 24) / (float) n;
+        // 2.36 (#74, shaharyarz): «Muy grande» (3) y «Enorme» (4). Con ellos los nombres también crecen y, en la barra
+        // lateral, los botones se juntan en el centro en vez de repartirse a lo alto. Pequeño/Normal/Grande, como siempre.
+        boolean big = isz >= 3;
+        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : isz == 3 ? 1.5f : isz >= 4 ? 1.8f : 1f;
+        float lk = isz == 3 ? 1.2f : isz >= 4 ? 1.35f : 1f;
+        final float lblSize = (sideDock ? 10 : compactDock ? 12 : 13) * lk, lblPad = sideDock ? 2 : compactDock ? 2 : 8;
+        final float lblH = dockLabels ? lblSize * FONT * 1.3f + lblPad : 0;
+        final float railX = railLeft ? 16 : 1016 + ex, step0 = (boardH - 24) / (float) n;
         float cs0 = (sideDock ? (dockLabels ? 40 : 48) : compactDock ? 50 : 64) * ik;
-        if (sideDock) cs0 = Math.min(cs0, step - (dockLabels ? 18 : 6));          // que quepan en la barra lateral
-        final float lblSize = sideDock ? 10 : compactDock ? 12 : 13, lblPad = sideDock ? 2 : compactDock ? 2 : 8;
+        if (sideDock) cs0 = Math.min(cs0, step0 - (dockLabels ? 18 : 6));          // que quepan en la barra lateral
+        if (sideDock && big) cs0 = Math.min(cs0, Math.min(RAIL - 10, step0 - lblH - 6));
+        if (big && !sideDock) {   // que el círculo y el nombre quepan en su franja
+            float hAvail = compactDock ? boardH - dockTop - 8 : dockLabels ? 110 : 132;
+            cs0 = Math.min(cs0, hAvail - lblH - 4);
+        }
+        // barra lateral agrupada (solo con los tamaños nuevos): cada botón ocupa lo justo y el grupo queda centrado
+        final float step = sideDock && big ? Math.min(step0, cs0 + lblH + 16) : step0;
+        final float railY0 = 12 + ((boardH - 24) - step * n) / 2;
         final boolean appStyle = "apps".equals(prefs.getString("dock_style", "circle"));
         // botones a lo ancho: con 7 se usan las posiciones de siempre; con otra cantidad se reparten parejo
         final float slotW = n == 7 && !vertical ? 138 + ex / 6 : (948 + ex) / (float) n, itemW = Math.min(120, slotW - 4);
         final float x0 = n == 7 && !vertical ? 38 : 38 + (slotW - itemW) / 2;
-        if (vertical) cs0 = Math.min(cs0, slotW - 10);                            // con muchos botones, que no se monten
+        if (vertical || big) cs0 = Math.min(cs0, (big ? itemW : slotW) - 10);     // con muchos botones, que no se monten
         final float cs = cs0;          // círculo
         if (sideDock) {
             View rail = new View(this);
@@ -3829,7 +4085,7 @@ public class Main extends Activity {
             } else {
                 b.setGravity(Gravity.CENTER);   // sin nombres: el círculo queda centrado en la franja
             }
-            if (sideDock) { b.setGravity(Gravity.CENTER); place(board, b, railX, 12 + step * i, RAIL, step); }
+            if (sideDock) { b.setGravity(Gravity.CENTER); place(board, b, railX, railY0 + step * i, RAIL, step); }
             else if (compactDock) { b.setGravity(Gravity.CENTER); place(board, b, x0 + slotW * i, dockTop + 4, itemW, boardH - dockTop - 8); }
             else place(board, b, x0 + slotW * i, dockTop + (dockLabels ? 18 : 6), itemW, dockLabels ? 110 : 132);
             b.setOnClickListener(new View.OnClickListener() {
@@ -4110,7 +4366,7 @@ public class Main extends Activity {
 
     private void buildPremium() {
         carCard = null; mapGauge = null; mapGaugeBox = null; carGauge = null; chipTv = null; carDataTv = null;
-        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; carbMaintBox = null;
+        faroGauge = null; faroBar = null; faroWxIc = null; faroMaintBox = null; faroPillTv = null; carbMaintBox = null; carbRpm = null;
         if (Prem.carb()) { buildCarbono(); setGps(false, 0); return; }
         if (Prem.faro()) { buildFaro(); setGps(false, 0); return; }
         buildPremiumTop();
@@ -4879,7 +5135,7 @@ public class Main extends Activity {
     private void buildFaroDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.86f : isz == 2 ? 1.12f : 1f;
+        float ik = isz == 0 ? 0.86f : isz >= 2 ? 1.12f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         float pillH = premPillH;
         // centrada en el reproductor y sin pasarse de sus bordes: crece desde el centro hacia los lados
         float areaX = faroPlX, areaW = faroPlW;
@@ -5137,7 +5393,12 @@ public class Main extends Activity {
         if (cbWxW > 0) buildCarbWeather(cbWxX, cbOvY, cbWxW, cbOvH);
         else { faroWxIc = null; panelWx = null; }
         if (cbOvH > 0) buildCarbOvHandle();
+        carbOvLive = carbOv;
         carbOv = null;
+        if (carbOvLive != null && ((centerPager != null && centerPager.page() == 1) || (liveMap != null && liveMap.isExploring()))) {
+            carbOvLive.setAlpha(0f);
+            carbOvLive.setVisibility(View.INVISIBLE);
+        }
         if (!noDock) buildCarbDock();
         updateOilBadge();
     }
@@ -5311,6 +5572,13 @@ public class Main extends Activity {
             unit.setPadding((int) (8 * s), 0, 0, (int) (8 * s));
             num.addView(unit);
             place(card, num, sx - 3, sy + 22, sw, 62);
+            // revoluciones del escáner a la derecha de la velocidad (Ajustes → «Revoluciones junto al velocímetro»);
+            // solo si queda ancho para no pisar el número (con 3 cifras y la unidad ocupa ~150)
+            if (sw >= 270) {
+                carbRpm = new Carbono.Rpm(this, s, TEXT, MUTED, LIGHT);
+                place(card, carbRpm, sx + sw - 104, sy + 2, 100, 82);
+                showRpm();
+            }
         } else {
             speedTv = tv("0", 12, TEXT, true);   // no se muestra
             gpsDot = new View(this);
@@ -5547,7 +5815,7 @@ public class Main extends Activity {
     private void buildCarbDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.86f : isz == 2 ? 1.12f : 1f;
+        float ik = isz == 0 ? 0.86f : isz >= 2 ? 1.12f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         boolean vert = !vertical;
         float thick = premPillH, item = vert ? 58 : Math.max(60, Math.min(84, (cbDockW - 16) / Math.max(1, n)));
         View bg = new View(this);
@@ -5991,7 +6259,7 @@ public class Main extends Activity {
     private void buildPremiumDock() {
         final int n = dockCount;
         int isz = prefs.getInt("dock_icon_size", 1);
-        float ik = isz == 0 ? 0.82f : isz == 2 ? 1.2f : 1f;
+        float ik = isz == 0 ? 0.82f : isz >= 2 ? 1.2f : 1f;   // 2.36: Muy grande y Enorme = Grande aquí
         float W0 = premW(), avail = W0 - 32, pillH = premPillH;
         float itemW = Math.min(vertical ? 80 : 84, (avail - 24) / n), pillW = itemW * n + 24;
         float px = (W0 - pillW) / 2, py = dockTop;
@@ -7355,12 +7623,30 @@ public class Main extends Activity {
     private float obdKmh() {
         if (!obdOn() || !prefs.getBoolean("obd_speed", true) || Obd.status != Obd.LIVE || !Obd.SPEED.has()) return Float.NaN;
         if (SystemClock.elapsedRealtime() - Obd.SPEED.at > 3000) return Float.NaN;
-        if ("demo".equals(prefs.getString("obd_addr", "demo")) && !obdSpeedDemo
-            && !(getPackageName().endsWith(".debug") && prefs.getBoolean("obd_speed_demo", false))) return Float.NaN;
+        if (obdDemoAddr()) return Float.NaN;
         return Obd.SPEED.value;
     }
     private boolean obdSpeedDemo;
     private boolean speedFromObd;
+
+    /** Revoluciones en digital de la tarjeta del vehículo de Carbono (null en los demás temas). */
+    private Carbono.Rpm carbRpm;
+
+    /** RPM del escáner para el cuentarrevoluciones junto al velocímetro; NaN si está apagado o no hay lectura reciente. */
+    private float obdRpm() {
+        if (!prefs.getBoolean("speedo_rpm", false) || !obdOn() || Obd.status != Obd.LIVE || !Obd.RPM.has()) return Float.NaN;
+        if (SystemClock.elapsedRealtime() - Obd.RPM.at > 3000) return Float.NaN;
+        if (obdDemoAddr()) return Float.NaN;   // el auto simulado no cuenta, igual que la velocidad
+        return Obd.RPM.value;
+    }
+
+    private void showRpm() {
+        float r = obdRpm();
+        if (carGauge != null) carGauge.setRpm(r);
+        if (mapGauge != null) mapGauge.setRpm(r);
+        if (faroGauge != null) faroGauge.setRpm(r);
+        if (carbRpm != null) carbRpm.set(r);
+    }
 
     private void showSpeed() {
         float ob = obdKmh();
@@ -7785,6 +8071,8 @@ public class Main extends Activity {
         String msg = "Fuente: " + (curOrigin != null ? curOrigin : "—") + " / " + (curSource != null ? curSource : "—")
                 + "\nPista: " + curTitle + " — " + curArtist
                 + "\nCarátula: " + (curArt != null ? curArt.getWidth() + "x" + curArt.getHeight() : "no")
+                + "\nCarátula de internet: " + (prefs.getBoolean("cover_online", false) ? CoverFetch.lastInfo
+                    + (coverArt != null ? " · en pantalla " + coverArt.getWidth() + "x" + coverArt.getHeight() : "") : "apagada")
                 + "\nTiempo en StradaOS: " + (currentPos() / 1000) + "/" + (durMs / 1000) + " s · " + posSrc
                 + "\nÚltimo tiempo por Bluetooth: " + (btPosMs < 0 ? "ninguno"
                     : (btPosMs / 1000) + " s, hace " + ((SystemClock.elapsedRealtime() - btPosAt) / 1000) + " s")
@@ -7864,7 +8152,7 @@ public class Main extends Activity {
             trackTv.setText(curTitle != null ? curTitle : (curSource != null ? I18n.t(curSource) : ""));
             artistTv.setText(aaOff ? I18n.t("Activa «Pista actual de AA» en Open Headunit") : (curArtist != null ? curArtist : ""));
             sourceTv.setText(curSource != null ? I18n.t(curSource).toUpperCase(I18n.loc) : "");
-            playerArt.setArt(curArt);
+            playerArt.setArt(curArt != null || aaOff ? curArt : onlineCover());
             updateProgress();
         }
         if (playIc != null) {
@@ -7872,6 +8160,61 @@ public class Main extends Activity {
                     : ((AudioManager) getSystemService(AUDIO_SERVICE)).isMusicActive();
             playIc.setImageBitmap(asset(on ? "ic/pause.png" : "ic/play_arrow.png"));
         }
+    }
+
+    /**
+     * Carátula de internet (Ajustes → Música) para la canción que llegó sin ella. Se espera 3 s: la notificación de
+     * Open Headunit o la app pueden mandar la suya un instante después, y esa siempre manda.
+     */
+    private Bitmap onlineCover() {
+        if (curTitle == null || curArtist == null || !prefs.getBoolean("cover_online", false)) return null;
+        if (curSource != null && curSource.toLowerCase(ES).contains("radio")) return null;   // nombre de la emisora, no una canción
+        final String k = CoverFetch.key(curArtist, curTitle);
+        if (k.equals(coverKey)) return coverArt;
+        if (k.equals(coverAsked)) return null;
+        coverAsked = k;
+        h.postDelayed(new Runnable() { public void run() {
+            if (curArt != null || curTitle == null || curArtist == null || !k.equals(CoverFetch.key(curArtist, curTitle))) return;
+            CoverFetch.fetch(Main.this, curArtist, curTitle, new CoverFetch.Listener() {
+                public void onCover(final String key, final Bitmap art) {
+                    if (art == null) return;
+                    h.post(new Runnable() { public void run() {
+                        // queda con su canción: solo se muestra mientras suene esa y la fuente no traiga carátula
+                        coverKey = key;
+                        coverArt = art;
+                        renderTrack();
+                    }});
+                }
+            });
+        }}, 3000);
+        return null;
+    }
+
+    /**
+     * 2.36: prueba de la carátula por internet, paso a paso (MusicBrainz, Cover Art Archive, iTunes y sus imágenes),
+     * con la canción que suena. También queda en StradaDiag/caratulas.txt para pedírsela a quien no le funcione.
+     */
+    private void testCovers() {
+        toast("Probando…");
+        final String ar = curArtist, ti = curTitle;
+        final String head = "Fuente: " + (curSource != null ? curSource : "—") + "\nPista: " + (ti != null ? ti : "—") + " — " + (ar != null ? ar : "—")
+                + "\nCarátula de la fuente: " + (curArt != null ? curArt.getWidth() + "x" + curArt.getHeight() + " (con ella no se busca)" : "no")
+                + "\nÚltima búsqueda: " + CoverFetch.lastInfo + "\n\n";
+        new Thread(new Runnable() { public void run() {
+            final String r = head + CoverFetch.test(Main.this, ar, ti);
+            try {
+                java.io.File d = new java.io.File(android.os.Environment.getExternalStorageDirectory(), "StradaDiag");
+                d.mkdirs();
+                java.io.FileOutputStream o = new java.io.FileOutputStream(new java.io.File(d, "caratulas.txt"));
+                o.write(r.getBytes("UTF-8"));
+                o.close();
+            } catch (Throwable ignored) { }
+            h.post(new Runnable() { public void run() {
+                if (isFinishing()) return;
+                new TB(Main.this, dlg()).diag().setTitle("Prueba de carátulas")
+                    .setMessage(r + "\n" + I18n.t("Se guarda en StradaDiag/caratulas.txt")).setPositiveButton("OK", null).show();
+            }});
+        }}).start();
     }
 
     private void updateProgress() {
@@ -9735,6 +10078,15 @@ public class Main extends Activity {
                     prefs.edit().putInt("speedo", i).apply(); rebuild();
                 }});
         }
+        // solo donde hay dónde dibujarlas: velocímetro analógico o mixto, Faro y Carbono (el digital de los demás
+        // temas no tiene espacio libre al lado del número)
+        if (carSpeed && (carGauge != null || mapGauge != null || faroGauge != null || carbRpm != null))
+            toggle(lay, "Revoluciones junto al velocímetro", "Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)",
+                prefs.getBoolean("speedo_rpm", false), new IntCb() { public void on(int i) {
+                    // rebuild() vuelve a dibujar Ajustes con el interruptor en su nuevo estado (antes solo se guardaba y el
+                    // interruptor no cambiaba hasta salir y volver)
+                    prefs.edit().putBoolean("speedo_rpm", i == 1).apply(); rebuild();
+                }});
         LinearLayout mp = section(body, "Mapa");
         final String[] connKeys = {"both", "aa", "cp", "none"};
         choice(mp, "Botones de conexión", "Con uno o ninguno, el clima ocupa el espacio libre del mapa",
@@ -9860,7 +10212,7 @@ public class Main extends Activity {
             choice(lay, "Cantidad de botones", "«Apps» siempre queda al final", counts, dockCount - 4, new IntCb() { public void on(int i) {
                 prefs.edit().putInt("dock_count", i + 4).apply(); rebuild(); showSettings(settingsCat);
             }});
-            segmented(lay, "Tamaño de los íconos", null, new String[]{"Pequeño", "Normal", "Grande"}, prefs.getInt("dock_icon_size", 1), new IntCb() { public void on(int i) {
+            choice(lay, "Tamaño de los íconos", "«Muy grande» y «Enorme» también agrandan los nombres", new String[]{"Pequeño", "Normal", "Grande", "Muy grande", "Enorme"}, Math.max(0, Math.min(4, prefs.getInt("dock_icon_size", 1))), new IntCb() { public void on(int i) {
                 prefs.edit().putInt("dock_icon_size", i).apply(); rebuild(); showSettings(settingsCat);
             }});
             LinearLayout c = section(body, "Botones (déjalos presionados en el inicio para cambiarlos)");
@@ -9912,6 +10264,23 @@ public class Main extends Activity {
             edit("city_manual", "Ciudad (vacío = automática por GPS)", ""));
         LinearLayout mo = section(body, "Mapa");
         LinearLayout ml = mo, nv = mo;
+        final boolean vid = "both".equals(prefs.getString("center_card", "map"));
+        segmented(mo, "En la tarjeta del centro", "Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB", new String[]{"Mapa", "Mapa y video"}, vid ? 1 : 0,
+            new IntCb() { public void on(int i) {
+                prefs.edit().putString("center_card", i == 1 ? "both" : "map").apply();
+                if (i == 1 && SDK >= 23 && checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, REQ_VIDEO);
+                rebuild(); showSettings(settingsCat);
+            }});
+        if (vid) {
+            String vd = prefs.getString("video_dir", "");
+            row(mo, "Carpeta de videos", "Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB", vd.length() > 0 ? new File(vd).getName() : I18n.t("Todas"),
+                new Runnable() { public void run() { pickVideoDir(); } });
+            segmented(mo, "Video en movimiento", "Sobre 5 km/h. La ley prohíbe ver video mientras se conduce",
+                new String[]{"Preguntar", "Tapar siempre"}, "cover".equals(prefs.getString("video_moving", "ask")) ? 1 : 0, new IntCb() { public void on(int i) {
+                    prefs.edit().putString("video_moving", i == 1 ? "cover" : "ask").apply(); showSettings(settingsCat); }});
+            row(mo, "Diagnóstico del video", "Formato de cada video y lo que decodifica la pantalla", null, new Runnable() { public void run() { showVideoDiag(); } });
+        }
         segmented(mo, "El mapa apunta", "Según tu dirección: gira con el carro mientras te mueves", new String[]{"Norte arriba", "Según tu dirección"},
             prefs.getBoolean("map_heading", false) ? 1 : 0, new IntCb() { public void on(int i) {
                 prefs.edit().putBoolean("map_heading", i == 1).apply(); LiveMapView.headingUp = i == 1;
@@ -10155,7 +10524,95 @@ public class Main extends Activity {
             .setPositiveButton("OK", null).show();
     }
 
-    private static final int REQ_STORAGE = 79, REQ_STORAGE_W = 80;
+    private static final int REQ_STORAGE = 79, REQ_STORAGE_W = 80, REQ_VIDEO = 85;
+
+    private void pickVideo(final VideoCard v) { pickVideo(v, null); }
+
+    /**
+     * 2.35: «Elegir video» como un gestor de archivos (botón ☰ o el título del video): almacenamientos, carpetas con
+     * «‹»/Atrás y videos con miniatura y duración. Al elegir uno, la lista de reproducción pasa a ser esa carpeta (se
+     * recuerda: «video_dir» + «video_flat»). start: null = carpeta del video de ahora, "" = almacenamientos, o una ruta.
+     */
+    private void pickVideo(final VideoCard v, String start) {
+        final AlertDialog[] dd = new AlertDialog[1];
+        final VideoPicker vp = new VideoPicker(this, v.currentPath(), start, new VideoPicker.Cb() {
+            public void chosen(File folder, java.util.List<File> videos, int index) {
+                if (!videos.isEmpty() && index >= 0) {
+                    prefs.edit().putString("video_dir", folder.getAbsolutePath()).putBoolean("video_flat", true).apply();
+                    v.playList(videos, index);
+                }
+                // después de elegir: así, al cerrarse, el video de antes no vuelve a abrirse (Android 4)
+                try { if (dd[0] != null) dd[0].dismiss(); } catch (Throwable ignored) { }
+            }
+        });
+        // 2.35 r6: Android 4 (un solo decodificador): el video suelta el decodificador mientras se elige, para las miniaturas
+        if (SDK < 21) v.holdForPicker(true);
+        dd[0] = new TB(this, dlg()).wide().setTitle("Elegir video").setView(vp).setNegativeButton("Cancelar", null).show();
+        dd[0].setOnDismissListener(new DialogInterface.OnDismissListener() { public void onDismiss(DialogInterface d) {
+            vp.stop(); if (videoPicker == vp) videoPicker = null;
+            v.holdForPicker(false);     // se cerró sin elegir: el video sigue desde donde iba
+        }});
+        // Atrás sube una carpeta; en los almacenamientos, cierra
+        dd[0].setOnKeyListener(new DialogInterface.OnKeyListener() { public boolean onKey(DialogInterface d, int code, android.view.KeyEvent e) {
+            if (code != android.view.KeyEvent.KEYCODE_BACK) return false;
+            if (e.getAction() == android.view.KeyEvent.ACTION_UP && !vp.up()) d.dismiss();
+            return true;
+        }});
+        videoPicker = vp;
+    }
+
+    /**
+     * 2.35 r5: diagnóstico del video: la pantalla, sus decodificadores de video (qué perfiles y niveles de H.264 declara)
+     * y lo último que pasó con cada video (formato, errores, reintentos, primer cuadro). También queda en
+     * StradaDiag/video.txt.
+     */
+    private void showVideoDiag() {
+        String log = VideoLog.text();
+        String msg = VideoLog.device()
+                + "\n\n" + I18n.t("Decodificadores de video") + ":\n" + VideoLog.decoders()
+                + "\n" + I18n.t("Últimos videos") + ":\n" + (log.length() > 0 ? log : I18n.t("Todavía no se ha abierto ningún video") + "\n")
+                + "\n" + I18n.t("Se guarda en StradaDiag/video.txt");
+        new TB(this, dlg()).diag().setTitle("Diagnóstico del video").setMessage(msg).setPositiveButton("OK", null).show();
+    }
+
+    /** El selector de videos abierto (para los ganchos de prueba). */
+    private VideoPicker videoPicker;
+
+    /**
+     * En movimiento, «Sí, seguir viendo»: aviso de cuidado al manejar. Solo si lo confirma se ve el video (hasta que el
+     * carro se detenga); la decisión queda en manos del conductor, avisado.
+     */
+    private void confirmVideoMoving(final VideoCard v) {
+        new TB(this, dlg()).setTitle("Cuidado al manejar")
+            .setMessage("Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.")
+            .setPositiveButton("Seguir viendo", new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) { v.acceptMoving(); } })
+            .setNegativeButton("Cancelar", null).show();
+    }
+
+    /** Elegir la carpeta de videos entre las que tienen videos (memoria y USB), o «Todas». */
+    private void pickVideoDir() {
+        toast("Buscando videos…");
+        new Thread(new Runnable() { public void run() {
+            final java.util.List<File> found = VideoCard.find("");
+            h.post(new Runnable() { public void run() {
+                if (isFinishing()) return;
+                final java.util.LinkedHashMap<String, Integer> dirs = new java.util.LinkedHashMap<String, Integer>();
+                for (File f : found) { String d = f.getParent(); dirs.put(d, dirs.containsKey(d) ? dirs.get(d) + 1 : 1); }
+                final java.util.List<String> keys = new java.util.ArrayList<String>(dirs.keySet());
+                String[] items = new String[keys.size() + 1];
+                items[0] = I18n.t("Todas") + "  ·  " + found.size() + " " + I18n.t("videos");
+                for (int i = 0; i < keys.size(); i++) items[i + 1] = new File(keys.get(i)).getName() + "  ·  " + dirs.get(keys.get(i)) + " " + I18n.t("videos") + "\n" + keys.get(i);
+                new TB(Main.this, dlg()).setTitle("Carpeta de videos")
+                    .setItems(items, new DialogInterface.OnClickListener() { public void onClick(DialogInterface d, int w) {
+                        prefs.edit().putString("video_dir", w == 0 ? "" : keys.get(w - 1)).putBoolean("video_flat", false).putString("video_last", "").apply();
+                        rebuild();
+                        if (settingsView != null) showSettings(settingsCat);
+                    }})
+                    .setNegativeButton("Cancelar", null).show();
+            }});
+        }}, "StradaVideosCarpetas").start();
+    }
+
 
     /** Busca archivos .map en la memoria y en las USB, y deja elegir uno. */
     private void pickMapFile() {
@@ -10255,6 +10712,24 @@ public class Main extends Activity {
             new Runnable() { public void run() {
                 try { startActivity(new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); }
                 catch (Throwable e) { notifAccessAdb(); }
+            }});
+        final boolean online = prefs.getBoolean("cover_online", false);
+        toggle(c, "Buscar carátulas en internet", "Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista",
+            online, new IntCb() { public void on(int i) {
+                prefs.edit().putBoolean("cover_online", i == 1).apply();
+                coverAsked = coverKey = null;
+                coverArt = null;
+                renderTrack();
+                showSettings(settingsCat);
+            }});
+        if (online) row(c, "Probar la búsqueda de carátulas", "Prueba cada servidor con la canción que suena y muestra el error exacto", null,
+            new Runnable() { public void run() { testCovers(); } });
+        if (online) row(c, "Borrar carátulas guardadas", "Las que se bajaron de internet y se guardaron en el equipo", null,
+            new Runnable() { public void run() {
+                CoverFetch.clear(Main.this);
+                coverAsked = coverKey = null;
+                coverArt = null;
+                toast("Carátulas borradas");
             }});
         row(c, "Diagnóstico del reproductor", "Fuente activa, lector de notificaciones y Bluetooth", null, new Runnable() { public void run() { showPlayerDiag(); } });
         LinearLayout b = section(body, "Audio Bluetooth");
@@ -10817,7 +11292,10 @@ public class Main extends Activity {
         TextView v = tv("Tienes la " + Updates.currentVersion(this) + " · nueva: " + r.version, 13, MUTED, false);
         box.addView(v);
         android.widget.ScrollView sc = new android.widget.ScrollView(this);
-        TextView notes = tv(Updates.plain(r.notes).length() > 0 ? Updates.plain(r.notes) : "Mejoras y correcciones.", 14, TEXT, false);
+        // las notas vienen en español y en inglés (y a veces en más idiomas): se muestra la del idioma elegido
+        String nt = Updates.plain(Updates.localNotes(r.notes));
+        TextView notes = tv("Mejoras y correcciones.", 14, TEXT, false);
+        if (nt.length() > 0) notes.setText(nt);
         notes.setSingleLine(false);
         notes.setPadding(0, (int) (10 * s), 0, (int) (10 * s));
         sc.addView(notes);
@@ -12019,7 +12497,9 @@ public class Main extends Activity {
     /** Alertas graves: abren el panel aunque se esté en otra cosa (una vez por alerta); también avisa a las ventanas. */
     private final Obd.Listener obdWatch = new Obd.Listener() { public void onObd() {
         if (obdDlg != null) obdDlg.onObd();
+        try { odoFromObd(); } catch (Throwable ignored) { }
         if (speedFromObd || !Float.isNaN(obdKmh())) showSpeed();   // velocímetro del inicio con la velocidad del escáner
+        showRpm();
         java.util.HashSet<String> now = new java.util.HashSet<String>();
         boolean fresh = false;
         synchronized (Obd.alerts) {
@@ -12242,6 +12722,15 @@ public class Main extends Activity {
                 String.format(java.util.Locale.US, "%.1f L", prefs.getFloat("obd_displacement", 2.4f)), new Runnable() { public void run() { d.askDisplacement(); } });
             row(m, "Protocolo", "Automático casi siempre; fuerza uno si el escáner no lo detecta", ObdDialogs.protocolName(prefs.getString("obd_protocol", "auto")),
                 new Runnable() { public void run() { d.pickProtocol(); } });
+            // #77: algunos ELM327 clon no entienden varios datos por consulta; se detecta solo, pero se puede apagar a mano
+            final boolean multiBad = prefs.getString("obd_multi_bad", "").length() > 0
+                && prefs.getString("obd_multi_bad", "").equals(prefs.getString("obd_addr", "demo"));
+            toggle(m, "Leer varios datos por consulta", multiBad
+                    ? "Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar"
+                    : "Más rápido. Apágalo si tu escáner se desconecta a cada rato",
+                prefs.getBoolean("obd_multi", true) && !multiBad, new IntCb() { public void on(int i) {
+                    prefs.edit().putBoolean("obd_multi", i == 1).remove("obd_multi_bad").apply();
+                    d.reconnect(); }});
             LinearLayout ve = section(body, "Velocímetro");
             toggle(ve, "Usar la velocidad del escáner", "Con el escáner conectado, el inicio muestra la velocidad del carro en vez de la del GPS: más exacta y sin retraso",
                 prefs.getBoolean("obd_speed", true), new IntCb() { public void on(int i) {

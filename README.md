@@ -44,7 +44,7 @@
 
 **A tu medida**
 - Cada botón de la barra abre la app o la función que quieras. Oculta las apps que no usas.
-- 12 idiomas (español, inglés, portugués, francés, italiano, alemán, malayo, árabe, turco, chino, húngaro y polaco), km/h o mph.
+- 13 idiomas (español, inglés, portugués, francés, italiano, alemán, malayo, árabe, turco, chino, húngaro, polaco y ruso), km/h o mph.
 - Avisos de actualización con código QR. Pesa **alrededor de 1,5 MB**.
 
 👉 Novedades de cada versión en [Releases](https://github.com/lordnordic-debug/StradaOS/releases).
@@ -98,6 +98,15 @@ Sin cuentas, anuncios ni analíticas. Tu ubicación se usa solo en el equipo. De
 ## ☕ Apoya el proyecto
 
 StradaOS es y seguirá siendo gratis. Si te sirvió, dale una ⭐ a este repositorio o invítame un café en **[ko-fi.com/stradaos](https://ko-fi.com/stradaos)**. Reportes, ideas y traducciones son bienvenidos: lee [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### 👥 Contribuidores
+
+Gracias a cada persona que ha aportado código, traducciones o pruebas:
+
+<table>
+<tr><td align="center"><a href="https://github.com/lordnordic-debug"><img src="https://avatars.githubusercontent.com/u/293109340?v=4&s=80" width="64" height="64" alt="lordnordic-debug"><br><sub>lordnordic-debug</sub></a></td><td align="center"><a href="https://github.com/nothanks91"><img src="https://avatars.githubusercontent.com/u/21056650?v=4&s=80" width="64" height="64" alt="nothanks91"><br><sub>nothanks91</sub></a></td><td align="center"><a href="https://github.com/mryusufcan"><img src="https://avatars.githubusercontent.com/u/36123888?v=4&s=80" width="64" height="64" alt="mryusufcan"><br><sub>mryusufcan</sub></a></td><td align="center"><a href="https://github.com/imccyu"><img src="https://avatars.githubusercontent.com/u/276526105?v=4&s=80" width="64" height="64" alt="imccyu"><br><sub>imccyu</sub></a></td><td align="center"><a href="https://github.com/9M2PJU"><img src="https://avatars.githubusercontent.com/u/991353?v=4&s=80" width="64" height="64" alt="9M2PJU"><br><sub>9M2PJU</sub></a></td></tr>
+<tr><td align="center"><a href="https://github.com/MartinDean07"><img src="https://avatars.githubusercontent.com/u/81487973?v=4&s=80" width="64" height="64" alt="MartinDean07"><br><sub>MartinDean07</sub></a></td><td align="center"><a href="https://github.com/darlo-Pl"><img src="https://avatars.githubusercontent.com/u/357112707?v=4&s=80" width="64" height="64" alt="darlo-Pl"><br><sub>darlo-Pl</sub></a></td><td align="center"><a href="https://github.com/Jaacern"><img src="https://avatars.githubusercontent.com/u/135047165?v=4&s=80" width="64" height="64" alt="Jaacern"><br><sub>Jaacern</sub></a></td><td align="center"><a href="https://github.com/gugezhushou789-dotcom"><img src="https://avatars.githubusercontent.com/u/304327512?v=4&s=80" width="64" height="64" alt="gugezhushou789-dotcom"><br><sub>gugezhushou789-dotcom</sub></a></td></tr>
+</table>
 
 <a href="https://github.com/lordnordic-debug/StradaOS/graphs/contributors"><img src="https://contrib.rocks/image?repo=lordnordic-debug/StradaOS"></a>
 

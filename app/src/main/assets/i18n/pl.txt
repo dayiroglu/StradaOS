@@ -455,7 +455,7 @@ Orientación del mapa	Orientacja mapy
 El mapa apunta	Mapa wskazuje
 Según tu dirección: gira con el carro mientras te mueves	Zgodnie z kierunkiem jazdy: obraca się wraz z samochodem podczas jazdy
 Norte arriba	Północ u góry
-Según tu dirección	godnie z kierunkiem jazdy
+Según tu dirección	zgodnie z kierunkiem jazdy
 Último cambio	Ostatnia wymiana
 Corregir el último cambio	Popraw ostatnią zmianę
 ¿Tu tablero marca kilómetros o millas?	Czy Twoja deska rozdzielcza pokazuje kilometry czy mile?
@@ -1831,3 +1831,79 @@ Beige moderno	Nowoczesny beż
 Próximo mantenimiento	Następny przegląd
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	Samochód motywu Carbono widziany z góry. Możesz go też zmienić, przytrzymując samochód.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Czyste karty na teksturowanym tle z włókna węglowego z miękkim światłem od dołu (lub perłowa szarość w trybie jasnym). Twój pojazd w dużym rozmiarze z prędkościomierzem i dwoma najbliższymi przeglądami, mapa z odtwarzaczem i pogodą nad nią oraz pasek aplikacji w kształcie pigułki.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	Obroty obok prędkościomierza
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	Mały obrotomierz obok, z obrotami ze skanera OBD (tylko gdy jest połączony)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Licznik przebiegu
+Kilometraje del auto (escáner OBD)	Przebieg auta (skaner OBD)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	Przebieg auta wynosi {} i nadszedł czas na wymianę oleju (co {}).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	W środkowej karcie
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	Mapa i wideo: przesuń kartę, aby przejść z mapy do filmów z pamięci i pendrive'ów
+Mapa y video	Mapa i wideo
+Carpeta de videos	Folder z filmami
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	Dotknij, aby wybrać. Bez wyboru przeszukuje całą pamięć i pendrive'y
+Todas	Wszystkie
+Video en movimiento	Wideo w czasie jazdy
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	Powyżej 5 km/h. Prawo zabrania oglądania wideo podczas jazdy
+Tapar siempre	Zawsze zakrywaj
+Sin permiso de almacenamiento no se pueden buscar videos	Bez dostępu do pamięci nie można szukać filmów
+Buscando videos…	Szukam filmów…
+videos	filmów
+No se puede reproducir aquí	Nie można tu odtworzyć
+ábrelo en pantalla completa	otwórz na pełnym ekranie
+Buscando videos en la memoria y las USB…	Szukam filmów w pamięci i na pendrive'ach…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	Brak filmów. Skopiuj filmy (MP4 lub MKV) do pamięci lub na pendrive albo wybierz folder w Ustawienia → Mapa i pogoda.
+Ver en pantalla completa	Oglądaj na pełnym ekranie
+No hay una app de video para la pantalla completa	Brak aplikacji wideo do pełnego ekranu
+¿Quieres seguir viendo el video?	Chcesz dalej oglądać wideo?
+Imagen en pausa mientras manejas · el audio sigue	Obraz wstrzymany podczas jazdy · dźwięk gra dalej
+Solo se muestra con el carro detenido	Wyświetla się tylko, gdy auto stoi
+Sin GPS ni escáner no se sabe si el carro va andando	Bez GPS ani skanera nie wiadomo, czy auto jedzie
+Elegir video	Wybierz wideo
+Cuidado al manejar	Uwaga podczas jazdy
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	Patrz na drogę. Oglądanie wideo podczas jazdy jest niebezpieczne i w wielu krajach zabronione. Jeśli kontynuujesz, robisz to na własną odpowiedzialność.
+Seguir viendo	Oglądaj dalej
+Almacenamientos	Pamięci
+No hay videos en esta carpeta	Brak filmów w tym folderze
+Sin videos	Brak filmów
+Reproduciendo	Odtwarzanie
+Miniatura en curso: se abre igual	Trwa tworzenie miniatury: otwieranie mimo to
+Abrir	Otwórz
+reintento	ponowna próba
+Preparado	Gotowe
+Primer cuadro	Pierwsza klatka
+sin imagen	brak obrazu
+La pantalla no puede mostrar la imagen de este video	Ekran nie może wyświetlić obrazu tego wideo
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	Przytrzymaj przycisk pełnego ekranu, aby otworzyć je w VLC lub innej aplikacji
+Ningún video de la lista se pudo abrir	Nie udało się otworzyć żadnego wideo z listy
+sin video	brak wideo
+Diagnóstico del video	Diagnostyka wideo
+Formato de cada video y lo que decodifica la pantalla	Format każdego wideo i co ekran potrafi zdekodować
+Decodificadores de video	Dekodery wideo
+Últimos videos	Ostatnie wideo
+Todavía no se ha abierto ningún video	Nie otwarto jeszcze żadnego wideo
+Se guarda en StradaDiag/video.txt	Zapisano w StradaDiag/video.txt
+se leen con el video detenido	odczytywane przy zatrzymanym wideo
+la pantalla no tiene decodificador	ekran nie ma dekodera
+pide más de lo que decodifica la pantalla	wymaga więcej, niż ekran potrafi zdekodować
+No compatible con esta pantalla	Niezgodne z tym ekranem
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	Przekonwertuj na H.264 720p lub 1080p w poziomie, 30 klatek na sekundę
+Sin miniatura	Brak miniatury
+Leer varios datos por consulta	Odczytuj kilka danych na zapytanie
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	Twój skaner tego nie obsługuje: StradaOS czyta dane pojedynczo. Włącz, aby spróbować ponownie
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	Szybciej. Wyłącz, jeśli skaner ciągle się rozłącza
+Miniatura tomada del video	Miniatura pobrana z filmu
+Enorme	Ogromny
+«Muy grande» y «Enorme» también agrandan los nombres	«Bardzo duży» i «Ogromny» powiększają też nazwy
+Buscar carátulas en internet	Szukaj okładek w internecie
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	Jeśli utwór przychodzi bez okładki (np. przez Bluetooth), jest ona wyszukiwana w MusicBrainz i Cover Art Archive, a jeśli jej tam nie ma, w iTunes lub Deezerze. Wysyłany jest tylko tytuł i wykonawca
+Borrar carátulas guardadas	Usuń zapisane okładki
+Las que se bajaron de internet y se guardaron en el equipo	Pobrane z internetu i zapisane w urządzeniu
+Carátulas borradas	Okładki usunięte
+Probando…	Testowanie…
+Probar la búsqueda de carátulas	Przetestuj wyszukiwanie okładek
+Prueba cada servidor con la canción que suena y muestra el error exacto	Testuje każdy serwer z odtwarzanym utworem i pokazuje dokładny błąd
+Prueba de carátulas	Test okładek
+Se guarda en StradaDiag/caratulas.txt	Zapisano w StradaDiag/caratulas.txt

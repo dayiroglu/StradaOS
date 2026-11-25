@@ -65,6 +65,16 @@ if part 1; then
   for t in faro aurora cobalto; do step "premium-$t" "tema-premium:$t" 6; step "premium-$t-pista" pista-demo:Night_Drive 3; done
   for i in 0 1 2 3 4 5; do step "gratis-$i" "tema-gratis:$i" 5; done
   step gratis-1 tema-gratis:1 5
+  # ── 2.36 (#74): íconos «Muy grande» y «Enorme» en la barra lateral (agrupada al centro), abajo y compacta ──
+  step barra-lateral diseno:lateral 4
+  step barra-lateral-4 diseno:botones-4 4
+  step barra-lateral-enorme diseno:iconos-4 4
+  step barra-lateral-muygrande diseno:iconos-3 4
+  step barra-lateral-10 diseno:botones-10 4
+  step barra-abajo-muygrande diseno:normal 4
+  step barra-abajo-enorme diseno:iconos-4 4
+  step barra-compacta-enorme diseno:compacta 4
+  step barra-base diseno:base 4
   # ── ajustes: las 12 secciones, arriba, en medio y abajo ──
   for c in 0 1 2 3 4 5 6 7 8 9 10 11; do
     step "ajustes-$c" "ajustes:$c" 4
@@ -74,9 +84,94 @@ if part 1; then
   step inicio inicio 3
   # ── navegación ──
   step nav-buscar nav-buscar 6 1
+  # en Android 4.x el primer «atrás» solo cierra el teclado: otro más cierra el buscador
+  adb shell input keyevent 4; sleep 1
   step solo-mapa solo-mapa:1 6
   step solo-mapa-off solo-mapa:0 4
   step nav-salir nav-salir 4
+  # ── 2.35: tarjeta del centro con mapa y video (carrusel), mapa explorable y video detenido / en movimiento ──
+  adb shell mkdir -p /sdcard/Movies >/dev/null 2>&1
+  adb push "$(dirname "$0")/prueba-video.mp4" /sdcard/Movies/prueba-stradaos.mp4 >/dev/null 2>&1
+  # una subcarpeta con otro video, para el selector tipo gestor de archivos
+  adb shell mkdir -p /sdcard/Movies/Viajes >/dev/null 2>&1
+  adb push "$(dirname "$0")/prueba-video.mp4" /sdcard/Movies/Viajes/otro-stradaos.mp4 >/dev/null 2>&1
+  # 2.35 r5: un «video» dañado en Viajes (no abre): reintentos con superficie nueva, aviso en el centro y salto al siguiente
+  head -c 300000 /dev/urandom > /tmp/roto-stradaos.mp4
+  adb push /tmp/roto-stradaos.mp4 /sdcard/Movies/Viajes/roto-stradaos.mp4 >/dev/null 2>&1
+  [ "$API" -ge 23 ] && adb shell pm grant $PKG android.permission.READ_EXTERNAL_STORAGE >/dev/null 2>&1
+  step centro-mapa centro:mapa 6
+  step explorar explorar:1 4
+  step explorar-lejos explorar-zoom:-8 6
+  step explorar-cerca explorar-zoom:4 5
+  adb shell input keyevent 4; sleep 2; shot "$(printf %03d $N)-explorar-atras"
+  step seguir explorar:0 3
+  # toques reales sobre la tarjeta: tocar (entra a Explorar), arrastrar el mapa y doble toque
+  adb shell input tap 520 190; sleep 2; adb shell input swipe 520 190 420 240 300; sleep 1
+  adb shell input tap 520 190; adb shell input tap 520 190; sleep 2
+  shot "$(printf %03d $N)-explorar-toques"
+  step seguir-2 explorar:0 2
+  # explorar con una ruta activa (la ruta sale del carro, no del centro de la vista)
+  step nav-demo-ruta nav-demo 8
+  step nav-explorar explorar:1 3
+  step nav-explorar-lejos explorar-zoom:-2 5
+  adb shell input swipe 520 190 400 260 300; sleep 2; shot "$(printf %03d $N)-nav-explorar-arrastre"
+  step nav-seguir explorar:0 2
+  step nav-salir-2 nav-salir 3
+  step video-vel-0 video-vel:0 1
+  step centro-video centro:video 9
+  step video-solo video-modo:1 5
+  step video-completo video-modo:2 5
+  step video-tarjeta video-modo:0 4
+  step video-andando video-vel:40 4
+  step video-cuidado video-cuidado 3 1
+  step video-tapar-siempre video-aviso:cover 3
+  step video-sin-vel video-vel:nan 3
+  step video-preguntar video-aviso:ask 3
+  step video-detenido video-vel:0 8
+  # selector tipo gestor de archivos: abre en la carpeta del video (Viajes + el video, con miniatura y duración)
+  step video-elegir video-elegir 6
+  step video-elegir-viajes video-fila:0 5
+  # Atrás sube de carpeta (Viajes → Movies → memoria → almacenamientos) y en los almacenamientos cierra
+  adb shell input keyevent 4; sleep 2; shot "$(printf %03d $N)-video-elegir-atras"
+  adb shell input keyevent 4; sleep 2; shot "$(printf %03d $N)-video-elegir-memoria"
+  adb shell input keyevent 4; sleep 2; shot "$(printf %03d $N)-video-elegir-almacenamientos"
+  adb shell input keyevent 4; sleep 2; shot "$(printf %03d $N)-video-elegir-cerrado"
+  step video-elegir-arriba video-elegir:arriba 5
+  step video-elegir-memoria video-fila:0 4
+  adb shell input keyevent 4; sleep 1; adb shell input keyevent 4; sleep 2
+  # elegir el video de Viajes: la lista pasa a ser esa carpeta
+  step video-elegir-2 video-elegir 4
+  step video-elegir-entrar video-fila:0 4
+  step video-elegir-video video-fila:0 6
+  # línea de tiempo: a la vista con los controles y saltar al segundo 6
+  step video-controles video-controles 2
+  step video-ir video-ir:6 3
+  # 2.35 r5: el video termina (12 s) y pasa al dañado: 3 intentos, aviso y vuelta al primero; y el diagnóstico del video
+  sleep 8; shot "$(printf %03d $N)-video-danado"
+  sleep 6; shot "$(printf %03d $N)-video-danado-aviso"
+  step video-diag video-diag 3 1
+  step pagina-mapa pagina:1 3
+  # deslizar de verdad sobre la tarjeta (de mapa a video y de vuelta)
+  adb shell input swipe 700 200 330 200 250; sleep 3
+  shot "$(printf %03d $N)-deslizar-video"
+  adb shell input swipe 330 200 700 200 250; sleep 3
+  shot "$(printf %03d $N)-deslizar-mapa"
+  # el carrusel en cada tema (página del video y del mapa)
+  for t in tema-premium:aurora tema-premium:cobalto tema-premium:faro tema-premium:carbono tema-premium: ; do
+    n=${t#tema-premium:}; [ -z "$n" ] && n=clasico
+    step "centro-$n" "$t" 6
+    step "centro-$n-video" centro:video 6
+    step "centro-$n-solo-video" video-modo:1 4
+    step "centro-$n-tarjeta" video-modo:0 3
+    step "centro-$n-mapa" centro:mapa 5
+    step "centro-$n-explorar" explorar:1 3
+    step "centro-$n-seguir" explorar:0 2
+  done
+  step ajustes-mapa-video ajustes:7 4
+  scroll; scroll; shot "$(printf %03d $N)-ajustes-mapa-video-medio"
+  step centro-solo centro:solo 5
+  step video-aviso-preguntar video-aviso:ask 1
+  step video-vel-real video-vel:x 2
 fi
 # ════ Parte 2: diálogos, música, idiomas y asistente ════
 if part 2; then
@@ -91,11 +186,26 @@ if part 2; then
   step musica-hcn-off "hcn-sim:,stop,0,0" 3
   step musica-aa-off aa-simular:0 3
   step diag-final diag-reproductor 5 1
+  # ── 2.36 (#76): carátula por internet: ajuste, prueba paso a paso (con red real del emulador) y búsqueda con una pista ──
+  step caratulas-on pref:cover_online=true 3
+  step ajustes-musica-caratulas ajustes:8 4
+  scroll; scroll; shot "$(printf %03d $N)-ajustes-musica-caratulas-medio"
+  step caratula-prueba caratula-prueba 40 0
+  adb shell cat /sdcard/StradaDiag/caratulas.txt > $OUT/caratulas.txt 2>/dev/null
+  adb shell input swipe 600 450 600 150 400; sleep 1; shot "$(printf %03d $N)-caratula-prueba-fin"
+  adb shell input keyevent 4; sleep 2
+  # la búsqueda real va sin captura (no se guardan portadas de discos en el repositorio); el diagnóstico dice el resultado
+  adb shell am start -n $ACT --es prueba "pista-sin-caratula:La_Camisa_Negra,Juanes" >/dev/null 2>&1; sleep 14
+  adb shell am start -n $ACT --es prueba pista-demo >/dev/null 2>&1; sleep 2
+  step caratula-diag diag-reproductor 5 1
+  step caratulas-off pref:cover_online=false 3
   # ── idiomas: inicio y ajustes en cada uno ──
   # los diagnósticos también, para que StradaOS Prueba anote las frases sin traducir (sin-traducir.txt)
-  for l in en pt it de ms ar tr fr zh hu pl es; do
+  for l in en pt it de ms ar tr fr zh hu pl ru es; do
     step "idioma-$l" "idioma:$l" 6; step "ajustes-$l" "ajustes:9" 4
     [ "$l" != es ] && { step "diagr-$l" diag-reproductor 4 1; step "diagm-$l" diag-mapa 4 1; }
+    # 2.35 r7: la ventana de actualización con las notas en el idioma elegido (inglés si no hay sección del idioma)
+    case $l in en|pt|es) step "actualizacion-$l" actualizacion-demo 4 1;; esac
   done
   step final inicio 4
 fi

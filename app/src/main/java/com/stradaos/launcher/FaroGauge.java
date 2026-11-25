@@ -78,6 +78,12 @@ public class FaroGauge extends View {
     /** Límite de la vía en la unidad elegida (0 = desconocido: no se muestra). */
     public void setLimit(int l) { if (l != limit) { limit = l; invalidate(); } }
 
+    /** Cuentarrevoluciones chico centrado debajo de «km/h» (ver {@link Tach}). */
+    private final Tach tach = new Tach();
+
+    /** RPM del escáner para el cuentarrevoluciones chico; NaN lo esconde. */
+    public void setRpm(float rpm) { if (tach.set(rpm)) postInvalidateOnAnimation(); }
+
     /** Velocidad ya en la unidad elegida. Sin GPS el avance vuelve a cero y el número muestra «--». */
     public void setSpeed(float v, boolean hasFix) {
         ok = hasFix;
@@ -92,6 +98,27 @@ public class FaroGauge extends View {
 
     @Override
     protected void onDraw(Canvas c) {
+        drawGauge(c);
+        // el cuentarrevoluciones va encima de todo (el brillo del modo claro no lo apaga)
+        float d = Math.min(getWidth(), getHeight());
+        if (d <= 0) return;
+        if (tach.step()) postInvalidateOnAnimation();
+        if (tach.visible()) {
+            // centrado debajo de «km/h», en el hueco de abajo del aro (el aro deja libres los 90° de abajo)
+            float cx = getWidth() / 2f, cy = getHeight() / 2f;
+            if (mode == 0) {
+                // digital: debajo de la línea de avance (que va en cy + 0,31·d)
+                float tr = d * 0.08f;
+                tach.draw(c, cx, cy + d * 0.34f + tr, tr, 0xFFE5332A, text, muted);
+            } else {
+                // analógico y mixto: «km/h» va en cy + 0,46·r (0,50·r en el analógico)
+                float r = d / 2f * 0.80f, tr = r * 0.28f;
+                tach.draw(c, cx, cy + r * (mode == 1 ? 0.86f : 0.82f), tr, 0xFFE5332A, text, muted);
+            }
+        }
+    }
+
+    private void drawGauge(Canvas c) {
         long now = SystemClock.uptimeMillis();
         if (last != 0) {
             float dt = Math.min(0.1f, Math.max(0f, (now - last) / 1000f));

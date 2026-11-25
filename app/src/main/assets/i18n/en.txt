@@ -1856,3 +1856,79 @@ Beige moderno	Modern beige
 Próximo mantenimiento	Next service
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	The Carbono theme car, seen from above. You can also change it with a long press on the car.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Clean cards on a textured carbon background with a soft light from below (or pearl gray in light mode). Your vehicle up large with the speedometer and the two nearest services, the map with the player and weather floating on top, and a pill-shaped app bar.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	RPM next to the speedometer
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	A small tachometer beside it, with the RPM from the OBD scanner (only while it's connected)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Odometer
+Kilometraje del auto (escáner OBD)	Car mileage (OBD scanner)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	The car's odometer is {} and the oil change is due (every {}).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	In the center card
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	Map and video: swipe the card to go from the map to the videos on the memory and USB drives
+Mapa y video	Map and video
+Carpeta de videos	Video folder
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	Tap to choose. If you don't choose one, it searches the whole memory and the USB drives
+Todas	All
+Video en movimiento	Video while moving
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	Above 5 km/h. The law forbids watching video while driving
+Tapar siempre	Always cover
+Sin permiso de almacenamiento no se pueden buscar videos	Without storage permission videos can't be searched
+Buscando videos…	Searching for videos…
+videos	videos
+No se puede reproducir aquí	Can't play here
+ábrelo en pantalla completa	open it in full screen
+Buscando videos en la memoria y las USB…	Searching for videos in the memory and USB drives…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	No videos. Copy videos (MP4 or MKV) to the memory or a USB drive, or choose the folder in Settings → Map & weather.
+Ver en pantalla completa	Watch in full screen
+No hay una app de video para la pantalla completa	No video app for full screen
+¿Quieres seguir viendo el video?	Do you want to keep watching the video?
+Imagen en pausa mientras manejas · el audio sigue	Picture paused while driving · audio keeps playing
+Solo se muestra con el carro detenido	Only shown when the car is stopped
+Sin GPS ni escáner no se sabe si el carro va andando	Without GPS or scanner, it's unknown whether the car is moving
+Elegir video	Choose video
+Cuidado al manejar	Careful while driving
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	Keep your eyes on the road. Watching video while driving is dangerous and illegal in many countries. If you continue, you do so at your own risk.
+Seguir viendo	Keep watching
+Almacenamientos	Storage
+No hay videos en esta carpeta	No videos in this folder
+Sin videos	No videos
+Reproduciendo	Playing
+Miniatura en curso: se abre igual	Thumbnail in progress: opening anyway
+Abrir	Open
+reintento	retry
+Preparado	Ready
+Primer cuadro	First frame
+sin imagen	no picture
+La pantalla no puede mostrar la imagen de este video	The screen can't show the picture of this video
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	Press and hold the full-screen button to open it in VLC or another app
+Ningún video de la lista se pudo abrir	None of the videos in the list could be opened
+sin video	no video
+Diagnóstico del video	Video diagnostics
+Formato de cada video y lo que decodifica la pantalla	Format of each video and what the screen can decode
+Decodificadores de video	Video decoders
+Últimos videos	Latest videos
+Todavía no se ha abierto ningún video	No video has been opened yet
+Se guarda en StradaDiag/video.txt	Saved to StradaDiag/video.txt
+se leen con el video detenido	read with the video stopped
+la pantalla no tiene decodificador	the screen has no decoder for
+pide más de lo que decodifica la pantalla	asks for more than the screen can decode
+No compatible con esta pantalla	Not compatible with this screen
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	Convert it to H.264 at 720p or 1080p landscape, 30 frames per second
+Sin miniatura	No thumbnail
+Leer varios datos por consulta	Read several values per request
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	Your scanner doesn't support it: StradaOS reads one value at a time. Turn it on to try again
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	Faster. Turn it off if your scanner keeps disconnecting
+Miniatura tomada del video	Thumbnail taken from the video
+Enorme	Huge
+«Muy grande» y «Enorme» también agrandan los nombres	«Extra large» and «Huge» also make the names bigger
+Buscar carátulas en internet	Find album art online
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	If a song arrives without album art (e.g. over Bluetooth), it is looked up on MusicBrainz and Cover Art Archive and, if not found, on iTunes or Deezer. Only the title and artist are sent
+Borrar carátulas guardadas	Delete saved album art
+Las que se bajaron de internet y se guardaron en el equipo	Covers downloaded from the internet and saved on this unit
+Carátulas borradas	Album art deleted
+Probando…	Testing…
+Probar la búsqueda de carátulas	Test the album art search
+Prueba cada servidor con la canción que suena y muestra el error exacto	Tests each server with the song that's playing and shows the exact error
+Prueba de carátulas	Album art test
+Se guarda en StradaDiag/caratulas.txt	Saved to StradaDiag/caratulas.txt

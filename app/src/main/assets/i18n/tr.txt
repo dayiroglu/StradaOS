@@ -1854,3 +1854,79 @@ Beige moderno	Modern bej
 Próximo mantenimiento	Sonraki bakım
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	Carbono temasının aracı, yukarıdan görünüm. Araca uzun basarak da değiştirebilirsiniz.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	Dokulu karbon zemin üzerinde aşağıdan gelen yumuşak bir ışıkla sade kartlar (açık modda inci grisi). Hız göstergesi ve en yakın iki bakımla büyük araç görünümü, üzerinde müzik çalar ve hava durumu olan harita ve hap şeklinde uygulama çubuğu.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	Hız göstergesinin yanında devir
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	Yanında küçük bir devir göstergesi, OBD tarayıcısından gelen devirle (yalnızca bağlıyken)
+# kilometraje con el escáner OBD (#52)
+Odómetro	Kilometre sayacı
+Kilometraje del auto (escáner OBD)	Aracın kilometresi (OBD tarayıcı)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	Aracın kilometresi {} ve yağ değişiminin zamanı geldi (her {}).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	Ortadaki kartta
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	Harita ve video: haritadan bellek ve USB belleklerdeki videolara geçmek için kartı kaydırın
+Mapa y video	Harita ve video
+Carpeta de videos	Video klasörü
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	Seçmek için dokun. Seçmezsen tüm bellekte ve USB belleklerde arar
+Todas	Tümü
+Video en movimiento	Hareket halinde video
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	5 km/s üzerinde. Sürüş sırasında video izlemek yasaktır
+Tapar siempre	Her zaman kapat
+Sin permiso de almacenamiento no se pueden buscar videos	Depolama izni olmadan videolar aranamaz
+Buscando videos…	Videolar aranıyor…
+videos	video
+No se puede reproducir aquí	Burada oynatılamıyor
+ábrelo en pantalla completa	tam ekranda aç
+Buscando videos en la memoria y las USB…	Bellekte ve USB belleklerde videolar aranıyor…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	Video yok. Videoları (MP4 veya MKV) belleğe ya da bir USB belleğe kopyala veya klasörü Ayarlar → Harita ve hava durumu'ndan seç.
+Ver en pantalla completa	Tam ekranda izle
+No hay una app de video para la pantalla completa	Tam ekran için video uygulaması yok
+¿Quieres seguir viendo el video?	Videoyu izlemeye devam etmek istiyor musunuz?
+Imagen en pausa mientras manejas · el audio sigue	Sürüş sırasında görüntü duraklatıldı · ses devam ediyor
+Solo se muestra con el carro detenido	Yalnızca araç dururken gösterilir
+Sin GPS ni escáner no se sabe si el carro va andando	GPS veya tarayıcı olmadan aracın hareket edip etmediği bilinmez
+Elegir video	Video seç
+Cuidado al manejar	Sürerken dikkat
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	Gözünüzü yoldan ayırmayın. Araç kullanırken video izlemek tehlikelidir ve birçok ülkede yasaktır. Devam ederseniz sorumluluk size aittir.
+Seguir viendo	İzlemeye devam et
+Almacenamientos	Depolama alanları
+No hay videos en esta carpeta	Bu klasörde video yok
+Sin videos	Video yok
+Reproduciendo	Oynatılıyor
+Miniatura en curso: se abre igual	Küçük resim hazırlanıyor: yine de açılıyor
+Abrir	Aç
+reintento	yeniden deneme
+Preparado	Hazır
+Primer cuadro	İlk kare
+sin imagen	görüntü yok
+La pantalla no puede mostrar la imagen de este video	Ekran bu videonun görüntüsünü gösteremiyor
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	VLC'de veya başka bir uygulamada açmak için tam ekran düğmesini basılı tutun
+Ningún video de la lista se pudo abrir	Listedeki videoların hiçbiri açılamadı
+sin video	video yok
+Diagnóstico del video	Video tanılama
+Formato de cada video y lo que decodifica la pantalla	Her videonun biçimi ve ekranın çözebildikleri
+Decodificadores de video	Video kod çözücüleri
+Últimos videos	Son videolar
+Todavía no se ha abierto ningún video	Henüz hiç video açılmadı
+Se guarda en StradaDiag/video.txt	StradaDiag/video.txt dosyasına kaydedildi
+se leen con el video detenido	video durdurulmuşken okunur
+la pantalla no tiene decodificador	ekranda şunun için kod çözücü yok:
+pide más de lo que decodifica la pantalla	ekranın çözebildiğinden fazlasını istiyor
+No compatible con esta pantalla	Bu ekranla uyumlu değil
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	Yatay 720p veya 1080p, saniyede 30 kare H.264'e dönüştürün
+Sin miniatura	Küçük resim yok
+Leer varios datos por consulta	Sorgu başına birden çok veri oku
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	Tarayıcınız bunu anlamıyor: StradaOS verileri tek tek okuyor. Yeniden denemek için açın
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	Daha hızlı. Tarayıcınız sürekli bağlantıyı kesiyorsa kapatın
+Miniatura tomada del video	Küçük resim videodan alındı
+Enorme	Dev
+«Muy grande» y «Enorme» también agrandan los nombres	«Çok büyük» ve «Dev» adları da büyütür
+Buscar carátulas en internet	Albüm kapağını internette ara
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	Şarkı kapaksız gelirse (ör. Bluetooth ile), MusicBrainz ve Cover Art Archive'da, bulunamazsa iTunes'da veya Deezer'da aranır. Yalnızca şarkı adı ve sanatçı gönderilir
+Borrar carátulas guardadas	Kayıtlı kapakları sil
+Las que se bajaron de internet y se guardaron en el equipo	İnternetten indirilip cihaza kaydedilenler
+Carátulas borradas	Kapaklar silindi
+Probando…	Test ediliyor…
+Probar la búsqueda de carátulas	Kapak aramasını test et
+Prueba cada servidor con la canción que suena y muestra el error exacto	Çalan şarkıyla her sunucuyu test eder ve tam hatayı gösterir
+Prueba de carátulas	Kapak testi
+Se guarda en StradaDiag/caratulas.txt	StradaDiag/caratulas.txt dosyasına kaydedilir

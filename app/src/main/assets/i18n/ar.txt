@@ -1852,3 +1852,79 @@ Beige moderno	بيج عصري
 Próximo mantenimiento	الصيانة التالية
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	سيارة سمة Carbono من الأعلى. يمكنك تغييرها أيضاً بضغطة طويلة على السيارة.
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	بطاقات أنيقة على خلفية كربونية بملمس خفيف وضوء ناعم من الأسفل (أو رمادي لؤلؤي في الوضع الفاتح). مركبتك بحجم كبير مع عداد السرعة وأقرب صيانتين، والخريطة مع المشغّل والطقس فوقها، وشريط تطبيقات على شكل كبسولة.
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	عدد الدورات بجانب عداد السرعة
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	عداد دورات صغير بجانبه، بقراءة الدورات من ماسح OBD (فقط أثناء اتصاله)
+# kilometraje con el escáner OBD (#52)
+Odómetro	عداد المسافات
+Kilometraje del auto (escáner OBD)	المسافة المقطوعة للسيارة (ماسح OBD)
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	عدّاد المسافة في السيارة {} وقد حان وقت تغيير الزيت (كل {}).
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	في البطاقة الوسطى
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	الخريطة والفيديو: اسحب البطاقة للانتقال من الخريطة إلى مقاطع الفيديو في الذاكرة ووحدات USB
+Mapa y video	الخريطة والفيديو
+Carpeta de videos	مجلد الفيديوهات
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	اضغط للاختيار. إن لم تختر مجلدًا فسيبحث في الذاكرة كلها ووحدات USB
+Todas	الكل
+Video en movimiento	الفيديو أثناء الحركة
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	فوق 5 كم/س. القانون يمنع مشاهدة الفيديو أثناء القيادة
+Tapar siempre	التغطية دائمًا
+Sin permiso de almacenamiento no se pueden buscar videos	لا يمكن البحث عن الفيديوهات بدون إذن التخزين
+Buscando videos…	جارٍ البحث عن الفيديوهات…
+videos	فيديوهات
+No se puede reproducir aquí	لا يمكن التشغيل هنا
+ábrelo en pantalla completa	افتحه في وضع ملء الشاشة
+Buscando videos en la memoria y las USB…	جارٍ البحث عن الفيديوهات في الذاكرة ووحدات USB…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	لا توجد فيديوهات. انسخ فيديوهات (MP4 أو MKV) إلى الذاكرة أو إلى وحدة USB، أو اختر المجلد من الإعدادات ← الخريطة والطقس.
+Ver en pantalla completa	المشاهدة بملء الشاشة
+No hay una app de video para la pantalla completa	لا يوجد تطبيق فيديو لملء الشاشة
+¿Quieres seguir viendo el video?	هل تريد متابعة مشاهدة الفيديو؟
+Imagen en pausa mientras manejas · el audio sigue	الصورة متوقفة أثناء القيادة · الصوت مستمر
+Solo se muestra con el carro detenido	يظهر فقط عندما تكون السيارة متوقفة
+Sin GPS ni escáner no se sabe si el carro va andando	بدون GPS أو ماسح لا يمكن معرفة ما إذا كانت السيارة تتحرك
+Elegir video	اختيار فيديو
+Cuidado al manejar	انتبه أثناء القيادة
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	أبقِ عينيك على الطريق. مشاهدة الفيديو أثناء القيادة خطيرة وممنوعة في كثير من الدول. إذا تابعت فأنت تتحمل المسؤولية.
+Seguir viendo	متابعة المشاهدة
+Almacenamientos	أماكن التخزين
+No hay videos en esta carpeta	لا توجد فيديوهات في هذا المجلد
+Sin videos	لا توجد فيديوهات
+Reproduciendo	قيد التشغيل
+Miniatura en curso: se abre igual	جارٍ إنشاء صورة مصغّرة: يُفتح على أي حال
+Abrir	فتح
+reintento	إعادة محاولة
+Preparado	جاهز
+Primer cuadro	أول إطار
+sin imagen	بلا صورة
+La pantalla no puede mostrar la imagen de este video	لا تستطيع الشاشة عرض صورة هذا الفيديو
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	اضغط مطولاً على زر ملء الشاشة لفتحه في VLC أو تطبيق آخر
+Ningún video de la lista se pudo abrir	تعذّر فتح أي فيديو في القائمة
+sin video	بلا فيديو
+Diagnóstico del video	تشخيص الفيديو
+Formato de cada video y lo que decodifica la pantalla	صيغة كل فيديو وما تستطيع الشاشة فك ترميزه
+Decodificadores de video	مفككات ترميز الفيديو
+Últimos videos	آخر الفيديوهات
+Todavía no se ha abierto ningún video	لم يُفتح أي فيديو بعد
+Se guarda en StradaDiag/video.txt	يُحفظ في StradaDiag/video.txt
+se leen con el video detenido	تُقرأ والفيديو متوقف
+la pantalla no tiene decodificador	لا تملك الشاشة مفكك ترميز
+pide más de lo que decodifica la pantalla	يتطلب أكثر مما تستطيع الشاشة فك ترميزه
+No compatible con esta pantalla	غير متوافق مع هذه الشاشة
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	حوّله إلى H.264 بدقة 720p أو 1080p أفقياً و30 إطاراً في الثانية
+Sin miniatura	بلا صورة مصغّرة
+Leer varios datos por consulta	قراءة عدة بيانات في كل طلب
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	الماسح لا يدعم ذلك: يقرأ StradaOS بيانًا واحدًا في كل مرة. فعّله للمحاولة مجددًا
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	أسرع. أوقفه إذا كان الماسح ينقطع باستمرار
+Miniatura tomada del video	صورة مصغرة مأخوذة من الفيديو
+Enorme	ضخم
+«Muy grande» y «Enorme» también agrandan los nombres	«كبير جدًا» و«ضخم» يكبّران الأسماء أيضًا
+Buscar carátulas en internet	البحث عن غلاف الألبوم على الإنترنت
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	إذا وصلت الأغنية بدون غلاف (مثلاً عبر البلوتوث)، يتم البحث عنه في MusicBrainz وCover Art Archive، وإن لم يوجد ففي iTunes أو Deezer. يُرسل العنوان والفنان فقط
+Borrar carátulas guardadas	حذف الأغلفة المحفوظة
+Las que se bajaron de internet y se guardaron en el equipo	التي نُزّلت من الإنترنت وحُفظت على الجهاز
+Carátulas borradas	تم حذف الأغلفة
+Probando…	جارٍ الاختبار…
+Probar la búsqueda de carátulas	اختبار البحث عن الأغلفة
+Prueba cada servidor con la canción que suena y muestra el error exacto	يختبر كل خادم بالأغنية المشغّلة ويعرض الخطأ بدقة
+Prueba de carátulas	اختبار الأغلفة
+Se guarda en StradaDiag/caratulas.txt	يُحفظ في StradaDiag/caratulas.txt

@@ -1852,3 +1852,79 @@ Beige moderno	摩登米色
 Próximo mantenimiento	下次保养
 El carro del tema Carbono, visto desde arriba. También se cambia con una presión larga sobre el carro.	Carbono 主题的车辆俯视图。长按车辆也可以更换。
 Tarjetas limpias sobre un fondo carbón con textura y una luz suave desde abajo (o gris perla en claro). Tu vehículo en grande con el velocímetro y los dos mantenimientos más cercanos, el mapa con el reproductor y el clima flotando encima, y una barra de apps tipo píldora.	质感碳纤维背景上的简洁卡片，光线从左下方柔和照亮（浅色模式为珍珠灰）。大尺寸的车辆、速度表和最近的两项保养，地图上悬浮着播放器和天气，以及胶囊形的应用栏。
+# cuentarrevoluciones junto al velocímetro (Tach)
+Revoluciones junto al velocímetro	车速表旁显示转速
+Un cuentarrevoluciones chico al lado, con las RPM del escáner OBD (solo mientras está conectado)	在旁边显示一个小转速表，使用 OBD 扫描仪的转速（仅在连接时）
+# kilometraje con el escáner OBD (#52)
+Odómetro	里程表
+Kilometraje del auto (escáner OBD)	车辆里程（OBD 扫描仪）
+El kilometraje del auto es {} y ya toca el cambio de aceite (cada {}).	车辆里程为 {}，已到更换机油的时间（每 {} 更换一次）。
+# video en lugar del mapa (VideoCard)
+En la tarjeta del centro	在中间卡片中
+Mapa y video: desliza la tarjeta para pasar del mapa a los videos de la memoria y las USB	地图和视频：滑动卡片即可从地图切换到存储和U盘中的视频
+Mapa y video	地图和视频
+Carpeta de videos	视频文件夹
+Toca para elegir. Si no eliges una, busca en toda la memoria y en las USB	点按选择。不选择时会在整个存储和 U 盘中搜索
+Todas	全部
+Video en movimiento	行驶中的视频
+Sobre 5 km/h. La ley prohíbe ver video mientras se conduce	超过 5 km/h。法律禁止驾驶时观看视频
+Tapar siempre	始终遮盖
+Sin permiso de almacenamiento no se pueden buscar videos	没有存储权限，无法搜索视频
+Buscando videos…	正在搜索视频…
+videos	个视频
+No se puede reproducir aquí	无法在这里播放
+ábrelo en pantalla completa	请全屏打开
+Buscando videos en la memoria y las USB…	正在存储和 U 盘中搜索视频…
+No hay videos. Copia videos (MP4 o MKV) a la memoria o a una USB, o elige la carpeta en Ajustes → Mapa y clima.	没有视频。请把视频（MP4 或 MKV）复制到存储或 U 盘，或在 设置 → 地图和天气 中选择文件夹。
+Ver en pantalla completa	全屏观看
+No hay una app de video para la pantalla completa	没有可全屏播放的视频应用
+¿Quieres seguir viendo el video?	要继续观看视频吗？
+Imagen en pausa mientras manejas · el audio sigue	行驶中画面已暂停 · 声音继续播放
+Solo se muestra con el carro detenido	仅在车辆停止时显示
+Sin GPS ni escáner no se sabe si el carro va andando	没有GPS或扫描仪，无法判断车辆是否在行驶
+Elegir video	选择视频
+Cuidado al manejar	驾驶时请注意安全
+Mantén la vista en el camino. Ver video mientras manejas es peligroso y en muchos países está prohibido. Si sigues, lo haces bajo tu responsabilidad.	请注视道路。驾驶时观看视频很危险，并且在许多国家是违法的。如果继续，责任由你自行承担。
+Seguir viendo	继续观看
+Almacenamientos	存储位置
+No hay videos en esta carpeta	此文件夹中没有视频
+Sin videos	没有视频
+Reproduciendo	正在播放
+Miniatura en curso: se abre igual	正在生成缩略图：仍然打开
+Abrir	打开
+reintento	重试
+Preparado	就绪
+Primer cuadro	第一帧
+sin imagen	无画面
+La pantalla no puede mostrar la imagen de este video	屏幕无法显示此视频的画面
+Mantén presionado el botón de pantalla completa para abrirlo en VLC u otra app	长按全屏按钮，用 VLC 或其他应用打开
+Ningún video de la lista se pudo abrir	列表中的视频都无法打开
+sin video	无视频
+Diagnóstico del video	视频诊断
+Formato de cada video y lo que decodifica la pantalla	每个视频的格式以及屏幕能解码的内容
+Decodificadores de video	视频解码器
+Últimos videos	最近的视频
+Todavía no se ha abierto ningún video	尚未打开任何视频
+Se guarda en StradaDiag/video.txt	已保存到 StradaDiag/video.txt
+se leen con el video detenido	在视频停止时读取
+la pantalla no tiene decodificador	屏幕没有此解码器
+pide más de lo que decodifica la pantalla	超出屏幕的解码能力
+No compatible con esta pantalla	与此屏幕不兼容
+Conviértelo a H.264 de 720p o 1080p horizontal, a 30 cuadros por segundo	请转换为 H.264、720p 或 1080p 横屏、每秒 30 帧
+Sin miniatura	无缩略图
+Leer varios datos por consulta	每次查询读取多个数据
+Tu escáner no lo entiende: StradaOS lee de a un dato. Actívalo para volver a probar	你的扫描器不支持：StradaOS 逐个读取数据。打开以重新尝试
+Más rápido. Apágalo si tu escáner se desconecta a cada rato	更快。如果扫描器频繁断开，请关闭
+Miniatura tomada del video	从视频截取的缩略图
+Enorme	超大
+«Muy grande» y «Enorme» también agrandan los nombres	“特大”和“超大”也会放大名称
+Buscar carátulas en internet	在网上查找专辑封面
+Si la canción llega sin carátula (p. ej. por Bluetooth), la busca en MusicBrainz y Cover Art Archive y, si no está, en iTunes o Deezer. Solo se envían el título y el artista	如果歌曲没有封面（例如通过蓝牙播放），会在 MusicBrainz 和 Cover Art Archive 中查找，找不到时再到 iTunes 或 Deezer 查找。只发送歌名和歌手
+Borrar carátulas guardadas	删除已保存的封面
+Las que se bajaron de internet y se guardaron en el equipo	从网上下载并保存在设备上的封面
+Carátulas borradas	封面已删除
+Probando…	正在测试…
+Probar la búsqueda de carátulas	测试封面搜索
+Prueba cada servidor con la canción que suena y muestra el error exacto	用正在播放的歌曲测试每个服务器并显示确切错误
+Prueba de carátulas	封面测试
+Se guarda en StradaDiag/caratulas.txt	保存在 StradaDiag/caratulas.txt
