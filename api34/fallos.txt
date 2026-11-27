@@ -1,0 +1,6 @@
+2026-11-27 19:50:06 · v2.39.0-prueba · Android 14 (API 34) · unknown Android SDK built for x86_64
+PRUEBA verificar-apk: propio=true otro=false
+
+2026-11-27 19:51:34 · v2.39.0-prueba · Android 14 (API 34) · unknown Android SDK built for x86_64
+PRUEBA odo-sim: ok=true sumo=7.4492188 esperado=7.450246
+
